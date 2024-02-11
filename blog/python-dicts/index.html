@@ -103,6 +103,7 @@
         </span><span class="sh">"""</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">__find_key_bucket</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">self</span><span class="p">.</span><span class="n">__buckets</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">__n_items</span> <span class="o">-=</span> <span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">__resize_check</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
         <span class="sh">"""</span><span class="s">
