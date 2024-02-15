@@ -8,7 +8,7 @@
 <span class="n">x</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div></div> <p>We can retrieve the memory address using <code class="language-plaintext highlighter-rouge">id()</code>, represented as an integer:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">id</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>4342270592
-</code></pre></div></div> <p>Note that the assignment operator (<code class="language-plaintext highlighter-rouge">=</code>) <strong>never</strong> makes a copy of the value being assigned, it just copies the reference. We can check if two names point to the same memory location using <code class="language-plaintext highlighter-rouge">is</code>:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+</code></pre></div></div> <p>Note that the assignment operator (<code class="language-plaintext highlighter-rouge">=</code>) <strong>never</strong> makes a copy of the value being assigned, it just copies the reference. Similarly, the <code class="language-plaintext highlighter-rouge">del</code> operator never deletes an object, just a reference to it. We can check if two names point to the same memory location using <code class="language-plaintext highlighter-rouge">is</code>:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 <span class="n">z</span> <span class="o">=</span> <span class="n">x</span>
 
@@ -28,9 +28,10 @@
 </code></pre></div></div> <p>Similarly, we can check if an object is an instance of a given class:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
 <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="sh">"</span><span class="s">1</span><span class="sh">"</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
 <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
-</code></pre></div></div> <h2 id="refcount">Refcount</h2> <p>The <em>refcount</em> is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (<code class="language-plaintext highlighter-rouge">del</code>). When the refcount reaches 0, its object’s memory will be reclaimed by the garbage collector.</p> <p>In principle, we can access the refcounts of a variable using <code class="language-plaintext highlighter-rouge">sys.getrefcount</code>:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">sys</span>
-
-<span class="n">sys</span><span class="p">.</span><span class="nf">getrefcount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div> <h2 id="refcount">Refcount</h2> <p>The <em>refcount</em> is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (<code class="language-plaintext highlighter-rouge">del</code>). When the refcount reaches 0, its object’s memory will be <a href="../python-basics#memory-management-in-python">reclaimed by the garbage collector</a>.</p> <p>In principle, we can access the refcounts of a variable using <code class="language-plaintext highlighter-rouge">sys.getrefcount</code>:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">sys</span><span class="p">.</span><span class="nf">getrefcount</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>2
+</code></pre></div></div> <p>Note that its output of <code class="language-plaintext highlighter-rouge">getrefcount</code> is always increased by 1, as the function itself contains a reference for the variable. Let’s see another example:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sys</span><span class="p">.</span><span class="nf">getrefcount</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>218
 </code></pre></div></div> <p>I expected that a newly created integer would have a <code class="language-plaintext highlighter-rouge">refcount</code> of 1. However, the actual number is much higher. <a href="https://stackoverflow.com/a/44096890" rel="external nofollow noopener" target="_blank">The explanation might involve optimizations happening under the hood.</a> Accordingly, the refcount of more and more unique integers gets smaller:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">assert</span> <span class="n">sys</span><span class="p">.</span><span class="nf">refcount</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">sys</span><span class="p">.</span><span class="nf">getrefcount</span><span class="p">(</span><span class="mi">123456</span><span class="p">)</span>
 </code></pre></div></div> <h2 id="other-properties">Other properties</h2> <p>On top of these three properties, objects have additional properties and methods that encode their state and behaviors. For instance, the <code class="language-plaintext highlighter-rouge">float</code> class has an additional property that stores the numerical value, as well as multiple methods that enable algebraic operations. A user-defined object will have an arbitrary number of attributes and methods.</p> <p>Notably, the <code class="language-plaintext highlighter-rouge">None</code> object has no other properties. It is a singleton: only one such object exists:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">a</span> <span class="o">=</span> <span class="bp">None</span>
@@ -56,39 +57,7 @@
 
 <span class="nf">formatter_factory</span><span class="p">()(</span><span class="sh">"</span><span class="s">hey there</span><span class="sh">"</span><span class="p">)</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hey there.
-</code></pre></div></div> <h1 id="mutability">Mutability</h1> <p>Python has two kinds of data types, mutable and immutable, which respectively can and cannot be modified after being created. Mutable data types include lists, dictionaries and sets; immutable data types, integers, floats, booleans, strings and tuples. Let’s see an example:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># and (immutable) int(1) object is created
-# both x and y point at it
-</span><span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>
-
-<span class="c1"># we change the value of x. since integers are immutable,
-# a new int(x + 1) is created to store that value, and 
-# x is assigned that new reference
-</span><span class="n">x</span> <span class="o">+=</span> <span class="mi">1</span>
-
-<span class="c1"># x and y don't refer to the same object anymore
-</span><span class="k">assert</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">y</span>
-<span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">y</span>
-</code></pre></div></div> <p>Let’s compare this behaviour to that of a mutable object:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># an list is created, and both x and y point at it
-</span><span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-<span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>
-
-<span class="c1"># we change the value of x. since lists are mutable,
-# the original list gets altered
-</span><span class="n">x</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-
-<span class="c1"># x and y still refer to the same object
-</span><span class="k">assert</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y</span>
-<span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">y</span>
-</code></pre></div></div> <p>Interestingly, and as we saw when examining the <em>refcount</em>, Python leverages this immutability:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># two int(1) objects are created, each assigned a name
-</span><span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">y</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="k">assert</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">y</span>
-</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AssertionError
-</code></pre></div></div> <p>In other words, 1 (and other common objects, like 0 or <code class="language-plaintext highlighter-rouge">True</code>) are singletons. That way, Python does not need to keep allocating memory for new objects that are used very often.</p> <p>Mutability also has implications on memory allocation. Python knows at runtime how much memory an immutable data type requires. However, the memory requirements of mutable containers will change as we add and remove elements. Hence, to add new elements quickly if needed, Python allocates more memory than is strictly needed.</p> <h2 id="copying-an-object">Copying an object</h2> <p>As mentioned above, <code class="language-plaintext highlighter-rouge">=</code> does not copy objects, only references. If we need to copy an object, we need to use the <code class="language-plaintext highlighter-rouge">copy</code> module. There are two kinds of copies:</p> <ul> <li> <strong>Shallow copy:</strong> <code class="language-plaintext highlighter-rouge">copy.copy</code> copies the object, but any reference it stores will just get copied, i.e., not the whole referenced object.</li> <li> <strong>Deep copy:</strong> <code class="language-plaintext highlighter-rouge">copy.deepcopy</code> recursively copies the object, all the objects it references to, and so on.</li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+</code></pre></div></div> <h1 id="copying-objects">Copying objects</h1> <p>As mentioned above, <code class="language-plaintext highlighter-rouge">=</code> does not copy objects, only references. If we need to copy an object, we need to use the <code class="language-plaintext highlighter-rouge">copy</code> module. There are two kinds of copies:</p> <ul> <li> <strong>Shallow copy:</strong> <code class="language-plaintext highlighter-rouge">copy.copy</code> copies the object, but any reference it stores will just get copied, i.e., not the whole referenced object.</li> <li> <strong>Deep copy:</strong> <code class="language-plaintext highlighter-rouge">copy.deepcopy</code> recursively copies the object, all the objects it references to, and so on.</li> </ul> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">copy</span> <span class="kn">import</span> <span class="n">copy</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
 <span class="c1"># copies the two first integers, but only 
@@ -108,46 +77,6 @@
 <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nf">append</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="nf">print</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[3, 4]
-</code></pre></div></div> <h1 id="scopes-and-namespaces">Scopes and namespaces</h1> <p>A namespace is a mapping from names to objects. In fact, underlying a namespace there is a dictionary: its keys are symbolic names (e.g., <code class="language-plaintext highlighter-rouge">x</code>) and its values, the object they reference (e.g., an integer with a value of 8). During the execution of a typical Python program, multiple namespaces are created, each with its own lifetime. There are four types of namespaces:</p> <ul> <li> <strong>Builtin</strong> namespace: it is created when the interpreter starts up. It contain names such as <code class="language-plaintext highlighter-rouge">print</code>, <code class="language-plaintext highlighter-rouge">int</code> or <code class="language-plaintext highlighter-rouge">len</code>.</li> <li> <strong>Global</strong> namespaces: <ul> <li> <em>The</em> global namespace contains every name created at the main level of the program. This dictionary can be examined using <code class="language-plaintext highlighter-rouge">globals()</code>.</li> <li>Weirdly, <em>other</em> global namespaces are possible: each imported module will create its own.</li> </ul> </li> <li> <strong>Local</strong> namespaces: one is created every time a function is called, and is “forgotten” when it terminates. This dictionary can be examined using <code class="language-plaintext highlighter-rouge">locals()</code>.</li> <li> <strong>Enclosed</strong> namespaces: when a function calls another function, the child has access to its parent’s namespace.</li> </ul> <p>Namespaces are related to scopes, which are the parts of the code in which a specific set of namespaces can be accessed. When a Python needs to lookup a name, if resolves it by examining the namespaces using the LEGB rule: it starts at the Local namespace; if unsuccessful, it moves to the Enclosing namespace; then the Global, and lastly the Builtin. By default, assignments and deletions happen on the local namespace. However, this behaviour can be altered using the <code class="language-plaintext highlighter-rouge">nonlocal</code> and <code class="language-plaintext highlighter-rouge">global</code> statements:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">enclosing_test</span><span class="p">():</span>
-    <span class="n">foo</span> <span class="o">=</span> <span class="sh">"</span><span class="s">enclosed</span><span class="sh">"</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Inside enclosing_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">local_test</span><span class="p">():</span>
-        <span class="n">foo</span> <span class="o">=</span> <span class="sh">"</span><span class="s">local</span><span class="sh">"</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Inside local_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="nf">local_test</span><span class="p">()</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">After local_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">nonlocal_test</span><span class="p">():</span>
-        <span class="k">nonlocal</span> <span class="n">foo</span>
-        <span class="n">foo</span> <span class="o">=</span> <span class="sh">"</span><span class="s">nonlocal</span><span class="sh">"</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Inside nonlocal_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="nf">nonlocal_test</span><span class="p">()</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">After nonlocal_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">global_test</span><span class="p">():</span>
-        <span class="k">global</span> <span class="n">foo</span>
-        <span class="n">foo</span> <span class="o">=</span> <span class="sh">"</span><span class="s">global</span><span class="sh">"</span>
-        <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Inside global_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-    <span class="nf">global_test</span><span class="p">()</span>
-    <span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">After global_test, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-
-<span class="n">foo</span> <span class="o">=</span> <span class="sh">"</span><span class="s">original</span><span class="sh">"</span>
-<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">At the beginning, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-<span class="nf">enclosing_test</span><span class="p">()</span>
-<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Finally, foo = </span><span class="si">{</span><span class="n">foo</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
-</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>At the beginning, foo = original
-Inside enclosing_test, foo = enclosed
-Inside local_test, foo = local
-After local_test, foo = enclosed
-Inside nonlocal_test, foo = nonlocal
-After nonlocal_test, foo = nonlocal
-Inside global_test, foo = global
-After global_test, foo = nonlocal
-Finally, foo = global
 </code></pre></div></div> <h1 id="defining-our-own-objects">Defining our own objects</h1> <p>Python allows us to define our own classes:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Animal</span><span class="p">:</span>
 
     <span class="n">phylum</span> <span class="o">=</span> <span class="sh">"</span><span class="s">metazoan</span><span class="sh">"</span>
