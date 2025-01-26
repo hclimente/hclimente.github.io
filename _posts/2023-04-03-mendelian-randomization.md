@@ -15,9 +15,7 @@ toc:
 
 Understanding how exposures, such as gene expression, cause complex phenotypes is a key question in biology. While randomized controlled trials are the gold standard for establishing causality, their use on humans is unethical, necessitating the use of observational studies. Crucially, observational studies cannot directly prove causality: they can produce biased estimates and be affected by unknown confounders and reverse causality. Interestingly, SNPs are generally equivalent to a randomized treatment, as they are randomized at conception and fixed throughout life, making them unaffected by confounders (though LD and population structure are exceptions to the former, and canalization to the latter). Hence, when this is true, we can indeed establish causality. This is the case between siblings, for which the inheritance of each SNP is completely randomized. However, in the general population, the distribution of variants is not completely random. For instance, due to assortative mating, people with similar heritable phenotypes will tend to get together. In general, traits that are more genetically proximal (e.g., molecular traits like gene expression) are less prone to these biases.
 
-<aside>
-💡 **Randomized controlled trials** (RCTs) can establish causality even in the presence of variables that are not under experimental control. The key procedure involves randomly assigning the treatment to the subjects. In other words, with a large enough sample size, the treatment and control groups should be similar in all regards except for the treatment variable. Hence, any difference between the groups must be attributable to the treatment.
-</aside>
+> 💡 **Randomized controlled trials** (RCTs) can establish causality even in the presence of variables that are not under experimental control. The key procedure involves randomly assigning the treatment to the subjects. In other words, with a large enough sample size, the treatment and control groups should be similar in all regards except for the treatment variable. Hence, any difference between the groups must be attributable to the treatment.
 
 Mendelian Randomization (MR) studies the causal effect of an exposure on an outcome using genetic variants (SNPs). When certain assumptions are met ([Key assumptions and how to verify them](#key-assumptions-and-how-to-verify-them)), it can address the aforementioned issues. MR leverages [this](https://www.cell.com/cms/attachment/8c0c3e2d-595c-4c71-8562-85225737be90/gr2.jpg) [directed acyclic graph](https://mr-dictionary.mrcieu.ac.uk/term/dag/) (DAG).
 
@@ -25,13 +23,13 @@ Mendelian Randomization (MR) studies the causal effect of an exposure on an outc
 
 Our goal is to precisely estimate the effect of an exposure on a trait. However, the presence of confounders that are either unobserved or difficult to measure makes this impossible. An instrument, such as the SNP, is a variable that modifies the exposure and is not affected by the confounders. Since there are no backdoor paths between the SNP and the outcome, any effect between them must occur through the exposure.
 
-In mathematical terms, we aim to estimate the effect of an exposure $X$ on an outcome $Y$using an instrument $Z$. Since $Z$ is a SNP, it will usually take values in 0, 1 and 2 (the number of minor alleles). Assume some potential confounders affecting both $X$ and $Y$. The most basic MR protocol assumes linearity, and consists of three steps:
+In mathematical terms, we aim to estimate the effect of an exposure $$X$$ on an outcome $$Y$$using an instrument $$Z$$. Since $$Z$$ is a SNP, it will usually take values in 0, 1 and 2 (the number of minor alleles). Assume some potential confounders affecting both $$X$$ and $$Y$$. The most basic MR protocol assumes linearity, and consists of three steps:
 
-1. Estimate the relation between the instrument and the exposure: $X=\beta_{ZX}Z+\varepsilon$
-2. Compute an estimated exposure, $\tilde X = \beta_{ZX}Z$, which is independent of potential confounders
-3. Estimate $Y=\beta_{\hat{X}Y}\hat{X}+\epsilon$
+1. Estimate the relation between the instrument and the exposure: $$X=\beta_{ZX}Z+\varepsilon$$
+2. Compute an estimated exposure, $$\tilde X = \beta_{ZX}Z$$, which is independent of potential confounders
+3. Estimate $$Y=\beta_{\hat{X}Y}\hat{X}+\epsilon$$
 
-The estimated causal effect $\beta_{\hat{X}Y}$ is unconfounded! This is usually performed via [**two-stage least squares**](https://mr-dictionary.mrcieu.ac.uk/term/tsls/). Alternatively, we can obtain $\beta_{\hat{X}Y}$ without computing it explicitly via the **[Wald ratio estimator](https://mr-dictionary.mrcieu.ac.uk/term/wald-ratio/)**: $\beta_{\hat{X}Y} = \frac {\beta_{ZY}} {\beta_{ZX}}$. Note that the standard error of $\beta_{\hat{X}Y}$ also needs to be computed.
+The estimated causal effect $$\beta_{\hat{X}Y}$$ is unconfounded! This is usually performed via [**two-stage least squares**](https://mr-dictionary.mrcieu.ac.uk/term/tsls/). Alternatively, we can obtain $$\beta_{\hat{X}Y}$$ without computing it explicitly via the **[Wald ratio estimator](https://mr-dictionary.mrcieu.ac.uk/term/wald-ratio/)**: $$\beta_{\hat{X}Y} = \frac {\beta_{ZY}} {\beta_{ZX}}$$. Note that the standard error of $$\beta_{\hat{X}Y}$$ also needs to be computed.
 
 ## Key assumptions and how to verify them
 
@@ -45,7 +43,7 @@ Other common, but optional, assumptions are *linearity* and *homogeneity* (the e
 
 Although these assumptions are sometimes violated, we have ways to detect such cases:
 
-1. It can be violated when the SNP is a weak instrument. It can be measured using (Cragg-Donald) F-statistic $\left( \frac {n-m-1} {m} \right) \left( \frac {R^2} {1-R^2}\right)$ where $n$ is the number of samples, $m$ is the number of SNPs, and $R^2$ is the SNP heritability. Conventionally, this assumption is considered met when F is larger than 10.
+1. It can be violated when the SNP is a weak instrument. It can be measured using (Cragg-Donald) F-statistic $$\left( \frac {n-m-1} {m} \right) \left( \frac {R^2} {1-R^2}\right)$$ where $$n$$ is the number of samples, $$m$$ is the number of SNPs, and $$R^2$$ is the SNP heritability. Conventionally, this assumption is considered met when F is larger than 10.
 2. Common violations include [assortative mating](https://mr-dictionary.mrcieu.ac.uk/term/assortative-mating/), [population structure](https://mr-dictionary.mrcieu.ac.uk/term/pop-strat/) and [dynastic effects](https://mr-dictionary.mrcieu.ac.uk/term/dynastic/). This can only be assessed for the potential confounders that have been measured, by measuring the respective associations between those and the SNP and outcome.
 3. [(Horizontal) pleiotropy](https://mr-dictionary.mrcieu.ac.uk/term/horizontal-pleiotropy/) and linkage with other causal genes are common violations. When using multiple instruments, it can be assumed that they will all lead to the same estimate of the causal effect. Strong departures from this situation suggest that some instruments are affecting the outcome in different ways.
 
