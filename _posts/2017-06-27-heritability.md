@@ -1,10 +1,10 @@
 ---
 layout: post
-title: Graph Glossary
-date: 2025-01-23 11:59:00-0000
-description: Definitions of frequent graph terms
+title: Heritability
+date: 2017-06-27 11:59:00-0000
+description: A first approach to the heritability of complex traits
 tags: comments
-categories: graphs
+categories: genetics
 giscus_comments: true
 related_posts: false
 toc:

@@ -4,7 +4,7 @@ title: Familial breast cancer
 date: 2017-07-20 11:59:00-0000
 description: Molecular basis of familial breast cancer
 tags: comments
-categories: cancer
+categories: cancer genetics
 giscus_comments: true
 related_posts: false
 toc:
