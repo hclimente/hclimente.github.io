@@ -69,6 +69,14 @@ A simple, undirected graph in which every pair of vertices are connected by an e
 
 A graph in which a [path](#path) exists between every pair of vertices.
 
+## Multigraph
+
+A graph which can have multiple edges between the same pair of vertices.
+
+## Simple graph
+
+A graph with at most one edge between any pair of vertices and no loops.
+
 # Spectral graph theory
 
 ## First *k* eigenvectors

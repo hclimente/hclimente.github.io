@@ -9,7 +9,6 @@ giscus_comments: true
 related_posts: false
 mermaid:
     enabled: true
-    zoomable: true
 toc:
     sidebar: left
 ---
@@ -57,7 +56,7 @@ $$
 
 ## Incidence matrix
 
-[Incidence](2025-01-23-graphs-glossary.md#incidence) is used to define the **incidence** matrix $$Q$$, a $$n \times m$$ matrix such that $$Q_{ij}$$ equals:
+[Incidence](../graphs-glossary#incidence) is used to define the **incidence** matrix $$Q$$, a $$n \times m$$ matrix such that $$Q_{ij}$$ equals:
 
 - If $$G$$ is *directed*:
     - $$0$$ if vertex $$i$$ and edge $$e_j$$ are not incident
@@ -69,7 +68,7 @@ $$
 
 ## Adjacency matrix
 
-[Adjacency](2025-01-23-graphs-glossary.md#adjacency) is used to define the **adjacency** matrix $$A$$, a matrix $$n \times n$$ such that the $$A_{ij}$$ equals:
+[Adjacency](../graphs-glossary#adjacency) is used to define the **adjacency** matrix $$A$$, a matrix $$n \times n$$ such that the $$A_{ij}$$ equals:
 
 - $$0$$ if vertices $$i$$ and $$j$$ are not adjacent (note that in simple graphs vertices are not self-adjacent)
 - $$w_{ij}$$ otherwise
@@ -85,7 +84,7 @@ A = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-The adjacency matrix relates to the concept of [**paths**](2025-01-23-graphs-glossary.md#path) in an unweighted graph: $$(A^k)_{ij}$$ represents the number of paths of length $$k$$ from vertex $$i$$ to vertex $$j$$. In a weighted graph, it represents the sum of products of weights. For instance, if edge weights represent transition probabilities, $$(A^k)_{ij}$$ represents the probability of starting a walk at node $$i$$ and ending at node $$j$$ after $$k$$ steps.
+The adjacency matrix relates to the concept of [**paths**](../graphs-glossary#path) in an unweighted graph: $$(A^k)_{ij}$$ represents the number of paths of length $$k$$ from vertex $$i$$ to vertex $$j$$. In a weighted graph, it represents the sum of products of weights. For instance, if edge weights represent transition probabilities, $$(A^k)_{ij}$$ represents the probability of starting a walk at node $$i$$ and ending at node $$j$$ after $$k$$ steps.
 
 The adjacency matrix has some important properties:
 
@@ -113,7 +112,7 @@ L = D - A = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-The Laplacian relates to the connectedness of a graph, giving rise to [spectral graph theory](#spectral-graph-theory). It also is connected to [*flows*](2025-01-23-graphs-glossary.md#flow). The diagonal entries represent the total outflow capacity from a vertex, while off-diagonal entries encode pairwise connection strengths.
+The Laplacian relates to the connectedness of a graph, giving rise to [spectral graph theory](#spectral-graph-theory). It also is connected to [*flows*](../graphs-glossary#flow). The diagonal entries represent the total outflow capacity from a vertex, while off-diagonal entries encode pairwise connection strengths.
 
 The Laplacian matrix has some important properties:
 
@@ -136,7 +135,7 @@ $$L_\text{rw} = D^{-1}L$$
 
 ## Number of connected components
 
-A simple, but ultimately insightful property of $$L$$ is that, for an undirected graph, the sum over the rows or the columns equals 0. In other words, multiplying $$L$$ by an all-ones vector $$\mathbf{1}$$ results in the zero vector. This tells us that $$L$$ has an eigenvalue of 0, corresponding to the eigenvector $$\mathbf{1}$$. Separately, linear algebra tells us that since $$L$$ is real and symmetric, it has *real* eigenvalues and *orthogonal* eigenvectors. And since $$L$$ is positive semi-definite, its eigenvalues are *non-negative*. As we have just seen, the [first eigenvalue](2025-01-23-graphs-glossary.md#first-k-eigenvectors), $$\lambda_1$$, of $$L$$ is 0, corresponding to the $$\mathbf{1}$$ eigenvector. If a vector has multiple [components](2025-01-23-graphs-glossary.md#component), $$L$$ is block diagonal. This makes it easy to see that the indicator vectors, representing the membership of each vertex to one of the components, are eigenvectors with an eigenvalue of 0. This highlights another important property of the Laplacian: given an undirected graph, the multiplicity of the eigenvalue 0 of $$L$$ equals the number of [components](2025-01-23-graphs-glossary.md#component). Conversely, for a [connected](2025-01-23-graphs-glossary.md#connected-graph) graph, $$\lambda_2 > 0$$. (The second smallest eigenvalue is sometimes called the Fiedler eigenvalue.)
+A simple, but ultimately insightful property of $$L$$ is that, for an undirected graph, the sum over the rows or the columns equals 0. In other words, multiplying $$L$$ by an all-ones vector $$\mathbf{1}$$ results in the zero vector. This tells us that $$L$$ has an eigenvalue of 0, corresponding to the eigenvector $$\mathbf{1}$$. Separately, linear algebra tells us that since $$L$$ is real and symmetric, it has *real* eigenvalues and *orthogonal* eigenvectors. And since $$L$$ is positive semi-definite, its eigenvalues are *non-negative*. As we have just seen, the [first eigenvalue](../graphs-glossary#first-k-eigenvectors), $$\lambda_1$$, of $$L$$ is 0, corresponding to the $$\mathbf{1}$$ eigenvector. If a vector has multiple [components](../graphs-glossary#component), $$L$$ is block diagonal. This makes it easy to see that the indicator vectors, representing the membership of each vertex to one of the components, are eigenvectors with an eigenvalue of 0. This highlights another important property of the Laplacian: given an undirected graph, the multiplicity of the eigenvalue 0 of $$L$$ equals the number of [components](../graphs-glossary#component). Conversely, for a [connected](../graphs-glossary#connected-graph) graph, $$\lambda_2 > 0$$. (The second smallest eigenvalue is sometimes called the Fiedler eigenvalue.)
 
 ## Spectral clustering
 
@@ -144,7 +143,7 @@ The goal of **spectral clustering** is find a partition of the graph into $$k$$ 
 
 An spectral clustering algorithm, in which seek to find *k* clusters, looks as follows:
 
-1. Compute the [first *k* eigenvectors](2025-01-23-graphs-glossary.md#first-k-eigenvectors) $$u_1, \dots, u_k$$ of $$L$$. Store them in the columns of matrix $$U \in R^{n \times k}$$.
+1. Compute the [first *k* eigenvectors](../graphs-glossary#first-k-eigenvectors) $$u_1, \dots, u_k$$ of $$L$$. Store them in the columns of matrix $$U \in R^{n \times k}$$.
 2. Cluster the rows $$1, \dots, n$$ of $$U$$ using k-means clustering into clusters $$C_1, \dots, C_k$$.
 
 ## Graph partitioning
