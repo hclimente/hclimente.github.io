@@ -17,9 +17,30 @@ In this article I discuss matrices associated to graphs, and how studying their 
 
 A graph $$G = (V, E)$$ s.t. $$V = \{v_1, \dots, v_n\}$$ and $$E = \{e_1, \dots, e_m \}$$ has several important associated matrices. I consider case in which edges can have weights $$w_{ij} \geq 0$$. For convenience, I often refer to vertex $$v_i$$ simply by its index ($$i$$), and to an edge by the vertices it links (e.g., $$ij$$).
 
+I will show examples on the following graph, named $$G_1$$:
+
+
+```mermaid
+graph LR
+    1 --- 2
+    2 --- 3
+    3 --- 1
+    1 --- 4
+```
+
+
 ## Degree matrix
 
-The **degree** matrix $$D$$ is a diagonal $$n \times n$$ matrix such that $$D_{ii} = \sum_{j=1}^n w_{ij}$$.
+The **degree** matrix $$D$$ is a diagonal $$n \times n$$ matrix such that $$D_{ii} = \sum_{j=1}^n w_{ij}$$. For instance, for $$G_1$$:
+
+$$
+D = \begin{bmatrix}
+3 & 0 & 0 & 0 \\
+0 & 2 & 0 & 0 \\
+0 & 0 & 2 & 0 \\
+0 & 0 & 0 & 1 \\
+\end{bmatrix}
+$$
 
 ## Incidence matrix
 
@@ -40,6 +61,17 @@ The **degree** matrix $$D$$ is a diagonal $$n \times n$$ matrix such that $$D_{i
 - $$0$$ if vertices $$i$$ and $$j$$ are not adjacent (note that in simple graphs vertices are not self-adjacent)
 - $$w_{ij}$$ otherwise
 
+For $$G_1$$:
+
+$$
+A = \begin{bmatrix}
+0 & 1 & 1 & 1 \\
+1 & 0 & 1 & 0 \\
+1 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+\end{bmatrix}
+$$
+
 The adjacency matrix relates to the concept of [**paths**](2025-01-23-graphs-glossary.md#path) in an unweighted graph: $$(A^k)_{ij}$$ represents the number of paths of length $$k$$ from vertex $$i$$ to vertex $$j$$. In a weighted graph, it represents the sum of products of weights. For instance, if edge weights represent transition probabilities, $$(A^k)_{ij}$$ represents the probability of starting a walk at node $$i$$ and ending at node $$j$$ after $$k$$ steps.
 
 The adjacency matrix has some important properties:
@@ -56,6 +88,17 @@ The **Laplacian** matrix $$L$$ is a $$n \times n$$ matrix such that the $$L_{ij}
 - For $$i = j$$, the degree of $$i$$.
 
 More concisely, $$L = D - A$$.
+
+For $$G_1$$:
+
+$$
+L = D - A = \begin{bmatrix}
+3 & -1 & -1 & -1 \\
+-1 & 2 & -1 & 0 \\
+-1 & -1 & 2 & 0 \\
+-1 & 0 & 0 & 1 \\
+\end{bmatrix}
+$$
 
 The Laplacian relates to the connectedness of a graph, giving rise to [spectral graph theory](#spectral-graph-theory). It also is connected to [*flows*](2025-01-23-graphs-glossary.md#flow). The diagonal entries represent the total outflow capacity from a vertex, while off-diagonal entries encode pairwise connection strengths.
 

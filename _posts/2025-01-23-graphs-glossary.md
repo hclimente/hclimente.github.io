@@ -25,6 +25,10 @@ A [trail](#trail) in which only the first and last vertices are equal.
 
 An example of a flow is a heat diffusion process across a graph. In such processes, each vertex starts with a certain amount of heat and, at each time point, exchanges heat with its neighbors (gains heat from its hotter neighbors; loses it to its colder neighbors).
 
+## Module
+
+A [subgraph](#subgraph) whose vertices are densely connected to each other, and loosely to the rest of the graph.
+
 ## Subgraph
 
 A graph resulting from subsetting vertices from a larger graph, as well as a subset of the edges connecting them.
