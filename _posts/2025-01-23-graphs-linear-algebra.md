@@ -24,11 +24,21 @@ I will show examples on the following graph, named $$G_1$$:
 
 
 ```mermaid
+---
+config:
+  layout: elk
+  look: handDrawn
+---
 graph LR
-    1 --- 2
-    2 --- 3
-    3 --- 1
-    1 --- 4
+    node_1((1))
+    node_2((2))
+    node_3((3))
+    node_4((4))
+
+    node_1 === node_2
+    node_1 === node_3
+    node_1 === node_4
+    node_2 === node_3
 ```
 
 
