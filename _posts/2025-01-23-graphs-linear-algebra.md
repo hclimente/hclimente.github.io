@@ -7,6 +7,9 @@ tags: comments
 categories: graphs linear_algebra
 giscus_comments: true
 related_posts: false
+mermaid:
+    enabled: true
+    zoomable: true
 toc:
     sidebar: left
 ---
