@@ -63,8 +63,10 @@ $$
     - $$\sqrt{w_{ij}}$$ if edge $$e_j$$ originates at vertex $$i$$
     - $$-\sqrt{w_{ij}}$$ if edge $$e_j$$ terminates at vertex $$i$$
 - If $$G$$ is *undirected*:
-    - $$0$$ if vertex $$i$$ and edge $$e_j$$ are not incident
-    - $$\sqrt{w_{ij}}$$ otherwise
+    - If $$Q$$ is *unoriented*:
+        - $$0$$ if vertex $$i$$ and edge $$e_j$$ are not incident
+        - $$\sqrt{w_{ij}}$$ otherwise
+    - If $$Q$$ is *oriented*: we pick an [orientation](../graphs-glossary#orientation) of the graph, and use the incidence matrix of the resulting directed graph.
 
 ## Adjacency matrix
 
@@ -99,7 +101,7 @@ The **Laplacian** matrix $$L$$ is a $$n \times n$$ matrix such that the $$L_{ij}
     - $$-w_{ij}$$ otherwise
 - For $$i = j$$, the degree of $$i$$.
 
-More concisely, $$L = D - A$$.
+More concisely, $$L = D - A$$. Or, given any oriented incidence matrix $$Q(G)$$, $$L = QQ^T$$.
 
 For $$G_1$$:
 
@@ -157,3 +159,4 @@ TODO Relationship with graph connectivity and stationary distributions.
 # Further reading
 
 - [A Tutorial on Spectral Clustering](https://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf)
+- [Four graph partitioning algorithms](https://mathweb.ucsd.edu/~fan/talks/mlg.pdf)

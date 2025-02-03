@@ -29,13 +29,21 @@ An example of a flow is a heat diffusion process across a graph. In such process
 
 A [subgraph](#subgraph) whose vertices are densely connected to each other, and loosely to the rest of the graph.
 
-## Subgraph
+## Orientation
 
-A graph resulting from subsetting vertices from a larger graph, as well as a subset of the edges connecting them.
+An orientation of an undirected graph is the directed graph resulting of assigning a direction to each of its vertices. A directed graph is oriented if no two vertices form a 2-cycle.
 
 ## Path
 
 A [walk](#walk) with no repeated *vertices*.
+
+## Spanning graph
+
+A subgraph $$G' = (V', E')$$ of $$G = (V, E)$$ is spanning if $$V' = V$$.
+
+## Subgraph
+
+A graph resulting from subsetting vertices from a larger graph, as well as a subset of the edges connecting them.
 
 ## Trail
 
@@ -49,11 +57,23 @@ A walk *on a graph* is an alternating sequence of vertices and edges, such that 
 
 ## Adjacency
 
-A vertex is adjacent with *another vertex* if they are connected by an edge.
+A vertex is adjacent with *another vertex* if they are connected by an edge. $$u \sim v$$ denote that $$u$$ and $$v$$ are adjacent.
+
+## Distance
+
+The distance *between two vertices* is the shortest [path](#path) between them.
+
+## Destination
+
+In a directed graph, the destination *of an edge* is the vertex at the head of the edge.
 
 ## Incidence
 
 A vertex is incident *with an edge* if the vertex is one of the two vertices the edge connects.
+
+## Source
+
+In a directed graph, the source *of an edge* is the vertex at the tail of the edge.
 
 # Types of graphs
 
@@ -68,6 +88,10 @@ A simple, undirected graph in which every pair of vertices are connected by an e
 ## Connected graph
 
 A graph in which a [path](#path) exists between every pair of vertices.
+
+## Digraph
+
+A directed graph.
 
 ## Multigraph
 
