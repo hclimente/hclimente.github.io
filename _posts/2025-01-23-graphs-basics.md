@@ -7,6 +7,8 @@ tags: comments
 categories: graphs
 giscus_comments: true
 related_posts: false
+mermaid:
+    enabled: true
 toc:
     sidebar: left
 ---
