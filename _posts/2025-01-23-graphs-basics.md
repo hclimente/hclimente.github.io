@@ -44,8 +44,7 @@ $$G = (V, E)$$
 
 Where $$V$$ denotes the set of vertices and $$E$$ the set of edges (pairs of vertices).
 
-> [!NOTE]  
-> $$V$$ and $$E$$ above refer sets, specifically to the vertex and edge set of a specific graph ($$G$$). Note that they are in italics. In contrast, the $$\text{V}$$ in $$V(H)$$ and $$V(I)$$ refer to the vertex sets of graphs $$H$$ and $$I$$ respectively. Note that they are not in italics. I will follow the same convention elsewhere, e.g. when writing about [graph's matrices](../graphs-linear-algebra).
+> **_Notation note:_** $$V$$ and $$E$$ above refer sets, specifically to the vertex and edge set of a specific graph ($$G$$). Note that they are in italics. In contrast, the $$\text{V}$$ in $$\text{V}(H)$$ and $$\text{V}(I)$$ refer to the vertex sets of graphs $$H$$ and $$I$$ respectively. Note that they are not in italics. I will follow the same convention elsewhere, e.g. when writing about [graph's matrices](../graphs-linear-algebra).
 
 Sometimes, graphs are defined as triples $$G = (V, E, \phi)$$, which includes the incidence $$\phi$$ (mapping edges to pairs of vertices). This is to allow for [*multigraphs*](../graphs-glossary#multigraph), in which multiple edges between the same pair of vertices are allowed. Königsberg is an example of multigraph, since it has multiple bridges connecting the same landmasses (e.g., the North Bank and the Kneiphof Island). In this series we will ignore multigraphs and focus on [*simple*](../graphs-glossary#simple-graph) graphs, which have at most one edge between any pair of vertices and no loops. These graphs are important in real world applications to encode binary relations. This notation allows to concisely define multiple types of graph:
 
