@@ -85,16 +85,18 @@ This notation allows to concisely define multiple types of graph:
 
 Sometimes, graphs are defined as triples. For instance [**multigraphs**](../graphs-glossary#multigraph), in which multiple edges between the same pair of vertices are allowed. They are noted as $$G = (V, E, \phi)$$, in which the incidence function $$\phi$$ represents the mapping edges to pairs of vertices. Königsberg is an example of multigraph, since it has multiple bridges connecting the same landmasses (e.g., the North Bank and the Kneiphof Island). For instance, the Königsberg graph is an undirected multigraph with: 
 
-- $$V = \{N, K, L, S \}$$
-- $$E = \{ e_1, e_2, e_3, e_4, e_5, e_6, e_7 \}$$
-- $$\phi$$:
-  - $$\phi(e_1) = \{ N, K \}$$
-  - $$\phi(e_2) = \{ N, K \}$$
-  - $$\phi(e_3) = \{ N, L \}$$
-  - $$\phi(e_4) = \{ S, L \}$$
-  - $$\phi(e_5) = \{ S, K \}$$
-  - $$\phi(e_6) = \{ S, K \}$$
-  - $$\phi(e_7) = \{ K, L \}$$
+$$V = \{N, K, L, S \}$$
+$$E = \{ e_1, e_2, e_3, e_4, e_5, e_6, e_7 \}$$
+$$\phi(x) = \begin{cases}
+  \{ N, K \} & \text{if $x = e_1$} \\
+  \{ N, K \} & \text{if $x = e_2$} \\
+  \{ N, L \} & \text{if $x = e_3$} \\
+  \{ S, L \} & \text{if $x = e_4$} \\
+  \{ S, K \} & \text{if $x = e_5$} \\
+  \{ S, K \} & \text{if $x = e_6$} \\
+  \{ K, L \} & \text{if $x = e_7$} \\
+  \end{cases}
+$$
  
 Another type of graph that requires a triple are **weighted** graphs, in which edges have a weight. They are noted as $$G = (V, E, w)$$, in which $$w$$ is a function that maps the edges to their weights. Note that weighted multigraph would require both an incidence and a weight functions, and hence would require a quadruple.
 
