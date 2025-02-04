@@ -59,13 +59,17 @@ A walk *on a graph* is an alternating sequence of vertices and edges, such that 
 
 A vertex is adjacent with *another vertex* if they are connected by an edge. $$u \sim v$$ denote that $$u$$ and $$v$$ are adjacent.
 
-## Distance
+## Degree
 
-The distance *between two vertices* is the shortest [path](#path) between them.
+The degree of a vertex in a (simple) undirected graph is the number of edges [incident](#incidence) with that vertex. In a (simple) directed graph we distinguish the indegree (number of edges with the vertex as their [destination](#destination)) and the outdegree (number of edges with the vertex as their [source](#source)).
 
 ## Destination
 
 In a directed graph, the destination *of an edge* is the vertex at the head of the edge.
+
+## Distance
+
+The distance *between two vertices* is the shortest [path](#path) between them.
 
 ## Incidence
 
