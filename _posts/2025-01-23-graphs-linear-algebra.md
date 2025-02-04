@@ -13,11 +13,11 @@ toc:
     sidebar: left
 ---
 
-In this article I discuss matrices associated to graphs. As we will see, a graph can be represented as a matrix without any information loss. Hence, the properties of these matrices describe properties of the underlying graph.
+In this article I discuss matrices associated to graphs. As we will see, a graph can be represented as a matrix without any information loss. Hence, the properties of these matrices describe [properties of the underlying graph](../graphs-basics#properties-of-a-graph).
 
 # Matrices associated to graphs
 
-A graph $$G = (V, E)$$ s.t. $$V = \{v_1, \dots, v_n\}$$ and $$E = \{e_1, \dots, e_m \}$$ has several important associated matrices. I consider case in which edges can have weights $$w_{ij} \geq 0$$. For convenience, I often refer to vertex $$v_i$$ simply by its index ($$i$$), and to an edge by the vertices it links (e.g., $$ij$$).
+A graph $$G = (V, E)$$ s.t. $$V = \{v_1, \dots, v_n\}$$ and $$E = \{e_1, \dots, e_m \}$$ has several important associated matrices. For convenience, I often refer to vertex $$v_i$$ simply by its index ($$i$$), and to an edge by the vertices it links (e.g., $$ij$$).
 
 I will show examples on the following graph, named $$G_1$$:
 
@@ -29,24 +29,24 @@ config:
   look: handDrawn
 ---
 graph LR
-    node_1((1))
-    node_2((2))
-    node_3((3))
-    node_4((4))
+    vertex_1((1))
+    vertex_2((2))
+    vertex_3((3))
+    vertex_4((4))
 
-    node_1 === node_2
-    node_1 === node_3
-    node_1 === node_4
-    node_2 === node_3
+    vertex_1 === vertex_2
+    vertex_1 === vertex_3
+    vertex_1 === vertex_4
+    vertex_2 === vertex_3
 ```
 
 
 ## Degree matrix
 
-The **degree** matrix $$D$$ is a diagonal $$n \times n$$ matrix such that $$D_{ii} = \sum_{j=1}^n w_{ij}$$. For instance, for $$G_1$$:
+[Vertex degree](../graphs-basics#degree) is ised to define the **degree** matrix $$D$$ is a diagonal $$n \times n$$ matrix such that $$D_{ii} = \text{deg} i$$, and 0 elsewhere. For instance, for $$G_1$$:
 
 $$
-D = \begin{bmatrix}
+\text{D}(G_1) = \begin{bmatrix}
 3 & 0 & 0 & 0 \\
 0 & 2 & 0 & 0 \\
 0 & 0 & 2 & 0 \\
@@ -60,12 +60,12 @@ $$
 
 - If $$G$$ is *directed*:
     - $$0$$ if vertex $$i$$ and edge $$e_j$$ are not incident
-    - $$\sqrt{w_{ij}}$$ if edge $$e_j$$ originates at vertex $$i$$
-    - $$-\sqrt{w_{ij}}$$ if edge $$e_j$$ terminates at vertex $$i$$
+    - $$1$$ if edge $$e_j$$ originates at vertex $$i$$
+    - $$-1$$ if edge $$e_j$$ terminates at vertex $$i$$
 - If $$G$$ is *undirected*:
     - If $$Q$$ is *unoriented*:
         - $$0$$ if vertex $$i$$ and edge $$e_j$$ are not incident
-        - $$\sqrt{w_{ij}}$$ otherwise
+        - $$1$$ otherwise
     - If $$Q$$ is *oriented*: we pick an [orientation](../graphs-glossary#orientation) of the graph, and use the incidence matrix of the resulting directed graph.
 
 ## Adjacency matrix
@@ -73,7 +73,7 @@ $$
 [Adjacency](../graphs-glossary#adjacency) is used to define the **adjacency** matrix $$A$$, a matrix $$n \times n$$ such that the $$A_{ij}$$ equals:
 
 - $$0$$ if vertices $$i$$ and $$j$$ are not adjacent (note that in simple graphs vertices are not self-adjacent)
-- $$w_{ij}$$ otherwise
+- $$1$$ otherwise
 
 For $$G_1$$:
 
@@ -98,7 +98,7 @@ The **Laplacian** matrix $$L$$ is a $$n \times n$$ matrix such that the $$L_{ij}
 
 - For $$i \neq j$$:
     - $$0$$ if vertex $$i$$ and edge $$j$$ are not adjacent
-    - $$-w_{ij}$$ otherwise
+    - $$-1$$ otherwise
 - For $$i = j$$, the degree of $$i$$.
 
 More concisely, $$L = D - A$$. Or, given any oriented incidence matrix $$Q(G)$$, $$L = QQ^T$$.
