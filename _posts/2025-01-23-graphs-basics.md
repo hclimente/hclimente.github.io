@@ -83,10 +83,12 @@ This notation allows to concisely define multiple types of graph:
       vertex_b --> vertex_c
   ```
 
-Sometimes, graphs are defined as triples. For instance [**multigraphs**](../graphs-glossary#multigraph), in which multiple edges between the same pair of vertices are allowed. They are noted as $$G = (V, E, \phi)$$, in which the incidence function $$\phi$$ represents the mapping edges to pairs of vertices. Königsberg is an example of multigraph, since it has multiple bridges connecting the same landmasses (e.g., the North Bank and the Kneiphof Island). For instance, the Königsberg graph is an undirected multigraph with: 
+Sometimes, graphs are defined as triples. An example are [**multigraphs**](../graphs-glossary#multigraph), graphs in which multiple edges between the same pair of vertices are allowed. They are triples $$G = (V, E, \phi)$$ in which the incidence function $$\phi$$ represents the mapping edges to pairs of vertices. Königsberg is an example of multigraph, since it has multiple bridges connecting the same landmasses (e.g., the North Bank and the Kneiphof Island). For instance, the Königsberg graph is an undirected multigraph with: 
 
 $$V = \{N, K, L, S \}$$
+
 $$E = \{ e_1, e_2, e_3, e_4, e_5, e_6, e_7 \}$$
+
 $$\phi(x) = \begin{cases}
   \{ N, K \} & \text{if $x = e_1$} \\
   \{ N, K \} & \text{if $x = e_2$} \\
@@ -98,7 +100,7 @@ $$\phi(x) = \begin{cases}
   \end{cases}
 $$
  
-Another type of graph that requires a triple are **weighted** graphs, in which edges have a weight. They are noted as $$G = (V, E, w)$$, in which $$w$$ is a function that maps the edges to their weights. Note that weighted multigraph would require both an incidence and a weight functions, and hence would require a quadruple.
+Another type of graph that requires a triple are **weighted** graphs, in which each edge has a weight. They are triples $$G = (V, E, w)$$ in which $$w$$ is a function that maps edges to their weights. Note that weighted multigraph would be a quadruple, since it would require both an incidence and a weight functions.
 
 > **Note:** unless specified otherwise, in this series I will focus on [*simple*](../graphs-glossary#simple-graph) graphs, which have at most one edge between any pair of vertices and no loops.
 
