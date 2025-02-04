@@ -13,7 +13,7 @@ toc:
     sidebar: left
 ---
 
-Graph theory was founded in the 18th century, with [Euler's](https://en.wikipedia.org/wiki/Leonhard_Euler) article on the [Seven Bridges of Königsberg problem](https://en.wikipedia.org/wiki/Seven_Bridges_of_K%C3%B6nigsberg). The city of Königsberg had seven bridges, connecting the north and south banks of the river and two fluvial islands (Kneiphof and Lomse). Back then, Königsberg looked roughly like this:
+Graph theory was founded in the 18th century, with [Euler's](https://en.wikipedia.org/wiki/Leonhard_Euler) article on the [Seven Bridges of Königsberg problem](https://en.wikipedia.org/wiki/Seven_Bridges_of_K%C3%B6nigsberg). The city of Königsberg had seven bridges, connecting the north and south banks of the river, and two fluvial islands (Kneiphof and Lomse). Back then, Königsberg looked roughly like this:
 
 ```mermaid
 ---
@@ -36,7 +36,7 @@ graph LR
     K === L
 ```
 
-The problem was to find a path around the city such that a walker would cross each bridge of the city exactly once. To solve this problem (by proving it had no solution), Euler found two useful abstraction: vertices representing land masses, and edges representing bridges. A key insight is that a graph can be represented in many ways (e.g., where to position the vertices), and all of them are equivalent. 
+The problem was to find a path such that a walker would cross each bridge exactly once. To solve this problem (by proving it had no solution), Euler found two useful abstractions: vertices representing land masses, and edges representing bridges. A key insight of framing the problem like this was that a graph can be represented in many ways (e.g., where to position the vertices), and all of them are equivalent. 
 
 In the 21st century, we define graphs as sets of objects (vertices) and pairwise relations between them (edges). Graphs are also known as networks; vertices as nodes; and edges as links. Königsberg is a graph with 4 vertices and 6 edges. Importantly, graphs are mathematical objects. A graph $$G$$ can be defined as
 

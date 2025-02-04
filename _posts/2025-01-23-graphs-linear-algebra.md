@@ -13,7 +13,7 @@ toc:
     sidebar: left
 ---
 
-In this article I discuss matrices associated to graphs, and how studying their properties can lead to better understanding of graphs.
+In this article I discuss matrices associated to graphs. As we will see, a graph can be represented as a matrix without any information loss. Hence, the properties of these matrices describe properties of the underlying graph.
 
 # Matrices associated to graphs
 
