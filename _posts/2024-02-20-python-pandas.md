@@ -10,7 +10,7 @@ toc:
     sidebar: left
 ---
 
-[Pandas](https://pandas.pydata.org/) is the most common Python library to deal with real world data. It builds on top of [NumPy](../python-numpy) to provide useful structures for data scientists.
+[Pandas](https://pandas.pydata.org/) is the most common Python library to deal with real world data. It builds on top of [NumPy](../python-vectors) to provide useful structures for data scientists.
 
 # Data structures provided by pandas
 
@@ -18,7 +18,7 @@ Pandas provides several data structures, out of which two are particularly popul
 
 ## Series
 
-A Series is a vector-like structure, that extends [NumPy vectors](../python-numpy#the-inner-workings-of-numpy-arrays).
+A Series is a vector-like structure, that extends [NumPy vectors](../python-vectors#the-inner-workings-of-numpy-arrays).
 
 ```python
 import pandas as pd
@@ -132,7 +132,7 @@ dtype: int64
 
 # Views and copies
 
-[As NumPy](../python-numpy#views,-copies-and-in-place-operations), Pandas distinguishes between *viewing* an object and *copying* it.
+[As NumPy](../python-vectors#views-copies-and-in-place-operations), Pandas distinguishes between *viewing* an object and *copying* it.
 
 TODO
 
