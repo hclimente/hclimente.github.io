@@ -7,7 +7,7 @@ tags: graphs
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # Parts of a graph
@@ -34,7 +34,7 @@ An orientation of an undirected graph is the directed graph resulting of assigni
 
 ## Path
 
-A [walk](#walk) with no repeated *vertices*.
+A [walk](#walk) with no repeated _vertices_.
 
 ## Spanning graph
 
@@ -46,25 +46,25 @@ A graph resulting from subsetting vertices from a larger graph, as well as a sub
 
 ### Induced subgraph
 
-A [subgraph](#subgraph) containing *all* the edges connecting the vertices in the original graph.
+A [subgraph](#subgraph) containing _all_ the edges connecting the vertices in the original graph.
 
 ## Trail
 
-A [walk](#walk) with no repeated *edges*.
+A [walk](#walk) with no repeated _edges_.
 
 ## Triplet
 
-A set of 3 vertices and at least 2 edges between them, none of which are redundant or loops. *Open* triplets have exactly 2 edges; *closed* triplets have exactly 3.
+A set of 3 vertices and at least 2 edges between them, none of which are redundant or loops. _Open_ triplets have exactly 2 edges; _closed_ triplets have exactly 3.
 
 ## Walk
 
-A walk *on a graph* is an alternating sequence of vertices and edges, such that every vertex is [incident](#incidence) with the previous and the following edge (if any).
+A walk _on a graph_ is an alternating sequence of vertices and edges, such that every vertex is [incident](#incidence) with the previous and the following edge (if any).
 
 # Properties of vertices
 
 ## Adjacency
 
-A vertex is adjacent with *another vertex* if they are connected by an edge. $$u \sim v$$ denote that $$u$$ and $$v$$ are adjacent.
+A vertex is adjacent with _another vertex_ if they are connected by an edge. $$u \sim v$$ denote that $$u$$ and $$v$$ are adjacent.
 
 ## Degree
 
@@ -72,11 +72,11 @@ The degree of a vertex in a (simple) undirected graph is the number of edges [in
 
 ## Destination
 
-In a directed graph, the destination *of an edge* is the vertex at the head of the edge.
+In a directed graph, the destination _of an edge_ is the vertex at the head of the edge.
 
 ## Distance
 
-The distance *between two vertices* is the shortest [path](#path) between them.
+The distance _between two vertices_ is the shortest [path](#path) between them.
 
 ## Neighborhood
 
@@ -84,11 +84,11 @@ The neighborhood of vertex $$v$$ is the [induced subgraph](#induced-subgraph) co
 
 ## Incidence
 
-A vertex is incident *with an edge* if the vertex is one of the two vertices the edge connects.
+A vertex is incident _with an edge_ if the vertex is one of the two vertices the edge connects.
 
 ## Source
 
-In a directed graph, the source *of an edge* is the vertex at the tail of the edge.
+In a directed graph, the source _of an edge_ is the vertex at the tail of the edge.
 
 # Types of graphs
 
@@ -118,10 +118,10 @@ A graph with at most one edge between any pair of vertices and no loops.
 
 ### Triangle graph
 
-A [triplet](#triplet) with 3 edges. It consists of *three* closed triplets, each centered around each of the vertices.
+A [triplet](#triplet) with 3 edges. It consists of _three_ closed triplets, each centered around each of the vertices.
 
 # Spectral graph theory
 
-## First *k* eigenvectors
+## First _k_ eigenvectors
 
-Eigenvectors associated with the *k* smallest eigenvalues.
+Eigenvectors associated with the _k_ smallest eigenvalues.

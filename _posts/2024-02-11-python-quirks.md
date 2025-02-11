@@ -11,9 +11,10 @@ related_posts: false
 In this post, I present some interesting features of Python that were not within the scope of the previous posts.
 
 # Strings
+
 ## String formatting
 
-While Python offers multiple ways of formatting strings (i.e., combining predefined text and variables), [F-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals) are particularly elegant: 
+While Python offers multiple ways of formatting strings (i.e., combining predefined text and variables), [F-strings](https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals) are particularly elegant:
 
 ```python
 constants = {
@@ -25,6 +26,7 @@ constants = {
 for name, value in constants.items():
     print(f"{name} = {value}")
 ```
+
 ```
 pi = 3.141592653589793
 sqrt(2) = 1.4142135623730951
@@ -32,10 +34,12 @@ Euler's number = 2.718281828459045
 ```
 
 The float variables can be rounded to a given precision:
+
 ```python
 for name, value in constants.items():
     print(f"{name} = {value:.3f}")
 ```
+
 ```
 pi = 3.142
 sqrt(2) = 1.414
@@ -48,13 +52,14 @@ Values can also be formatted to occupy a minimum fixed width:
 for name, value in constants.items():
     print(f"{name:10} = {value:.3f}")
 ```
+
 ```
 pi         = 3.142
 sqrt(2)    = 1.414
 Euler's number = 2.718
 ```
 
-Note that the string "Euler's number" exceeds the minimum length of 10, and is hence represented as is. 
+Note that the string "Euler's number" exceeds the minimum length of 10, and is hence represented as is.
 
 ## Implicit string concatenation
 
@@ -71,6 +76,7 @@ message = "Hello, " \
           "World!"
 print(message)
 ```
+
 ```
 Hello, World!
 ```
@@ -87,6 +93,7 @@ x = ["a", "b", "c"]
 for idx, item in enumerate(x, 10):
     print(f"{idx}: {item}")
 ```
+
 ```
 10: a
 11: b
@@ -104,6 +111,7 @@ squared = [x**2 for x in numbers]
 for number, square in zip(numbers, squared):
     print(f"The square of {number} is {square}.")
 ```
+
 ```
 The square of 1 is 1.
 The square of 2 is 4.
@@ -119,6 +127,7 @@ ys = list(range(5))
 for x, y in zip(xs, ys):
     print(x, y)
 ```
+
 ```
 0 0
 1 1
@@ -137,6 +146,7 @@ ys = list(range(5))
 for x, y in zip_longest(xs, ys):
     print(x, y)
 ```
+
 ```
 0 0
 1 1
@@ -169,6 +179,7 @@ animals = [
 animals.sort(key = lambda x: x.weight)
 print(animals)
 ```
+
 ```
 [Animal(possum, 2.5), Animal(sea lion, 200), Animal(lion, 200), Animal(whale, 100000)]
 ```
@@ -178,6 +189,7 @@ print(animals)
 animals.sort(key = lambda x: x.name)
 print(animals)
 ```
+
 ```
 [Animal(lion, 200), Animal(possum, 2.5), Animal(sea lion, 200), Animal(whale, 100000)]
 ```
@@ -189,6 +201,7 @@ As shown, `key` takes a function which will receive an item, and output a compar
 animals.sort(key = lambda x: (x.weight, x.name))
 print(animals)
 ```
+
 ```
 [Animal(possum, 2.5), Animal(lion, 200), Animal(sea lion, 200), Animal(whale, 100000)]
 ```
@@ -219,12 +232,15 @@ def is_divisor(x, y):
 
 print(is_divisor(10, 5))
 ```
+
 ```
 (True, 0)
 ```
+
 ```python
 print(is_divisor(10, 3))
 ```
+
 ```
 (False, 1)
 ```
@@ -251,6 +267,7 @@ Most decimal floating-point numbers cannot be represented as binary floating-poi
 ```python
 print(0.1)
 ```
+
 ```
 0.1
 ```
@@ -260,6 +277,7 @@ However, if we request Python to give more significant digits:
 ```python
 format(0.1, '.20g')
 ```
+
 ```
 '0.10000000000000000555'
 ```
@@ -269,6 +287,7 @@ While this approximation is smaller than $$2^(-53)$$, that is enough to cause er
 ```python
 assert .1 + .2 == .3
 ```
+
 ```
 AssertionError
 ```
@@ -292,10 +311,13 @@ TODO
 In this series, we have seen multiple examples in which the type of a variable is specified. For instance:
 
 - Variables:
+
 ```python
 x: dict[int, int] = {0: 0, 1: 1}
 ```
+
 - Function arguments and return values:
+
 ```python
 def pretty_print(x: str, prefix: str | None = None) -> None:
     prefix = f"{prefix}: " if prefix else ""
@@ -312,15 +334,15 @@ The decorator `@typing.overload` allows to overload functions, that is, have a f
 
 ```python
 from typing import overload
- 
+
 @overload
 def square(x: int) -> int:
     ...
- 
+
 @overload
 def square(x: list[int]) -> list[int]:
     ...
- 
+
 def square(x: list[int] | int) -> list[int] | int:
     if isinstance(x, list):
         return [square(_x) for _x in x]
@@ -422,6 +444,6 @@ A context manager is a programming construct that makes it easy to allocate and 
 
 # References
 
-* D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
-* B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.
-* [PEP 515 – Underscores in Numeric Literals](https://peps.python.org/pep-0515/)
+- D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
+- B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.
+- [PEP 515 – Underscores in Numeric Literals](https://peps.python.org/pep-0515/)

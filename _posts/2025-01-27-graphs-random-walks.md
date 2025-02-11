@@ -7,7 +7,7 @@ tags: graphs
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # Random walk

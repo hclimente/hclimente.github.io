@@ -2,15 +2,15 @@
 layout: post
 title: Python objects
 date: 2024-02-08 11:59:00-0000
-description: Everything is an object! 
+description: Everything is an object!
 tags: python coding objects
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
-*Python has been the programming language I used most in the past decade. In this series, I explore its more advanced features.*
+_Python has been the programming language I used most in the past decade. In this series, I explore its more advanced features._
 
 It is often said that in Python, everything is an object: builtins, functions, classes, instances, etc. Thus, improving our understanding of objects will is key to mastering Python. In this first post I explore some general concepts related to objects.
 
@@ -22,10 +22,10 @@ Every object has, at least, three properties: a reference, a class, and a refcou
 
 ## Reference
 
-A *reference* is a pointer, a way to access the memory address that stores the object. It can be associated to a name, or an element in a collection:
+A _reference_ is a pointer, a way to access the memory address that stores the object. It can be associated to a name, or an element in a collection:
 
 ```python
-# create a new integer object, and 
+# create a new integer object, and
 # copy its reference to the name "a"
 a = 1
 
@@ -40,6 +40,7 @@ We can retrieve the memory address using `id()`, represented as an integer:
 ```python
 id(a)
 ```
+
 ```
 4342270592
 ```
@@ -62,23 +63,28 @@ assert x == y
 
 ## Class
 
-A *class* is the type of the object (e.g., a float, or a str). Each object contains a pointer to its class, [as we will see below](#the-two-dictionaries-underlying-an-object). We can know an object's class using the `type` operator:
+A _class_ is the type of the object (e.g., a float, or a str). Each object contains a pointer to its class, [as we will see below](#the-two-dictionaries-underlying-an-object). We can know an object's class using the `type` operator:
 
 ```python
 type(1)
 ```
+
 ```
 <class 'int'>
 ```
+
 ```python
 type("1")
 ```
+
 ```
 <class 'str'>
 ```
+
 ```python
 type(1.)
 ```
+
 ```
 <class 'float'>
 ```
@@ -93,7 +99,7 @@ assert isinstance(1., float)
 
 ## Refcount
 
-The *refcount* is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector](../python-basics#memory-management-in-python).
+The _refcount_ is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector](../python-basics#memory-management-in-python).
 
 In principle, we can access the refcounts of a variable using `sys.getrefcount`:
 
@@ -101,6 +107,7 @@ In principle, we can access the refcounts of a variable using `sys.getrefcount`:
 x = []
 sys.getrefcount(x)
 ```
+
 ```
 2
 ```
@@ -110,6 +117,7 @@ Note that its output of `getrefcount` is always increased by 1, as the function 
 ```python
 sys.getrefcount(1)
 ```
+
 ```
 218
 ```
@@ -162,6 +170,7 @@ def format(x: str, formatter: Callable[[str], None]):
 
 format("hey there", pretty_print)
 ```
+
 ```
 Hey there.
 ```
@@ -174,6 +183,7 @@ def formatter_factory():
 
 formatter_factory()("hey there")
 ```
+
 ```
 Hey there.
 ```
@@ -189,13 +199,14 @@ As mentioned above, `=` does not copy objects, only references. If we need to co
 from copy import copy
 
 x = [1, 2, [3, 4]]
-# copies the two first integers, but only 
+# copies the two first integers, but only
 # the reference to the 3rd element
 y = copy(x)
 
 x[2].append(5)
 print(y[2])
 ```
+
 ```
 [3, 4, 5]
 ```
@@ -204,13 +215,14 @@ print(y[2])
 from copy import deepcopy
 
 x = [1, 2, [3, 4]]
-# copies the two first integers as 
+# copies the two first integers as
 # well as the list
 y = deepcopy(x)
 
 x[2].append(5)
 print(y[2])
 ```
+
 ```
 [3, 4]
 ```
@@ -244,6 +256,7 @@ In other languages, a class' attributes can be set as protected (only accessible
 whale = Animal("whale", 100000)
 whale.__favorite # a private attribute
 ```
+
 ```
 AttributeError: 'Animal' object has no attribute '__favorite'
 ```
@@ -253,6 +266,7 @@ If we want to access that attribute, we need to put some extra effort:
 ```python
 print(whale._Animal__favorite)
 ```
+
 ```
 True
 ```
@@ -264,6 +278,7 @@ whale.__favorite = False
 print(whale._Animal__favorite)
 print(whale.__favorite)
 ```
+
 ```
 True
 False
@@ -278,6 +293,7 @@ whale = Animal("whale", 100000)
 
 print(whale.__dict__)
 ```
+
 ```
 {'name': 'whale', 'weight': 100000, '_Animal__favorite': True}
 ```
@@ -289,6 +305,7 @@ Similarly, each class has its own dictionary, containing the data and functions 
 ```python
 Animal.__dict__
 ```
+
 ```
 mappingproxy({'__module__': '__main__', 'phylum': 'metazoan', '__init__': <function Animal.__init__ at 0x103236b90>, 'eat': <function Animal.eat at 0x103236c20>, '__dict__': <attribute '__dict__' of 'Animal' objects>, '__weakref__': <attribute '__weakref__' of 'Animal' objects>, '__doc__': None})
 ```
@@ -298,6 +315,7 @@ For instance, this is where the `Animal.eat()` method lives. This dictionary is 
 ```python
 Animal.__dict__["eat"]()
 ```
+
 ```
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
@@ -307,6 +325,7 @@ TypeError: Animal.eat() missing 1 required positional argument: 'self'
 ```python
 Animal.__dict__["eat"](whale)
 ```
+
 ```
 chompchomp
 ```
@@ -327,6 +346,7 @@ The instance's dictionary keeps the class flexible, since we can add new attribu
 whale.medium = "water"
 print(whale.__dict__)
 ```
+
 ```
 {'name': 'whale', 'weight': 100000, '_Animal__favorite': True, 'medium': 'water'}
 ```
@@ -347,6 +367,7 @@ class EfficientAnimal:
 dog = EfficientAnimal("dog", 10)
 dog.__dict__
 ```
+
 ```
 AttributeError: 'EfficientAnimal' object has no attribute '__dict__'. Did you mean: '__dir__'?
 ```
@@ -356,13 +377,14 @@ In addition to the memory optimizations, this approach also helps to prevent bug
 ```python
 dog.namme = "puppy"
 ```
+
 ```
 AttributeError: 'EfficientAnimal' object has no attribute 'namme'
 ```
 
 # Further reading
 
-* D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
-* https://www.interviewbit.com/python-interview-questions/#freshers
-* More on classes: <https://docs.python.org/3/tutorial/classes.html>
-* More on `__slots__`: <https://wiki.python.org/moin/UsingSlots>
+- D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
+- https://www.interviewbit.com/python-interview-questions/#freshers
+- More on classes: <https://docs.python.org/3/tutorial/classes.html>
+- More on `__slots__`: <https://wiki.python.org/moin/UsingSlots>

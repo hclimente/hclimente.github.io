@@ -7,6 +7,7 @@ tags: local-sensitivity-hashing document-similarity
 giscus_comments: true
 related_posts: false
 ---
+
 Here we address the problem of looking for similar, but not necessarily equal items. This is frequently the case of looking for related documents. For example, all the versions of the same news article: they all possibly come from the same source, each website makes slight modifications.
 
 # Distance measures
@@ -27,7 +28,7 @@ Cosine distance is used in spaces that have dimensions, and hence we can think o
 
 ## Edit distance
 
-Edit distance can be used when points are strings. The distance between two strings $$x$$ and $$y$$ will be the smallest number of single-character insertions and deletions that would convert $$x$$ into $$y$$. It can be easily computed from the *longest common subsequence*.
+Edit distance can be used when points are strings. The distance between two strings $$x$$ and $$y$$ will be the smallest number of single-character insertions and deletions that would convert $$x$$ into $$y$$. It can be easily computed from the _longest common subsequence_.
 
 # Efficiently finding similar items
 
@@ -43,7 +44,7 @@ The first step is representing the documents as sets. A $$k$$-shingle of a docum
 
 The choice of $$k$$ is not trivial, and mostly depends on how long are usually the documents we are dealing with. Hence, $$k$$ must be chosen so that the probability of any given shingle appearing in any given document is low: the longer the average document, the higher the $$k$$ of choice.
 
-There are two kind of special elements in the text that must be dealt with: white spaces - tabs, spaces... - and *stop words* -  the most common words. Stop words are specially interesting because, while usually are just ignored, in some instances they have been used for improved classification.
+There are two kind of special elements in the text that must be dealt with: white spaces - tabs, spaces... - and _stop words_ - the most common words. Stop words are specially interesting because, while usually are just ignored, in some instances they have been used for improved classification.
 
 (Sets contain unique, unordered elements; multisets or bags are generalisations of sets which may contain several instances of the same element.)
 
@@ -55,8 +56,8 @@ We will do so through a process called minhashing. To understand it, we can imag
 
 1. Generate a random permutation of the rows of $$C$$.
 1. For each column $$c$$/document:
-	1. Get the first row $$k$$ that has a 1.
-	1. Fill the column $$c$$ of the signature matrix M with $$k$$.
+   1. Get the first row $$k$$ that has a 1.
+   1. Fill the column $$c$$ of the signature matrix M with $$k$$.
 
 We build a new representation of our set $$S$$ as a vector $$[h_1(S), h_2(S), ..., h_n(S)]$$. This is the only representation we will use to study similarity. Minhashing exploits an interesting property: the probability that permutation $$i$$ of two sets $$S$$ and $$T$$ produce $$h_i(S) = h_i(T)$$ equals the Jaccard similarity of these two sets. This allows us to estimate the Jaccard similarity from $$M$$.
 
@@ -72,5 +73,4 @@ Depending the choice of r and t, we modulate the curve. Hence we get to the sens
 
 # References
 
-* Leskovec, J., Rajaraman, A., & Ullman, J. D. (2014). Mining of Massive Datasets (3rd ed.). Cambridge University Press. Retrieved from http://i.stanford.edu/~ullman/mmdsn.html
-
+- Leskovec, J., Rajaraman, A., & Ullman, J. D. (2014). Mining of Massive Datasets (3rd ed.). Cambridge University Press. Retrieved from http://i.stanford.edu/~ullman/mmdsn.html

@@ -92,9 +92,7 @@
       "startDate": "2013-12",
       "endDate": "2016-08",
       "location": "Barcelona, Spain",
-      "highlights": [
-        "Conducted a large scale study of the involvement of alternative splicing in cancer"
-      ]
+      "highlights": ["Conducted a large scale study of the involvement of alternative splicing in cancer"]
     },
     {
       "name": "Anaxomics Biotech Ltd.",
@@ -122,41 +120,19 @@
   "skills": [
     {
       "name": "Programming",
-      "keywords": [
-        "Python (numpy, pandas, scikit-learn)",
-        "Deep learning (PyTorch)",
-        "R",
-        "nextflow",
-        "C++",
-        "Bash"
-      ]
+      "keywords": ["Python (numpy, pandas, scikit-learn)", "Deep learning (PyTorch)", "R", "nextflow", "C++", "Bash"]
     },
     {
       "name": "Big Data",
-      "keywords": [
-        "Accelerated computing (CUDA, HPC)",
-        "Cloud computing (Azure)",
-        "Databases (SQL)"
-      ]
+      "keywords": ["Accelerated computing (CUDA, HPC)", "Cloud computing (Azure)", "Databases (SQL)"]
     },
     {
       "name": "Omics",
-      "keywords": [
-        "GWAS",
-        "Epigenetics (ATAC-seq)",
-        "RNA-seq (single cell and bulk)",
-        "MS-MS proteomics"
-      ]
+      "keywords": ["GWAS", "Epigenetics (ATAC-seq)", "RNA-seq (single cell and bulk)", "MS-MS proteomics"]
     },
     {
       "name": "DevOps",
-      "keywords": [
-        "Virtual environments (Docker, conda)",
-        "Testing",
-        "CI/CD",
-        "Open source",
-        "git"
-      ]
+      "keywords": ["Virtual environments (Docker, conda)", "Testing", "CI/CD", "Open source", "git"]
     },
     {
       "name": "Professional Skills",

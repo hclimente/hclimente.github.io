@@ -7,14 +7,14 @@ tags: python coding numpy
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 In data science we often operate on numerical vectors are matrices. Although we could store such data as Python's builtins, as a list and a list of lists respectively, we don't. Instead, we use specialized packages like [NumPy](https://numpy.org/), which provide much better performances. In this post I dig into the reasons behind this superiority. As is common in this series, I assume familiarity with Python, and NumPy in this case.
 
 # The inner workings of NumPy arrays
 
-The main selling point of NumPy is the speed up in computations it offers. However, to understand that, we need to first understand the underpinnings of the NumPy array, or `ndarray`. The `ndarray` is made up of two components: an array (the *data buffer*) containing the data, and the metadata, containing information about the data buffer.
+The main selling point of NumPy is the speed up in computations it offers. However, to understand that, we need to first understand the underpinnings of the NumPy array, or `ndarray`. The `ndarray` is made up of two components: an array (the _data buffer_) containing the data, and the metadata, containing information about the data buffer.
 
 The **data buffer** is an array of elements of the same type:
 
@@ -36,7 +36,7 @@ np.array(["1", "2", "3"])
 np.array([int, float, str])
 ```
 
-Let's compare this to a Python builtin: a list containing floats. [Remember](../python-lists) that each of the 64-bit buckets does not store the float, but a 64-bit reference to the float object. This keeps lists flexible, since each bucket can contain a reference to any object, float or not. But it comes with a memory overhead since, on top of the reference, we need to store the object itself, [which is more complex than a naked float value](../python-objects/#properties-of-an-object). In contrast, an `ndarray` stores only the floats themselves, requiring less than 25% of the memory. Furthermore, in the list of floats, the data is *fragmented*: the list itself, and all the objects it references are scattered across memory. In contrast, the whole data buffer lives in a single block of memory.
+Let's compare this to a Python builtin: a list containing floats. [Remember](../python-lists) that each of the 64-bit buckets does not store the float, but a 64-bit reference to the float object. This keeps lists flexible, since each bucket can contain a reference to any object, float or not. But it comes with a memory overhead since, on top of the reference, we need to store the object itself, [which is more complex than a naked float value](../python-objects/#properties-of-an-object). In contrast, an `ndarray` stores only the floats themselves, requiring less than 25% of the memory. Furthermore, in the list of floats, the data is _fragmented_: the list itself, and all the objects it references are scattered across memory. In contrast, the whole data buffer lives in a single block of memory.
 
 The **metadata** includes important information about the data buffer. We can access the metadata like this:
 
@@ -44,6 +44,7 @@ The **metadata** includes important information about the data buffer. We can ac
 x = np.array([1, 2, 3, 4, 5, 6])
 x.__array_interface__
 ```
+
 ```python
 {'data': (105553130143936, False),
  'descr': [('', '<i8')],
@@ -73,6 +74,7 @@ ys = [4, 5, 6]
 # pairs and compute the sum
 [x + y for x, y in zip(xs, ys)]
 ```
+
 ```
 [5, 7, 9]
 ```
@@ -87,6 +89,7 @@ ys = np.array(ys)
 # all 3 sums happen at once
 xs + ys
 ```
+
 ```
 array([5, 7, 9])
 ```
@@ -117,7 +120,7 @@ import time
 n_rows = 100_000
 n_cols = 100_000
 
-# the default order is "C", 
+# the default order is "C",
 # which confusingly refers to row-major
 matrix = np.ones((n_rows, n_cols), order = "C", dtype = "int8")
 
@@ -135,6 +138,7 @@ end_time = time.time()
 col_time = end_time - start_time
 print("Time taken for the column operation:", col_time)
 ```
+
 ```
 Time taken for the row operation: 8.663719177246094
 Time taken for the column operation: 9.641089916229248
@@ -146,7 +150,7 @@ Consistenly, shifting to column-major order (`order = "F"`) produces the opposit
 
 # Views, copies and in-place operations
 
-NumPy introduced an important but tricky concept: data *views*. A views is just a new way to access the data buffer of an existing `ndarray`, with different metadata. Some operations produce views, like basic indexing (i.e., using single indexes and slices):
+NumPy introduced an important but tricky concept: data _views_. A views is just a new way to access the data buffer of an existing `ndarray`, with different metadata. Some operations produce views, like basic indexing (i.e., using single indexes and slices):
 
 ```python
 x = np.array([1, 2, 3, 4, 5, 6])
@@ -227,6 +231,7 @@ binary_repr = ''.join(format(byte, '08b') for byte in x.data.tobytes())
 
 print(binary_repr)
 ```
+
 ```
 0000000100000010
 ```
@@ -245,8 +250,8 @@ Ignore the `byteswap()` call. [It relates to how NumPy parses a sequence of bits
 
 - M. Gorelick & I. Ozsvald, High Performance Python: Practical Performant Programming for Humans. Chapter 5. Matrix and Vector Computation.
 - A series of [Python⇒Speed](https://pythonspeed.com/) articles:
-    - [The limits of Python vectorization as a performance technique](https://pythonspeed.com/articles/vectorization-python-alternatives/)
-    - [How vectorization speeds up your Python code](https://pythonspeed.com/articles/vectorization-python/)
-    - [Massive memory overhead: Numbers in Python and how NumPy helps](https://pythonspeed.com/articles/python-integers-memory/)
+  - [The limits of Python vectorization as a performance technique](https://pythonspeed.com/articles/vectorization-python-alternatives/)
+  - [How vectorization speeds up your Python code](https://pythonspeed.com/articles/vectorization-python/)
+  - [Massive memory overhead: Numbers in Python and how NumPy helps](https://pythonspeed.com/articles/python-integers-memory/)
 - [What scientists must know about hardware to write fast code](https://viralinstruction.com/posts/hardware/)
 - [Scipy lecture notes: Advanced NumPy](https://scipy-lectures.org/advanced/advanced_numpy/)

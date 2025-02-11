@@ -7,7 +7,7 @@ tags: bioinformatics genetics
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # A primer on Mendelian randomization
@@ -34,11 +34,11 @@ The estimated causal effect $$\beta_{\hat{X}Y}$$ is unconfounded! This is usuall
 
 MR relies on three assumptions:
 
-1. *Relevance*: the SNP is associated with the exposure.
-2. *Independence*: the SNP is not associated to the outcome through a confounder, measured or not.
-3. *Exclusion restriction*: the SNP is exclusively associated to the outcome through the exposure.
+1. _Relevance_: the SNP is associated with the exposure.
+2. _Independence_: the SNP is not associated to the outcome through a confounder, measured or not.
+3. _Exclusion restriction_: the SNP is exclusively associated to the outcome through the exposure.
 
-Other common, but optional, assumptions are *linearity* and *homogeneity* (the effect does not vary across strata in the population, like SNP levels or sex).
+Other common, but optional, assumptions are _linearity_ and _homogeneity_ (the effect does not vary across strata in the population, like SNP levels or sex).
 
 Although these assumptions are sometimes violated, we have ways to detect such cases:
 
@@ -51,47 +51,43 @@ Although these assumptions are sometimes violated, we have ways to detect such c
 MR methods can be classified according to multiple criteria:
 
 - Origin of the measurements
-    - One-sample: the SNP, exposure and outcome are measured on the same samples.
-        
-        Example: two-stage least squares.
-        
-    - Two-sample: the SNP-exposure relationship is measured on a set of samples, and the exposure-outcome on another one.
-        
-        Example: Wald ratio estimate
-        
+  - One-sample: the SNP, exposure and outcome are measured on the same samples.
+    Example: two-stage least squares.
+  - Two-sample: the SNP-exposure relationship is measured on a set of samples, and the exposure-outcome on another one.
+    Example: Wald ratio estimate
 - Instrument
-    - SNP
-    - Polygenic score
+  - SNP
+  - Polygenic score
 - Granularity
-    - Individual-level
-    - Summary-level: as an attention note, all summary statistics must come from ancestry-matched samples.
+  - Individual-level
+  - Summary-level: as an attention note, all summary statistics must come from ancestry-matched samples.
 - Number of SNPs
-    - Single SNP
-    - Multiple SNPs: this can address the weak association that individual SNPs might have with the trait. Notably, the dependencies between the SNPs (linkage disequilibrium) can produce trouble.  The SNPs should be conditionally independent predictors (e.g., not in perfect LD). Even when not in perfect LD, too many correlated SNPs can lead to numerically unstable estimates. This is solvable by a prior feature selection and/or dimensionality reduction steps.
+  - Single SNP
+  - Multiple SNPs: this can address the weak association that individual SNPs might have with the trait. Notably, the dependencies between the SNPs (linkage disequilibrium) can produce trouble. The SNPs should be conditionally independent predictors (e.g., not in perfect LD). Even when not in perfect LD, too many correlated SNPs can lead to numerically unstable estimates. This is solvable by a prior feature selection and/or dimensionality reduction steps.
 - Number of exposures
-    - Univariable: one exposure
-    - Multivariable: several exposures
+  - Univariable: one exposure
+  - Multivariable: several exposures
 - Location of the SNPs
-    - Cis-MR: use SNP(s) from the gene of interest coding region
-    - Trans-MR
+  - Cis-MR: use SNP(s) from the gene of interest coding region
+  - Trans-MR
 
 ## Applications
 
 ### Learning the causes of a trait
 
-MR provides an ethical way to find causal links between exposures and diseases. 
+MR provides an ethical way to find causal links between exposures and diseases.
 
-**Exposure:** it can be simple (e.g., gene expression), or complex (e.g., body mas index). 
+**Exposure:** it can be simple (e.g., gene expression), or complex (e.g., body mas index).
 
-**Instruments:** we will use as many SNPs associated to the exposure of interest as possible (e.g., polygenic score). This will capture the full genetic architecture of the trait as well as violations of the assumptions. 
+**Instruments:** we will use as many SNPs associated to the exposure of interest as possible (e.g., polygenic score). This will capture the full genetic architecture of the trait as well as violations of the assumptions.
 
 ### Finding drug targets
 
-In the clinical setting, our interest is learning about *modifiable *****causes of disease, i.e., those that can be treated. 
+In the clinical setting, our interest is learning about \*modifiable **\***causes of disease, i.e., those that can be treated.
 
-**Exposure:** typically, a protein, since it needs to be targetable by a small molecule, a monoclonal antibody, etc. The expectation is that it will affect a complex biomarker through *vertical* pleiotropy (e.g., drugs that lower blood LDL do not target LDL directly, but hamper LDL/cholesterol synthesis).
+**Exposure:** typically, a protein, since it needs to be targetable by a small molecule, a monoclonal antibody, etc. The expectation is that it will affect a complex biomarker through _vertical_ pleiotropy (e.g., drugs that lower blood LDL do not target LDL directly, but hamper LDL/cholesterol synthesis).
 
-**Instruments:** SNPs affecting the gene/protein of interest, often *cis*-pQTL. *Trans*-pQTL can also be used, but they are more likely to partake in horizontal pleiotropy.
+**Instruments:** SNPs affecting the gene/protein of interest, often _cis_-pQTL. _Trans_-pQTL can also be used, but they are more likely to partake in horizontal pleiotropy.
 
 ### Identifying the relevant tissues
 

@@ -24,6 +24,7 @@ b = sum_five(a)
 print(f"a = {a}")
 print(f"b = {b}")
 ```
+
 ```
 a = 3
 b = 8
@@ -41,6 +42,7 @@ b = append_three(a)
 print(f"a = {a}")
 print(f"b = {b}")
 ```
+
 ```
 a = [1, 2, 3]
 b = [1, 2, 3]
@@ -63,6 +65,7 @@ def append_three(input: list = []):
 print(append_three())
 print(append_three())
 ```
+
 ```
 [3]
 [3, 3]
@@ -85,6 +88,7 @@ def format(x, debug=False):
 
 format("hey there", True)
 ```
+
 ```
 Formatting string: hey there
 Hey There
@@ -99,6 +103,7 @@ def format(x, *, debug=False):
 
 format("hey there", True)
 ```
+
 ```
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
@@ -108,6 +113,7 @@ TypeError: format() takes 1 positional argument but 2 were given
 ```python
 format("hey there", debug=True)
 ```
+
 ```
 Formatting string: hey there
 Hey There
@@ -126,10 +132,11 @@ A decorator is syntactic sugar to easily create a wrapper around our functions.
 ```python
 def wrapper()
 ```
+
 ```
+
 ```
 
 # References
 
-* B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.
-
+- B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.

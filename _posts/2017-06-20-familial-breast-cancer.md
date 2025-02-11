@@ -7,7 +7,7 @@ tags: cancer genetics
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # Cancer
@@ -42,7 +42,7 @@ Triple-negative tumors (also known as basal-like) lack the expression of all thr
 
 Routine screening for breast cancer has been set up in the last decades in many countries. After it was introduced we observed a mortality reduction of 30%, justifying its wide implementation. It consists on yearly mammographies. This technique uses low resolution X-rays to detect lesions in the breast. If the lesion is big enough, further morphological examination allows to characterize if the lesion is benign or malign. However, most of the screen-detected lesions are small. In consequence, we perform an additional intervention (biopsy or advanced imaging technique) to make the diagnosis.
 
-Despite the aforementioned success, there is a big controversy regarding mammography programs usefulness. That is because, in practical terms, the 30%  decrease in mortality means that for every 1000 women examined, we will save 7-9 lives. On the other hand, it will provoke with 4 cases of overdiagnosis, tumors that would have never progressed to symptomatic presentation during the lifetime of the woman. That, and many more cases which will require further, possibly invasive, testing to make the final (negative) diagnosis. The proposed solution to this involves adapting the screening process to different demographic groups, so that high risk groups are closely watched while low risk groups loosely so.
+Despite the aforementioned success, there is a big controversy regarding mammography programs usefulness. That is because, in practical terms, the 30% decrease in mortality means that for every 1000 women examined, we will save 7-9 lives. On the other hand, it will provoke with 4 cases of overdiagnosis, tumors that would have never progressed to symptomatic presentation during the lifetime of the woman. That, and many more cases which will require further, possibly invasive, testing to make the final (negative) diagnosis. The proposed solution to this involves adapting the screening process to different demographic groups, so that high risk groups are closely watched while low risk groups loosely so.
 
 # Familial breast cancer
 
@@ -54,36 +54,36 @@ It wasn’t until the late 20th century that two genes involved in DNA repair, B
 
 HBOC follows an autosomal dominant inheritance pattern. While approximately 5–10% of all patients with breast cancer exhibit a monogenic predisposition to breast and ovarian cancer, only about 25% of them harbor BRCA1/2 mutations. Other 23 genes have been associated with familial breast and/or ovarian cancer (Table 1).
 
-Table 1. Overview of HBOC genes: estimated lifetime risk of breast cancer (age in years) and tumorogenic molecular mechanisms that involves them: homologous recombination repair (HRR), replication fork stability, transcription–replication collisions, mismatch repair (MMR), DNA damage signaling, checkpoints and cell death, and/or others. Adapted from *Nielsen et al.*
+Table 1. Overview of HBOC genes: estimated lifetime risk of breast cancer (age in years) and tumorogenic molecular mechanisms that involves them: homologous recombination repair (HRR), replication fork stability, transcription–replication collisions, mismatch repair (MMR), DNA damage signaling, checkpoints and cell death, and/or others. Adapted from _Nielsen et al._
 
-**Gene**|**Breast cancer estimated lifetime risk (age in years)**|**HRR**|**Replication fork stability**|**Transcription–replication collisions**|**MMR**|**DNA damage signaling, checkpoints and cell death**|**Other**
-:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:
-ATM|60% by age 80|✓| | | |✓|
-BARD1|Unknown|✓| | | | |
-BLM|Unknown| |✓| | | |
-BRCA1|57–65% by age 70|✓|✓|✓| |✓|
-BRCA2|45–55% by age 70|✓|✓|✓| |✓|
-BRIP1|OR: <2.0| | | | | |
-CDH1|42% by age 80| | | | | |✓
-CHEK2|37% by age 70| | | | |✓|
-FAM175A|Unknown|✓| | | | |
-FANCC|Unknown| |✓| | | |
-FANCM|Unknown| |✓| | | |
-MLH1|~19% by age 70| |✓| |✓| |
-MRE11|Unknown| | | |✓| |
-MSH2|~11% by age 70| | | |✓| |
-NBN|OR: 3.0|✓| | | | |
-NF1|6.5-fold increase in women aged 30–39| | | | | |✓
-PALB2|35% by age 70|✓|✓| | | |
-PMS2|SIR: 3.8| | | |✓| |
-PTEN|85% by age 70| | | | | |✓
-RAD51B|Unknown|✓| | | | |
-RAD51C|Unknown|✓| | | | |
-RAD51D|Unknown|✓| | | | |
-RECQL|Unknown| |✓| | | |
-RINT1|Unknown|✓| | | | |
-STK11|32% by age 60| | | | | |✓
-TP53|25% by age 70| | | | |✓|
+| **Gene** | **Breast cancer estimated lifetime risk (age in years)** | **HRR** | **Replication fork stability** | **Transcription–replication collisions** | **MMR** | **DNA damage signaling, checkpoints and cell death** | **Other** |
+| :------: | :------------------------------------------------------: | :-----: | :----------------------------: | :--------------------------------------: | :-----: | :--------------------------------------------------: | :-------: |
+|   ATM    |                      60% by age 80                       |    ✓    |                                |                                          |         |                          ✓                           |
+|  BARD1   |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|   BLM    |                         Unknown                          |         |               ✓                |                                          |         |                                                      |
+|  BRCA1   |                     57–65% by age 70                     |    ✓    |               ✓                |                    ✓                     |         |                          ✓                           |
+|  BRCA2   |                     45–55% by age 70                     |    ✓    |               ✓                |                    ✓                     |         |                          ✓                           |
+|  BRIP1   |                         OR: <2.0                         |         |                                |                                          |         |                                                      |
+|   CDH1   |                      42% by age 80                       |         |                                |                                          |         |                                                      |     ✓     |
+|  CHEK2   |                      37% by age 70                       |         |                                |                                          |         |                          ✓                           |
+| FAM175A  |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|  FANCC   |                         Unknown                          |         |               ✓                |                                          |         |                                                      |
+|  FANCM   |                         Unknown                          |         |               ✓                |                                          |         |                                                      |
+|   MLH1   |                      ~19% by age 70                      |         |               ✓                |                                          |    ✓    |                                                      |
+|  MRE11   |                         Unknown                          |         |                                |                                          |    ✓    |                                                      |
+|   MSH2   |                      ~11% by age 70                      |         |                                |                                          |    ✓    |                                                      |
+|   NBN    |                         OR: 3.0                          |    ✓    |                                |                                          |         |                                                      |
+|   NF1    |          6.5-fold increase in women aged 30–39           |         |                                |                                          |         |                                                      |     ✓     |
+|  PALB2   |                      35% by age 70                       |    ✓    |               ✓                |                                          |         |                                                      |
+|   PMS2   |                         SIR: 3.8                         |         |                                |                                          |    ✓    |                                                      |
+|   PTEN   |                      85% by age 70                       |         |                                |                                          |         |                                                      |     ✓     |
+|  RAD51B  |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|  RAD51C  |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|  RAD51D  |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|  RECQL   |                         Unknown                          |         |               ✓                |                                          |         |                                                      |
+|  RINT1   |                         Unknown                          |    ✓    |                                |                                          |         |                                                      |
+|  STK11   |                      32% by age 60                       |         |                                |                                          |         |                                                      |     ✓     |
+|   TP53   |                      25% by age 70                       |         |                                |                                          |         |                          ✓                           |
 
 ## Molecular function
 
@@ -113,7 +113,7 @@ Pathways involved in genome maintenance, cell cycle checkpoints and cell death u
 
 # Missing heritability
 
-Despite the identification of HBOC genes, 52% of the heritability or familial breast cancer remains unexplained: 20% is explained by high penetrance loci and an extra 28% by common variants. We can illustrate this point with the largest genetic association in familial breast cancer so far, carried out in 2013 by Michailidou *et al.*. The study had two steps. In a first stage, 10,052 breast cancer cases and 12,575 controls of European ancestry were genotyped using the iCOGS platform. Through a GWAS, they selected 29,807 SNPs for further examination in a second stage on a larger cohort (45,290 cases and 41,880 controls). Despite estimating that at least 1,000 uncorrelated loci were involved in breast cancer susceptibility, they were only able to get a genome wide significance (p < 5 × 10<sup>−8</sup>) for ~5% of them (41 SNPs). Moreover, the 41 SNPs have low effect sizes (OR <= 1.26). In fact, only 10 of the +1000 candidate SNPs showed an OR > 1.05.
+Despite the identification of HBOC genes, 52% of the heritability or familial breast cancer remains unexplained: 20% is explained by high penetrance loci and an extra 28% by common variants. We can illustrate this point with the largest genetic association in familial breast cancer so far, carried out in 2013 by Michailidou _et al._. The study had two steps. In a first stage, 10,052 breast cancer cases and 12,575 controls of European ancestry were genotyped using the iCOGS platform. Through a GWAS, they selected 29,807 SNPs for further examination in a second stage on a larger cohort (45,290 cases and 41,880 controls). Despite estimating that at least 1,000 uncorrelated loci were involved in breast cancer susceptibility, they were only able to get a genome wide significance (p < 5 × 10<sup>−8</sup>) for ~5% of them (41 SNPs). Moreover, the 41 SNPs have low effect sizes (OR <= 1.26). In fact, only 10 of the +1000 candidate SNPs showed an OR > 1.05.
 
 > **iCOGS** is a custom Illumina array designed by four consortia that study genetic susceptibility of three hormone-related cancers: breast ([BCAC](http://ccge.medschl.cam.ac.uk/consortia/bcac/) and [CIMBA](http://ccge.medschl.cam.ac.uk/consortia/cimba/)), ovarian ([OCAC](http://ccge.medschl.cam.ac.uk/consortia/ocac/)) and prostate ([PRACTICAL](http://ccge.medschl.cam.ac.uk/consortia/practical/)). Its explicit purpose is to facile the genotyping in large case-control studies for these tumors. The criteria to include the SNPs was (i) previously associated with cancer susceptibility or survival; (ii) fine mapping of genomic regions of interest; (iii) associated with cancer-related quantitative traits; (iv) in selected candidate genes or pathways; (v) associated with other cancers. The final array included ~211,000 SNPs.
 
@@ -123,10 +123,10 @@ GENESIS (GENE SISter) is a French project that aims to shed some light on famili
 
 # References
 
-* PDQ® Cancer Genetics Editorial Board. PDQ Genetics of Breast and Gynecologic Cancers. Bethesda, MD: National Cancer Institute. Updated 30/03/2017. Available at: https://www.cancer.gov/types/breast/hp/breast-ovarian-genetics-pdq. Accessed 14/04/2017. [PMID: 26389210]
-* Foulkes, W. D. (2008). Inherited Susceptibility to Common Cancers. The New England Journal of Medicine, 359(20), 2143–2153. https://doi.org/10.1056/NEJMra0802968
-* Nielsen, F. C., van Overeem Hansen, T., & Sørensen, C. S. (2016). Hereditary breast and ovarian cancer: new genes in confined pathways. Nature Reviews Cancer, 16(9), 599–612. https://doi.org/10.1038/nrc.2016.
-* Michailidou, K., Hall, P., Gonzalez-Neira, A., Ghoussaini, M., Dennis, J., Milne, R. L., … Easton, D. F. (2013). Large-scale genotyping identifies 41 new loci associated with breast cancer risk. Nature Genetics, 45(4), 353–361. https://doi.org/10.1038/ng.2563
-* Rudolph, A., Chang-claude, J., & Schmidt, M. K. (2016). Gene – environment interaction and risk of breast cancer. British Journal of Cancer, 114(2), 125–133. https://doi.org/10.1038/bjc.2015.439
-* Sakoda, L. C., Jorgenson, E., & Witte, J. S. (2013). Turning of COGS moves forward findings for hormonally mediated cancers. Nature Genetics, 45(4), 345–8. https://doi.org/10.1038/ng.2587
-* Sinilnikova, O. M., Dondon, M.-G., Eon-Marchais, S., Damiola, F., Barjhoux, L., Marcou, M., … Andrieu, N. (2016). GENESIS: a French national resource to study the missing heritability of breast cancer. BMC Cancer, 16(1), 13. https://doi.org/10.1186/s12885-015-2028-9
+- PDQ® Cancer Genetics Editorial Board. PDQ Genetics of Breast and Gynecologic Cancers. Bethesda, MD: National Cancer Institute. Updated 30/03/2017. Available at: https://www.cancer.gov/types/breast/hp/breast-ovarian-genetics-pdq. Accessed 14/04/2017. [PMID: 26389210]
+- Foulkes, W. D. (2008). Inherited Susceptibility to Common Cancers. The New England Journal of Medicine, 359(20), 2143–2153. https://doi.org/10.1056/NEJMra0802968
+- Nielsen, F. C., van Overeem Hansen, T., & Sørensen, C. S. (2016). Hereditary breast and ovarian cancer: new genes in confined pathways. Nature Reviews Cancer, 16(9), 599–612. https://doi.org/10.1038/nrc.2016.
+- Michailidou, K., Hall, P., Gonzalez-Neira, A., Ghoussaini, M., Dennis, J., Milne, R. L., … Easton, D. F. (2013). Large-scale genotyping identifies 41 new loci associated with breast cancer risk. Nature Genetics, 45(4), 353–361. https://doi.org/10.1038/ng.2563
+- Rudolph, A., Chang-claude, J., & Schmidt, M. K. (2016). Gene – environment interaction and risk of breast cancer. British Journal of Cancer, 114(2), 125–133. https://doi.org/10.1038/bjc.2015.439
+- Sakoda, L. C., Jorgenson, E., & Witte, J. S. (2013). Turning of COGS moves forward findings for hormonally mediated cancers. Nature Genetics, 45(4), 345–8. https://doi.org/10.1038/ng.2587
+- Sinilnikova, O. M., Dondon, M.-G., Eon-Marchais, S., Damiola, F., Barjhoux, L., Marcou, M., … Andrieu, N. (2016). GENESIS: a French national resource to study the missing heritability of breast cancer. BMC Cancer, 16(1), 13. https://doi.org/10.1186/s12885-015-2028-9

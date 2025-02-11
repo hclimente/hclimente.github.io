@@ -7,19 +7,19 @@ tags: python coding lists tuples
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 Lists and tuples are fundamental data structures.
 
 # The inner workings of lists and tuples
 
-[Similarly to the computer's memory](../hardware), lists and tuples can be visualized as a sequence of equally-sized buckets. Each bucket can store a fixed-length integer (e.g., 64 bits in modern computers), representing the memory address to an object. The buckets are located consecutively in memory, in a data structure known as *array*. When Python instantiates an array, it will request $$N$$ consecutive buckets to the kernel. Out of those, the first bucket stores the length of the array, and the remainng $$N - 1$$ will store the elements. However, lists are stored in so-called *dynamic* arrays, while tuples are stored in *static* arrays. Let's explore why:
+[Similarly to the computer's memory](../hardware), lists and tuples can be visualized as a sequence of equally-sized buckets. Each bucket can store a fixed-length integer (e.g., 64 bits in modern computers), representing the memory address to an object. The buckets are located consecutively in memory, in a data structure known as _array_. When Python instantiates an array, it will request $$N$$ consecutive buckets to the kernel. Out of those, the first bucket stores the length of the array, and the remainng $$N - 1$$ will store the elements. However, lists are stored in so-called _dynamic_ arrays, while tuples are stored in _static_ arrays. Let's explore why:
 
 - Lists are mutable: we can keep adding and removing items to the buckets. Hence, sometimes we might need to store more than $$N - 1 $$ elements originally requested. That is why they are stored in so-called dynamic arrays, which can be resized. Specifically, when the array gets full, Python will allocate a new array with ~12.5% more space and copy all the elements. This means that any given array might be using up to 12.5% more space than absolutely necesary to store their data.
-- Tuples, on the other hand, are immutable. Hence, they are supported by *static* arrays, which cannot be resized. Hence, tuples only take up the strictly required memory, making them more lightweight. Additionally, Python has a little optimization trick involving tuples. When a tuple of size 1 to 20 is no longer in use, Python does not immediately deallocate the memory. Hence, if a new tuple needs to be instantiated, Python can place it to that memory without communciating with the kernel, leading to a speed-up.
+- Tuples, on the other hand, are immutable. Hence, they are supported by _static_ arrays, which cannot be resized. Hence, tuples only take up the strictly required memory, making them more lightweight. Additionally, Python has a little optimization trick involving tuples. When a tuple of size 1 to 20 is no longer in use, Python does not immediately deallocate the memory. Hence, if a new tuple needs to be instantiated, Python can place it to that memory without communciating with the kernel, leading to a speed-up.
 
-## Time complexity 
+## Time complexity
 
 **Lookup**: since the buckets in the array are equally-sized and consecutive, we can quickly retrieve any item by knowing where the array starts and the index of its bucket. For instance, if our array starts at bucket index 1403, and our bucket is index 5 within the array, we simply need to go to bucket index 1408. Hence, accessing a given index is $$O(1)$$.
 
@@ -61,6 +61,7 @@ animals = [
 animals.sort(key = lambda x: x.weight)
 print(animals)
 ```
+
 ```
 [Animal(possum, 2.5), Animal(sea lion, 200), Animal(lion, 200), Animal(whale, 100000)]
 ```
@@ -70,6 +71,7 @@ print(animals)
 animals.sort(key = lambda x: x.name)
 print(animals)
 ```
+
 ```
 [Animal(lion, 200), Animal(possum, 2.5), Animal(sea lion, 200), Animal(whale, 100000)]
 ```
@@ -81,6 +83,7 @@ As shown, `key` takes a function which will receive an item, and output a compar
 animals.sort(key = lambda x: (x.weight, x.name))
 print(animals)
 ```
+
 ```
 [Animal(possum, 2.5), Animal(lion, 200), Animal(sea lion, 200), Animal(whale, 100000)]
 ```
@@ -93,12 +96,12 @@ When comparing tuples, Python first compares the initial elements. If they are e
 
 We can use unpacking to swap multiple of a list in place, without requiring additional temporary variables:
 
-
 ```python
 x = [1, 2, 3]
 x[1], x[0] = x[0], x[1]
 print(x)
 ```
+
 ```
 [2, 1, 3]
 ```
@@ -112,16 +115,19 @@ x = [1, 2, 3, 4, 5]
 first, second, *middle, last = x
 print(first, second, middle, last)
 ```
+
 ```
 1 2 [3, 4] 5
 ```
 
 If there is nothing left to unpack, the starred item will become an empty list:
+
 ```python
 x = [1, 2, 3]
 first, second, *middle, last = x
 print(first, second, middle, last)
 ```
+
 ```
 1 2 [] 3
 ```
@@ -132,7 +138,7 @@ Starred elements cannot be used without non-starred elements (e.g., `*all = x`);
 
 When dealing with queuing problems, we can use `collections.deque`,
 
-```python 
+```python
 from collections import deque
 
 q = deque()
@@ -143,18 +149,23 @@ q.appendleft(4)
 
 print(q)
 ```
+
 ```
 deque([4, 3, 1, 2])
 ```
+
 ```python
 q.pop()
 ```
+
 ```
 2
 ```
+
 ```python
 q.popleft()
 ```
+
 ```
 4
 ```
@@ -167,7 +178,7 @@ Deque is more efficient than a list when dealing with queuing problems.
 
 # References
 
-* D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
-* M. Gorelick & I. Ozsvald, High Performance Python: Practical Performant Programming for Humans. Chapter 3. Lists and Tuples.
-* B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.
-* CPython's implementation of lists: <http://www.laurentluce.com/posts/python-list-implementation/>
+- D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)
+- M. Gorelick & I. Ozsvald, High Performance Python: Practical Performant Programming for Humans. Chapter 3. Lists and Tuples.
+- B. Slatkin, Effective Python: 90 Specific Ways to Write Better Python.
+- CPython's implementation of lists: <http://www.laurentluce.com/posts/python-list-implementation/>

@@ -7,7 +7,7 @@ tags: python coding pandas
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 [Pandas](https://pandas.pydata.org/) is the most common Python library to deal with real world data. It builds on top of [NumPy](../python-vectors) to provide useful structures for data scientists.
@@ -26,6 +26,7 @@ import pandas as pd
 x = pd.Series([0, 1, 2, 3], index=["a", "b", "c", "d"])
 x
 ```
+
 ```
 a    0
 b    1
@@ -41,15 +42,15 @@ The Series stores the data as a NumPy vectors, inheriting its advantages and dis
 DataFrames are matrix-like structures, which build on top of Series. They can be created in multiple ways, some of which are:
 
 - A dictionary of lists/arrays/series
-    ```python
-    data = {'Column1': [1, 2, 3], 'Column2': ['A', 'B', 'C']}
-    df = pd.DataFrame(data)
-    ```
+  ```python
+  data = {'Column1': [1, 2, 3], 'Column2': ['A', 'B', 'C']}
+  df = pd.DataFrame(data)
+  ```
 - A list of dictionaries:
-    ```python
-    data = [{'Column1': 1, 'Column2': 'A'}, {'Column1': 2, 'Column2': 'B'}, {'Column1': 3, 'Column2': 'C'}]
-    df = pd.DataFrame(data)
-    ```
+  ```python
+  data = [{'Column1': 1, 'Column2': 'A'}, {'Column1': 2, 'Column2': 'B'}, {'Column1': 3, 'Column2': 'C'}]
+  df = pd.DataFrame(data)
+  ```
 - A CSV, Excel or JSON file
 - An SQL query or table
 
@@ -57,25 +58,25 @@ The DataFrame stores data as multiple Series with a shared index. While the data
 
 # Indexing
 
-As in NumPy vectors, we can access a Series' elements using their *positional* indexes. But, furthermore, it has an *index*, a hash map structure which allows us to access each element in the array using a *label*:
+As in NumPy vectors, we can access a Series' elements using their _positional_ indexes. But, furthermore, it has an _index_, a hash map structure which allows us to access each element in the array using a _label_:
 
 - `.iloc[]` uses the positional indices, and slicing works as usual:
-    ```python
-    x.iloc[2:3]
-    ```
-    ```
-    c    2
-    dtype: int64
-    ```
+  ```python
+  x.iloc[2:3]
+  ```
+  ```
+  c    2
+  dtype: int64
+  ```
 - `.loc[]` uses labels, and slicing includes both beginning and end:
-    ```python
-    x.loc["c":"d"]
-    ```
-    ```
-    c    2
-    d    3
-    dtype: int64
-    ```
+  ```python
+  x.loc["c":"d"]
+  ```
+  ```
+  c    2
+  d    3
+  dtype: int64
+  ```
 
 DataFrames also have a `.loc[]` and an `.iloc[]` function, which accepts columns as a second argument.
 
@@ -93,13 +94,14 @@ x = pd.Series([1,2,3,4])
 class_1 = ["foo", "bar"]
 class_2 = [1, 2]
 
-index = pd.MultiIndex.from_product((class_1, class_2), 
+index = pd.MultiIndex.from_product((class_1, class_2),
                                    # the name of the levels themselves
                                    names = ["first", "second"])
 x.index = index
 
 x
 ```
+
 ```
 first  second
 foo    1         1
@@ -114,15 +116,18 @@ As shown above, the items within a particular position in the tuple to not need 
 ```python
 x["foo"]
 ```
+
 ```
 second
 1    1
 2    2
 dtype: int64
 ```
+
 ```python
 x[:, 1]
 ```
+
 ```
 first
 foo    1
@@ -132,7 +137,7 @@ dtype: int64
 
 # Views and copies
 
-[As NumPy](../python-vectors#views-copies-and-in-place-operations), Pandas distinguishes between *viewing* an object and *copying* it.
+[As NumPy](../python-vectors#views-copies-and-in-place-operations), Pandas distinguishes between _viewing_ an object and _copying_ it.
 
 TODO
 

@@ -7,7 +7,7 @@ tags: python coding
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # Basic properties and concepts
@@ -53,7 +53,7 @@ x = y = 1
 assert x is y
 
 # we change the value of x. since integers are immutable,
-# a new int(x + 1) is created to store that value, and 
+# a new int(x + 1) is created to store that value, and
 # x is assigned that new reference
 x += 1
 
@@ -79,7 +79,7 @@ assert x == y
 assert x is y
 ```
 
-Interestingly, and as we saw when [examining the *refcount*](../python-objects#refcount), Python leverages this immutability:
+Interestingly, and as we saw when [examining the _refcount_](../python-objects#refcount), Python leverages this immutability:
 
 ```python
 # two int(1) objects are created, each assigned a name
@@ -88,6 +88,7 @@ y = 1
 
 assert x is not y
 ```
+
 ```
 AssertionError
 ```
@@ -109,8 +110,8 @@ A namespace is a mapping from names to objects. In fact, underlying a namespace 
 
 - **Builtin** namespace: it is created when the interpreter starts up. It contain names such as `print`, `int` or `len`.
 - **Global** namespaces:
-    - *The* global namespace contains every name created at the main level of the program. This dictionary can be examined using `globals()`.
-    - Weirdly, *other* global namespaces are possible: each imported module will create its own.
+  - _The_ global namespace contains every name created at the main level of the program. This dictionary can be examined using `globals()`.
+  - Weirdly, _other_ global namespaces are possible: each imported module will create its own.
 - **Local** namespaces: one is created every time a function is called, and is "forgotten" when it terminates. This dictionary can be examined using `locals()`.
 - **Enclosed** namespaces: when a function calls another function, the child has access to its parent's namespace.
 
@@ -149,6 +150,7 @@ print(f"At the beginning, foo = {foo}")
 enclosing_test()
 print(f"Finally, foo = {foo}")
 ```
+
 ```
 At the beginning, foo = original
 Inside enclosing_test, foo = enclosed
@@ -160,12 +162,12 @@ Inside global_test, foo = global
 After global_test, foo = nonlocal
 Finally, foo = global
 ```
-  
+
 # Memory management in Python
 
-In CPython, all the objects live in a *private* [heap](../hardware#memory-allocation). Memory management is handled exclusively by the Python memory manager. In other words, and in contrast to languages like C, the user has no way directly to manipulate items in memory. The Python heap is further subdivided into *arenas* to reduce data fragmentation.
+In CPython, all the objects live in a _private_ [heap](../hardware#memory-allocation). Memory management is handled exclusively by the Python memory manager. In other words, and in contrast to languages like C, the user has no way directly to manipulate items in memory. The Python heap is further subdivided into _arenas_ to reduce data fragmentation.
 
-When an object is created, the memory manager allocates some memory for it in the heap, and its reference is stored in the relevant namespace. 
+When an object is created, the memory manager allocates some memory for it in the heap, and its reference is stored in the relevant namespace.
 
 Conversely, the garbage collector is an algorithm that deallocates objects when they are no longer needed. The main mechanism uses the [reference count](../python-objects#refcount) of the object: when it falls to 0, its memory is deallocated. However, the garbage collector also watches for objects that still have a non-zero refcount, but have become inaccessible, for instance:
 
@@ -191,7 +193,7 @@ When parallel processing is needed, Python can still do that via:
 
 # The Python import system
 
-A Python module is simply a file containing Python functions, classes, constants and runnable code. When we want to use them, we need to *import* the module using the `import` statement. For instance:
+A Python module is simply a file containing Python functions, classes, constants and runnable code. When we want to use them, we need to _import_ the module using the `import` statement. For instance:
 
 ```python
 import numpy as np
@@ -208,7 +210,6 @@ There are multiple things that Python recognizes as modules:
 1. Directories
 
 TO EXPAND
-
 
 # TODO
 

@@ -7,12 +7,12 @@ tags: genetics
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 # Heritability
 
-I will try to explain what I know about heritability by using human height as example phenotype. This will be helpful not only because it is very tangible, but also because it is considered a "model" trait for quantitative genetics because it is easy to measure (Visscher, 2008). Height can be modeled as the sum of the contributions of a unobserved genotype *G* and an unobserved environment $$E$$: $$P = G + E$$ (Visscher et al., 2008). This definition ignores both the genotype-environment covariation as well as genotype-environment interactions, which usually cannot be estimated. As $$G$$ and $$E$$ are different between individuals, height is also variable. Specifically, it has a standard deviation of 7 cm in different human populations. As before, we can decompose the variance in height $$\sigma^2_P$$ as the fraction attributable to genetic factors and the fraction attributable to the environment:
+I will try to explain what I know about heritability by using human height as example phenotype. This will be helpful not only because it is very tangible, but also because it is considered a "model" trait for quantitative genetics because it is easy to measure (Visscher, 2008). Height can be modeled as the sum of the contributions of a unobserved genotype _G_ and an unobserved environment $$E$$: $$P = G + E$$ (Visscher et al., 2008). This definition ignores both the genotype-environment covariation as well as genotype-environment interactions, which usually cannot be estimated. As $$G$$ and $$E$$ are different between individuals, height is also variable. Specifically, it has a standard deviation of 7 cm in different human populations. As before, we can decompose the variance in height $$\sigma^2_P$$ as the fraction attributable to genetic factors and the fraction attributable to the environment:
 
 $$\sigma^2_P = \sigma^2_G + \sigma^2_E$$
 
@@ -50,7 +50,7 @@ Of the main suspects of missing heritability, variants not covered by standard e
 
 # References
 
-* Bahcall, O. Common variation and heritability estimates for breast, ovarian and prostate cancers. Nature iCOGS. Retrieved from https://doi:10.1038/ngicogs.1
-* Manolio, T. A., Collins, F. S., Cox, N. J., Goldstein, D. B., Hindorff, L. A., Hunter, D. J., … Visscher, P. M. (2009). Finding the missing heritability of complex diseases. Nature, 461(7265), 747–753. https://doi.org/10.1038/nature08494
-* Visscher, P. M. (2008). Sizing up human height variation. Nature Genetics, 40(5), 489–90. https://doi.org/10.1038/ng0508-489
-* Visscher, P. M., Hill, W. G., & Wray, N. R. (2008). Heritability in the genomics era--concepts and misconceptions. Nature Reviews. Genetics, 9(4), 255–66. https://doi.org/10.1038/nrg2322
+- Bahcall, O. Common variation and heritability estimates for breast, ovarian and prostate cancers. Nature iCOGS. Retrieved from https://doi:10.1038/ngicogs.1
+- Manolio, T. A., Collins, F. S., Cox, N. J., Goldstein, D. B., Hindorff, L. A., Hunter, D. J., … Visscher, P. M. (2009). Finding the missing heritability of complex diseases. Nature, 461(7265), 747–753. https://doi.org/10.1038/nature08494
+- Visscher, P. M. (2008). Sizing up human height variation. Nature Genetics, 40(5), 489–90. https://doi.org/10.1038/ng0508-489
+- Visscher, P. M., Hill, W. G., & Wray, N. R. (2008). Heritability in the genomics era--concepts and misconceptions. Nature Reviews. Genetics, 9(4), 255–66. https://doi.org/10.1038/nrg2322

@@ -7,7 +7,7 @@ tags: graphs
 giscus_comments: true
 related_posts: false
 toc:
-    sidebar: left
+  sidebar: left
 ---
 
 At the most fundamental level, graphs are just entities and connections between them. Yet, the network topology gives rise to emergent properties. For instance, how information flows through a social network is partly a function who posts the message and how they are connected to the rest of the network, with their immediate connections being likely more important. In this section, I review three levels at which networks operate: [local](#local-properties), [mesoscale](#mesoscale-properties) and [global](#global-properties). They refer, respectively, to properties of the nodes, properties of parts of the network and properties of the whole network.
@@ -16,11 +16,11 @@ At the most fundamental level, graphs are just entities and connections between 
 
 ## Degree
 
-In an undirected network, the **degree** of a vertex $$u$$ ($$\deg u$$) refers to the number of edges that are incident on $$u$$. In a directed network, this concept is split between *indegree* ([$$\deg^- u$$], the number of edges that have $$u$$ as their destination) and *outdegree* ([$$\deg^+ u$$], number of edges that have $$u$$ as their source). Weighted graphs extend this concept to *weighted* degree, in which $$\deg u = \sum_{i} w(e_{ui})$$.
+In an undirected network, the **degree** of a vertex $$u$$ ($$\deg u$$) refers to the number of edges that are incident on $$u$$. In a directed network, this concept is split between _indegree_ ([$$\deg^- u$$], the number of edges that have $$u$$ as their destination) and _outdegree_ ([$$\deg^+ u$$], number of edges that have $$u$$ as their source). Weighted graphs extend this concept to _weighted_ degree, in which $$\deg u = \sum_{i} w(e_{ui})$$.
 
 ## Local clustering coefficient
 
-The **(local) clustering coefficient** *of a vertex* measures the probability that its [neighbors](../graphs-glossary#neighborhood) are connected. It is computed as the ratio between number of [triangles](../graphs-glossary#triangle-graph) involving a vertex, and the number of [triplets](../graphs-glossary#triplet) involving that same vertex.
+The **(local) clustering coefficient** _of a vertex_ measures the probability that its [neighbors](../graphs-glossary#neighborhood) are connected. It is computed as the ratio between number of [triangles](../graphs-glossary#triangle-graph) involving a vertex, and the number of [triplets](../graphs-glossary#triplet) involving that same vertex.
 
 [Often](https://igraph.org/r/doc/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
 
@@ -32,7 +32,7 @@ The **modularity** measures how well a graph can be divided into [modules](../gr
 
 $$Q = \sum_{i=1}^k (e_{ii} - {a_i^2})$$
 
-where $$e_{ii} = \frac {\| \{\{u, v\} \mid u \in V_i, v \in V_i, \{u, v\} \in E \} \|} {\|E\|} $$,$$a_i = \frac {\| \{\{u, v\} \mid u \in V_i, \{u, v\} \in E \} \|} {\|E\|} $$ and $$V_i$$ is the set of vertices in module $$i$$. $$e_{ii}$$ is the fraction of edges within module $$i$$ and $$a_i$$ is the fraction of edges incident with one vertex in module $$i$$. $$Q$$ will be large when the fraction of edges within the module is much larger than expected by chance.
+where $$e_{ii} = \frac {\| \{\{u, v\} \mid u \in V_i, v \in V_i, \{u, v\} \in E \} \|} {\|E\|} $$,$$a*i = \frac {\| \{\{u, v\} \mid u \in V_i, \{u, v\} \in E \} \|} {\|E\|} $$ and $$V_i$$ is the set of vertices in module $$i$$. $$e*{ii}$$ is the fraction of edges within module $$i$$ and $$a_i$$ is the fraction of edges incident with one vertex in module $$i$$. $$Q$$ will be large when the fraction of edges within the module is much larger than expected by chance.
 
 ## Within-module degree
 
@@ -55,7 +55,7 @@ The radius and the diameter measure how easy it is to traverse a graph. They bot
 
 ## Global clustering coefficient
 
-The **global clustering coefficient** *of a graph* is the ratio between closed and open [triplets](../graphs-glossary#triplet) in that graph. Or, equivalently:
+The **global clustering coefficient** _of a graph_ is the ratio between closed and open [triplets](../graphs-glossary#triplet) in that graph. Or, equivalently:
 
 $$C = \frac {3 \times \text{triangles}} {\text{triplets}}$$
 
