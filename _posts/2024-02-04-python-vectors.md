@@ -36,7 +36,7 @@ np.array(["1", "2", "3"])
 np.array([int, float, str])
 ```
 
-Let's compare this to a Python builtin: a list containing floats. [Remember](../python-lists) that each of the 64-bit buckets does not store the float, but a 64-bit reference to the float object. This keeps lists flexible, since each bucket can contain a reference to any object, float or not. But it comes with a memory overhead since, on top of the reference, we need to store the object itself, [which is more complex than a naked float value](../python-objects/#properties-of-an-object). In contrast, an `ndarray` stores only the floats themselves, requiring less than 25% of the memory. Furthermore, in the list of floats, the data is _fragmented_: the list itself, and all the objects it references are scattered across memory. In contrast, the whole data buffer lives in a single block of memory.
+Let's compare this to a Python builtin: a list containing floats. [Remember]({% post_url 2024-01-20-python-lists %}) that each of the 64-bit buckets does not store the float, but a 64-bit reference to the float object. This keeps lists flexible, since each bucket can contain a reference to any object, float or not. But it comes with a memory overhead since, on top of the reference, we need to store the object itself, [which is more complex than a naked float value]({% post_url 2024-01-07-python-objects %}#properties-of-an-object). In contrast, an `ndarray` stores only the floats themselves, requiring less than 25% of the memory. Furthermore, in the list of floats, the data is _fragmented_: the list itself, and all the objects it references are scattered across memory. In contrast, the whole data buffer lives in a single block of memory.
 
 The **metadata** includes important information about the data buffer. We can access the metadata like this:
 
@@ -94,17 +94,17 @@ xs + ys
 array([5, 7, 9])
 ```
 
-Importantly, a vectorized operation is vastly faster than its explicit `for` loop counterpart. To understand why, we need to take a step back, and [understand how the RAM and the CPU interact](../hardware). CPU and RAM are the two sides of this story.
+Importantly, a vectorized operation is vastly faster than its explicit `for` loop counterpart. To understand why, we need to take a step back, and [understand how the RAM and the CPU interact]({% post_url 2024-02-10-hardware %}). CPU and RAM are the two sides of this story.
 
 ### On the memory side
 
-First, Python's native data structures are highly **fragmented**. This severely hampers the prefetcher, and [cache misses](../hardware#cache-and-prefetching) are common. In other words, the list is an object with an attribute containing a reference to an array which in turn stores references to float objects. The object, the array and the floats are scattered across memory. (Potentially, this could be solved by [`arrays`](https://docs.python.org/3/library/array.html). But they seem to have their own downsides.) Keeping data together, as `ndarrays` do, leads to less cache misses. (Additional gains are possible by reducing the number of [cache lines](../hardware) an array spans, e.g., using aligning their beginning to the memory grid. So far I have find some indications, but not strong sources supporting that NumPy attempts this too.)
+First, Python's native data structures are highly **fragmented**. This severely hampers the prefetcher, and [cache misses]({% post_url 2024-02-10-hardware %}#cache-and-prefetching) are common. In other words, the list is an object with an attribute containing a reference to an array which in turn stores references to float objects. The object, the array and the floats are scattered across memory. (Potentially, this could be solved by [`arrays`](https://docs.python.org/3/library/array.html). But they seem to have their own downsides.) Keeping data together, as `ndarrays` do, leads to less cache misses. (Additional gains are possible by reducing the number of [cache lines]({% post_url 2024-02-10-hardware %}) an array spans, e.g., using aligning their beginning to the memory grid. So far I have find some indications, but not strong sources supporting that NumPy attempts this too.)
 
 Second, Python is **dynamically** typed. This means that every operation between two numbers becomes a complex interaction between two heavy data structures. Internally, Python needs to find out the types of the objects, recover their values, run the computation, and store the result in a new object. Statically typed languages avoid much of this overhead.
 
 ### On the CPU side
 
-Vectorization has another meaning in hardware. Specifically, it refers to SIMD, the ability of the CPU to [handle multiple numbers in a single instruction](../hardware#registers-and-simd). CPython does not leverage SIMD, or gives us access to them. However, many NumPy functions are implemented in low-level languages to take advantage of this instruction set. This leads to even faster code. However, we won't take advantage of this optimization when using Python-implemented vector operations, for instance custom transformations of our data.
+Vectorization has another meaning in hardware. Specifically, it refers to SIMD, the ability of the CPU to [handle multiple numbers in a single instruction]({% post_url 2024-02-10-hardware %}#registers-and-simd). CPython does not leverage SIMD, or gives us access to them. However, many NumPy functions are implemented in low-level languages to take advantage of this instruction set. This leads to even faster code. However, we won't take advantage of this optimization when using Python-implemented vector operations, for instance custom transformations of our data.
 
 ### Further efficiency gains
 

@@ -79,7 +79,7 @@ assert x == y
 assert x is y
 ```
 
-Interestingly, and as we saw when [examining the _refcount_](../python-objects#refcount), Python leverages this immutability:
+Interestingly, and as we saw when [examining the _refcount_]({% post_url 2024-01-07-python-objects %}#refcount), Python leverages this immutability:
 
 ```python
 # two int(1) objects are created, each assigned a name
@@ -165,11 +165,11 @@ Finally, foo = global
 
 # Memory management in Python
 
-In CPython, all the objects live in a _private_ [heap](../hardware#memory-allocation). Memory management is handled exclusively by the Python memory manager. In other words, and in contrast to languages like C, the user has no way directly to manipulate items in memory. The Python heap is further subdivided into _arenas_ to reduce data fragmentation.
+In CPython, all the objects live in a _private_ [heap]({% post_url 2024-02-10-hardware %}#memory-allocation). Memory management is handled exclusively by the Python memory manager. In other words, and in contrast to languages like C, the user has no way directly to manipulate items in memory. The Python heap is further subdivided into _arenas_ to reduce data fragmentation.
 
 When an object is created, the memory manager allocates some memory for it in the heap, and its reference is stored in the relevant namespace.
 
-Conversely, the garbage collector is an algorithm that deallocates objects when they are no longer needed. The main mechanism uses the [reference count](../python-objects#refcount) of the object: when it falls to 0, its memory is deallocated. However, the garbage collector also watches for objects that still have a non-zero refcount, but have become inaccessible, for instance:
+Conversely, the garbage collector is an algorithm that deallocates objects when they are no longer needed. The main mechanism uses the [reference count]({% post_url 2024-01-07-python-objects %}#refcount) of the object: when it falls to 0, its memory is deallocated. However, the garbage collector also watches for objects that still have a non-zero refcount, but have become inaccessible, for instance:
 
 ```python
 # create a list - refcount = 1

@@ -20,7 +20,7 @@ In an undirected network, the **degree** of a vertex $$u$$ ($$\deg u$$) refers t
 
 ## Local clustering coefficient
 
-The **(local) clustering coefficient** _of a vertex_ measures the probability that its [neighbors](../graphs-glossary#neighborhood) are connected. It is computed as the ratio between number of [triangles](../graphs-glossary#triangle-graph) involving a vertex, and the number of [triplets](../graphs-glossary#triplet) involving that same vertex.
+The **(local) clustering coefficient** _of a vertex_ measures the probability that its [neighbors]({% post_url 2025-01-23-graphs-glossary %}#neighborhood) are connected. It is computed as the ratio between number of [triangles]({% post_url 2025-01-23-graphs-glossary %}#triangle-graph) involving a vertex, and the number of [triplets]({% post_url 2025-01-23-graphs-glossary %}#triplet) involving that same vertex.
 
 [Often](https://igraph.org/r/doc/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
 
@@ -28,7 +28,7 @@ The **(local) clustering coefficient** _of a vertex_ measures the probability th
 
 ## Modularity
 
-The **modularity** measures how well a graph can be divided into [modules](../graphs-glossary#modules). Given a partition of a graph into $$k$$ modules, the modularity $$Q$$ is computed as
+The **modularity** measures how well a graph can be divided into [modules]({% post_url 2025-01-23-graphs-glossary %}#modules). Given a partition of a graph into $$k$$ modules, the modularity $$Q$$ is computed as
 
 $$Q = \sum_{i=1}^k (e_{ii} - {a_i^2})$$
 
@@ -51,11 +51,11 @@ It is a mesoscale measure of [centrality](#centrality).
 
 ## Radius and diameter
 
-The radius and the diameter measure how easy it is to traverse a graph. They both are quantities based on the maximum [distance](../graphs-glossary#distance) between any two vertices found in the graph. Specifically, the **radius** is the minimum maximum distance; the **diameter** is the maximum distance.
+The radius and the diameter measure how easy it is to traverse a graph. They both are quantities based on the maximum [distance]({% post_url 2025-01-23-graphs-glossary %}#distance) between any two vertices found in the graph. Specifically, the **radius** is the minimum maximum distance; the **diameter** is the maximum distance.
 
 ## Global clustering coefficient
 
-The **global clustering coefficient** _of a graph_ is the ratio between closed and open [triplets](../graphs-glossary#triplet) in that graph. Or, equivalently:
+The **global clustering coefficient** _of a graph_ is the ratio between closed and open [triplets]({% post_url 2025-01-23-graphs-glossary %}#triplet) in that graph. Or, equivalently:
 
 $$C = \frac {3 \times \text{triangles}} {\text{triplets}}$$
 

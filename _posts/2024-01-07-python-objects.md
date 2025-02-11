@@ -99,7 +99,7 @@ assert isinstance(1., float)
 
 ## Refcount
 
-The _refcount_ is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector](../python-basics#memory-management-in-python).
+The _refcount_ is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector]({% post_url 2024-02-11-python-basics %}#memory-management-in-python).
 
 In principle, we can access the refcounts of a variable using `sys.getrefcount`:
 
