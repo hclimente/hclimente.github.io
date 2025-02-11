@@ -36,7 +36,7 @@
         </span><span class="sh">"""</span>
 
         <span class="c1"># virgin buckets are set to None, deleted buckets to False
-</span>        <span class="n">self</span><span class="p">.</span><span class="n">__buckets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">capacity</span><span class="p">)]</span>  
+</span>        <span class="n">self</span><span class="p">.</span><span class="n">__buckets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">capacity</span><span class="p">)]</span>
         <span class="n">self</span><span class="p">.</span><span class="n">__size</span> <span class="o">=</span> <span class="n">capacity</span>
         <span class="n">self</span><span class="p">.</span><span class="n">__n_items</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -263,7 +263,7 @@ Number of pineapples: 0
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Number of carrots: 3
 </code></pre></div></div> <h2 id="use-defaultdict-when-there-is-a-single-default-value">Use <code class="language-plaintext highlighter-rouge">defaultdict</code> when there is a single default value</h2> <p>The <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">collections.defaultdict</code></a> goes one step beyond. They are a good replacement for dictionaries when there is a unique default value. Its first argument is a function which returns the default value. It will be called if and only if the key is missing:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 
-<span class="n">ingredients_dd</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span> 
+<span class="n">ingredients_dd</span> <span class="o">=</span> <span class="nf">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">ingredient</span><span class="p">,</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">ingredients</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
     <span class="n">ingredients_dd</span><span class="p">[</span><span class="n">ingredient</span><span class="p">]</span> <span class="o">=</span> <span class="n">amount</span>

@@ -20,18 +20,18 @@ graph LR
 \begin{algorithmic}[1]
 \PROCEDURE{GraphSpectralClustering}{$$A, k$$}
     \STATE $$n \gets \text{number of nodes (rows in A)}$$
-    
+
     \STATE Compute degree matrix $$D$$ where $$D[i,i] = \sum_{j=1}^n A[i,j]$$
     \STATE $$D_{\text{sqrt-inv}} \gets \text{diag}(1/\sqrt{D[i,i]})$$
     \STATE $$L_{\text{sym}} \gets I - D_{\text{sqrt-inv}} A D_{\text{sqrt-inv}}$$ \COMMENT{Symmetric normalized Laplacian}
-    
+
     \STATE Compute first $$k$$ eigenvectors $$u_1, \ldots, u_k$$ of $$L_{\text{sym}}$$
     \STATE Form matrix $$U \in \mathbb{R}^{n \times k}$$ with columns $$u_1, \ldots, u_k$$
-    
+
     \FOR{$$i = 1$$ \TO $$n$$}
         \STATE $$U[i] \gets U[i] / \|U[i]\|$$ \COMMENT{Row normalization}
     \ENDFOR
-    
+
     \STATE $$\text{labels} \gets \text{KMeans}(U, k)$$ \COMMENT{Cluster embedded nodes}
     \RETURN $$\text{labels}$$
 \ENDPROCEDURE

@@ -11,15 +11,15 @@
 
 <span class="n">heapq</span><span class="p">.</span><span class="nf">heapify</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[-5, 2, 5, 3, 123, 6, 8]
-</code></pre></div></div> <p>The elements have been reordered to represent a heap: each parent note is indexed by \(k\), and its children by \(2k+1\) and \(2k+2\).</p> <p>Let’s see some common operations:</p> <ul> <li>Push a new element (and sift up): <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="n">heapq</span><span class="p">.</span><span class="nf">heappush</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
-  <span class="nf">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  [-10, -5, 5, 2, 123, 6, 8, 3]
-</code></pre></div> </div> </li> <li>Pop the root (and sift down): <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="n">heapq</span><span class="p">.</span><span class="nf">heappop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  -10
-</code></pre></div> </div> </li> <li> <p>Combine the two operations:</p> <ul> <li>Push, then pop: <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="n">heapq</span><span class="p">.</span><span class="nf">heappushpop</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># [-5, 2, 5, 3, 123, 6, 8]
-</span></code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  -7
-</code></pre></div> </div> </li> <li>Pop, then push: <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  <span class="n">heapq</span><span class="p">.</span><span class="nf">heapreplace</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># [-7, 2, 5, 3, 123, 6, 8]
-</span></code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>  -5
+</code></pre></div></div> <p>The elements have been reordered to represent a heap: each parent note is indexed by \(k\), and its children by \(2k+1\) and \(2k+2\).</p> <p>Let’s see some common operations:</p> <ul> <li> <p>Push a new element (and sift up):</p> <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">heapq</span><span class="p">.</span><span class="nf">heappush</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>[-10, -5, 5, 2, 123, 6, 8, 3]
+</code></pre></div> </div> </li> <li> <p>Pop the root (and sift down):</p> <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">heapq</span><span class="p">.</span><span class="nf">heappop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>-10
+</code></pre></div> </div> </li> <li> <p>Combine the two operations:</p> <ul> <li>Push, then pop: <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">heapq</span><span class="p">.</span><span class="nf">heappushpop</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># [-5, 2, 5, 3, 123, 6, 8]
+</span></code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>-7
+</code></pre></div> </div> </li> <li>Pop, then push: <div class="language-python highlighter-rouge"> <div class="highlight"><pre class="highlight"><code><span class="n">heapq</span><span class="p">.</span><span class="nf">heapreplace</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">7</span><span class="p">)</span> <span class="c1"># [-7, 2, 5, 3, 123, 6, 8]
+</span></code></pre></div> </div> <div class="language-plaintext highlighter-rouge"> <div class="highlight"><pre class="highlight"><code>-5
 </code></pre></div> </div> </li> </ul> </li> </ul> <p>Let’s examine the time complexity of each operation:</p> <ul> <li>Creation: \(O(n)\)</li> <li>Update: \(O(\log n)\)</li> <li>Min/max retrieval: \(O(1)\)</li> </ul> <p><strong>Note:</strong> Heaps are great to recover the smallest element, but not the k<sup>th</sup> smallest one. <a href="#binary-search-trees">BSTs</a> might me more appropriate for that.</p> <h3 id="binary-search-trees">Binary search trees</h3> <p>Binary serach trees (BSTs) are binary trees in which every node meets two properties:</p> <ul> <li>All descendants on the left are smaller than the parent node.</li> <li>All descendants on the right are larger than the parent node.</li> </ul> <p>They provide a good balance between insertion and search speeds:</p> <ul> <li>Search: done recursively on the tree. When balanced, search is as good as binary search on a sorted array.</li> <li>Insertion: also done recursively, by traversing the tree from the root in order until we find an appropriate place.</li> </ul> <p>The time complexity of both is \(O(\log n)\) when the tree is <strong>balanced</strong>; otherwise it is \(O(n)\). (Balanced trees are those whose height is small compared to the number of nodes. Visually, they look full and all branches look similarly long.) As a caveat, no operation takes constant time on a BST.</p> <h2 id="tries">Tries</h2> <p>Tries (from re<em>trie</em>val) are trees that store strings:</p> <ul> <li>Nodes represent characters, except for the root, represents the string start.</li> <li>Children represent each of the possible characters that can follow the parent.</li> <li>Leaf nodes represent the end of the string.</li> <li>Paths from the root to the leafs represent the different words.</li> </ul> <p>Due to its nature, tries excel at two things:</p> <ol> <li>Saving space when storing words sharing the same prefix, since they only store the prefix once.</li> <li>Searching words, which can be done in \(O(\text{word length})\). Similarly, they make it very fast to search for words with a given prefix.</li> </ol> <p>These two properties make them excellent at handling spell checking and autocomplete functions.</p> <h2 id="union-finds">Union-finds</h2> <p>Union-finds, also known as Disjoint-sets, store a collection of non-overlapping sets. Internally, sets are represented as directed trees, in which every member points towards the root of the tree. The root is just another member, which we call the <strong>representative</strong>. Union-finds provide two methods:</p> <ul> <li> <strong>Find:</strong> returns the set an element belongs to. Specifically, it returns its representative.</li> <li> <strong>Union:</strong> combines two sets. Specifically, first, it performs two finds. If the representatives differ, it will connect one tree’s root to the root of the other.</li> </ul> <p>Union-finds can be represented as an array, in which every member of the universal set is one element. Members linked to a set take as value the index of another member of the set, often the root. Consequently, members that are the only members of a set take their own value. The same goes for the root. While this eliminates many meaningful pairwise relationship between the elements, it speeds up the two core operations.</p> <p>Every set has a property, the <em>rank</em>, which approximates its depth. Union is performed <em>by rank</em>: the root with the highest rank is picked as the new root. Find performs an additional step, called <em>path compresion</em>, in which every member in the path to the root will be directly bound to the root. This increases the cost of that find operation, but keeps the tree shallow and the paths short, and hence speeds up subsequent find operations.</p> <p>Here is a Python implementation:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">UnionFind</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
         <span class="n">self</span><span class="p">.</span><span class="n">parent</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="n">size</span><span class="p">)]</span>
@@ -162,7 +162,7 @@
 </code></pre></div></div> <p>Or recursively:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">fetch_values</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="p">:</span> <span class="k">return</span> <span class="n">values</span>
     <span class="k">return</span> <span class="p">[</span><span class="n">node</span><span class="p">.</span><span class="n">val</span><span class="p">]</span> <span class="o">+</span> <span class="nf">fetch_values</span><span class="p">(</span><span class="n">node</span><span class="p">.</span><span class="nb">next</span><span class="p">)</span>
-    
+
 
 <span class="nf">fetch_values</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>['A', 'B', 'C', 'D']
@@ -375,7 +375,7 @@ f
     <span class="k">for</span> <span class="n">row_i</span><span class="p">,</span> <span class="n">col_i</span> <span class="ow">in</span> <span class="n">board</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">row_i</span> <span class="o">==</span> <span class="n">row</span> <span class="ow">or</span> <span class="n">col_i</span> <span class="o">==</span> <span class="n">col</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">True</span>
-        
+
         <span class="c1"># check the diagonals
 </span>        <span class="k">if</span> <span class="nf">abs</span><span class="p">(</span><span class="n">row_i</span> <span class="o">-</span> <span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="nf">abs</span><span class="p">(</span><span class="n">col_i</span> <span class="o">-</span> <span class="n">col</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">True</span>
@@ -388,7 +388,7 @@ f
         <span class="k">return</span> <span class="n">count</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
-        <span class="c1"># check the constraints: the explored square 
+        <span class="c1"># check the constraints: the explored square
 </span>        <span class="c1"># is not under attack
 </span>        <span class="k">if</span> <span class="ow">not</span> <span class="nf">under_attack</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
             <span class="n">board</span><span class="p">.</span><span class="nf">append</span><span class="p">((</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">))</span>
@@ -427,7 +427,7 @@ f
             <span class="k">return</span> <span class="bp">False</span>
         <span class="k">if</span> <span class="n">board</span><span class="p">[</span><span class="n">block_row</span> <span class="o">+</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">3</span><span class="p">][</span><span class="n">block_col</span> <span class="o">+</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">num</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">False</span>
-    
+
     <span class="k">return</span> <span class="bp">True</span>
 
 
@@ -445,9 +445,9 @@ f
                     <span class="k">if</span> <span class="nf">solve</span><span class="p">(</span><span class="n">board</span><span class="p">):</span>
                         <span class="k">return</span> <span class="bp">True</span>
                     <span class="n">board</span><span class="p">[</span><span class="n">row</span><span class="p">][</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            
+
             <span class="k">return</span> <span class="bp">False</span>
-            
+
     <span class="k">return</span> <span class="bp">True</span>
 
 <span class="k">if</span> <span class="nf">solve</span><span class="p">(</span><span class="n">board</span><span class="p">):</span>
@@ -505,7 +505,7 @@ f
         <span class="k">if</span> <span class="n">solution</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nf">len</span><span class="p">(</span><span class="n">solution</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length_best_solution</span><span class="p">:</span>
             <span class="n">memo</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">solution</span> <span class="o">+</span> <span class="p">[</span><span class="n">num</span><span class="p">]</span>
             <span class="n">length_best_solution</span> <span class="o">=</span> <span class="nf">len</span><span class="p">(</span><span class="n">memo</span><span class="p">[</span><span class="n">target</span><span class="p">])</span>
-        
+
     <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
 
 <span class="nf">print</span><span class="p">(</span><span class="nf">best_sum</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">]))</span>
@@ -524,7 +524,7 @@ f
             <span class="k">if</span> <span class="nf">can_construct</span><span class="p">(</span><span class="n">new_target</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
                 <span class="n">memo</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
                 <span class="k">break</span>
-            
+
     <span class="k">return</span> <span class="n">memo</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
 
 <span class="nf">print</span><span class="p">(</span><span class="nf">can_construct</span><span class="p">(</span><span class="sh">"</span><span class="s">abcdef</span><span class="sh">"</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">ab</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">abc</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">cd</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">def</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">abcd</span><span class="sh">"</span><span class="p">]))</span>
@@ -569,7 +569,7 @@ f
 <span class="nf">print</span><span class="p">(</span><span class="nf">all_construct</span><span class="p">(</span><span class="sh">"</span><span class="s">skateboard</span><span class="sh">"</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">bo</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">rd</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ate</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">t</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ska</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">sk</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">boar</span><span class="sh">"</span><span class="p">]))</span>
 <span class="nf">print</span><span class="p">(</span><span class="nf">all_construct</span><span class="p">(</span><span class="sh">"</span><span class="s">eeeeeeeeeeeeeeeeeeeeef</span><span class="sh">"</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">e</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">ee</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">eee</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">eeee</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">eeeee</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">eeeee</span><span class="sh">"</span><span class="p">]))</span>
 </code></pre></div></div> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">fib_t</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    
+
     <span class="n">table</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">table</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -608,14 +608,14 @@ f
         - Time: O(m*n)
         - Space: O(m)
     </span><span class="sh">"""</span>
-    
+
     <span class="n">grid</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">target</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
             <span class="k">continue</span>
-        
+
         <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">nums</span><span class="p">:</span>
             <span class="nf">if </span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">num</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">):</span>
                 <span class="n">grid</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
@@ -635,7 +635,7 @@ f
     </span><span class="sh">"""</span>
     <span class="n">grid</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">target</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    
+
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="nf">len</span><span class="p">(</span><span class="n">grid</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -765,12 +765,12 @@ f
                 <span class="n">new_constructs</span> <span class="o">=</span> <span class="nf">deepcopy</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_constructs</span><span class="p">:</span>
                     <span class="n">x</span><span class="p">.</span><span class="nf">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
-                
+
                 <span class="k">if</span> <span class="n">grid</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="nf">len</span><span class="p">(</span><span class="n">word</span><span class="p">)]:</span>
                     <span class="n">grid</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="nf">len</span><span class="p">(</span><span class="n">word</span><span class="p">)].</span><span class="nf">extend</span><span class="p">(</span><span class="n">new_constructs</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">grid</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="nf">len</span><span class="p">(</span><span class="n">word</span><span class="p">)]</span> <span class="o">=</span> <span class="n">new_constructs</span>
-                    
+
 
     <span class="k">return</span> <span class="n">grid</span><span class="p">[</span><span class="nf">len</span><span class="p">(</span><span class="n">target</span><span class="p">)]</span>
 
