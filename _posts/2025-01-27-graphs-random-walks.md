@@ -67,7 +67,7 @@ $$
 There are several remarks we can do:
 
 - This result holds regardless of what the starting node is. In fact, $$\pi_0$$ could be a probability distribution over the nodes.
-- The *speed* at which the distribution converges depends on the eigenvalues of $$P$$. Specifically, if $$\lambda_2$$ is close to 1, the convergence will be slow.
+- The _speed_ at which the distribution converges depends on the eigenvalues of $$P$$. Specifically, if $$\lambda_2$$ is close to 1, the convergence will be slow.
 
 # Random walk with restart
 

@@ -124,10 +124,10 @@ $$L_\text{rw} = D^{-1}L$$
 
 **Spectral graph theory** studies how the eigenvalues and eigenvectors of a graph's associated matrices relate to its properties. Looking more closely at two of the matrices described above, we can see they have interesting properties:
 
-- If $$G$$ is undirected, $$A$$ is both real and symmetric. Hence, it is diagonalizable and has only *real* values.
-- Since for an undirected graph both $$D$$ and $$A$$ are symmetric, $$L$$ is also real and symmetric. In fact, $$L$$ is **positive semi-definite**. This implies that $$L$$'s eigenvalues are not only real, but also *non-negative*.
+- If $$G$$ is undirected, $$A$$ is both real and symmetric. Hence, it is diagonalizable and has only _real_ values.
+- Since for an undirected graph both $$D$$ and $$A$$ are symmetric, $$L$$ is also real and symmetric. In fact, $$L$$ is **positive semi-definite**. This implies that $$L$$'s eigenvalues are not only real, but also _non-negative_.
 
-Spectral graph theory often focuses on studying the eigenvalues of the Laplacian. 
+Spectral graph theory often focuses on studying the eigenvalues of the Laplacian.
 
 ## Connectivity of the graph
 
@@ -135,7 +135,7 @@ The eigenvectors of $$L$$ are closely related to the connectivity of its associa
 
 A simple, but ultimately insightful property of $$L$$ is that, for an undirected graph, the sum over the rows or the columns equals 0. In other words, multiplying $$L$$ by an all-ones vector $$\mathbf{1}$$ results in the zero vector. This tells us that $$L$$ has an eigenvalue of 0, corresponding to the eigenvector $$\mathbf{1}$$. Separately, linear algebra tells us that since $$L$$ is real and symmetric, it has _real_ eigenvalues and _orthogonal_ eigenvectors. And since $$L$$ is positive semi-definite, its eigenvalues are _non-negative_. As we have just seen, the [first eigenvalue]({% post_url 2025-01-23-graphs-glossary %}#first-k-eigenvectors), $$\lambda_1$$, of $$L$$ is 0, corresponding to the $$\mathbf{1}$$ eigenvector. If a vector has multiple [components]({% post_url 2025-01-23-graphs-glossary %}#component), $$L$$ is block diagonal. This makes it easy to see that the indicator vectors, representing the membership of each vertex to one of the components, are eigenvectors with an eigenvalue of 0. This highlights another important property of the Laplacian: given an undirected graph, the multiplicity of the eigenvalue 0 of $$L$$ equals the number of [components]({% post_url 2025-01-23-graphs-glossary %}#component). Conversely, for a [connected]({% post_url 2025-01-23-graphs-glossary %}#connected-graph) graph, $$\lambda_2 > 0$$. (The second smallest eigenvalue is sometimes called the Fiedler eigenvalue.)
 
-More generally, less *smooth* eigenvectors (i.e., those in which consecutive elements change sharply) indicate a less connected. Equivalently, smaller eigenvalues correspond to smoother eigenvectors, and hence to better connected graphs.
+More generally, less _smooth_ eigenvectors (i.e., those in which consecutive elements change sharply) indicate a less connected. Equivalently, smaller eigenvalues correspond to smoother eigenvectors, and hence to better connected graphs.
 
 ## Spectral clustering
 
