@@ -91,7 +91,7 @@ The adjacency matrix relates to the concept of [**paths**]({% post_url 2025-01-2
 The **Laplacian** matrix $$L$$ is a $$n \times n$$ matrix such that the $$L_{ij}$$ equals::
 
 - For $$i \neq j$$:
-  - $$0$$ if vertex $$i$$ and edge $$j$$ are not adjacent
+  - $$0$$ if vertices $$i$$ and $$j$$ are not adjacent
   - $$-1$$ otherwise
 - For $$i = j$$, the degree of $$i$$.
 
@@ -112,11 +112,13 @@ The Laplacian relates to the connectedness of a graph, giving rise to [spectral 
 
 ## Normalized Laplacian matrices
 
-$$L_\text{sym}$$ is a symmetric matrix derived from $$L$$ as follows:
+The presence of [hubs]({% post_url 2025-01-23-graphs-glossary %}#hub) result in large diagonal entries in the Laplacian. There are normalized versions of the Laplacian that downweigh such vertices by dividing the entries by the vertex degree.
+
+The **symmetrically** normalized Laplacian $$L_\text{sym}$$ is a symmetric matrix derived as follows:
 
 $$L_\text{sym} = D^{-1/2}LD^{-1/2}$$
 
-$$L_\text{rw}$$ is a matrix closely related to [random walks]({% post_url 2025-01-27-graphs-random-walks %}) that is derived from $$L$$ as follows:
+The **random walk** normalized Laplacian $$L_\text{rw}$$ is a matrix closely related to [random walks]({% post_url 2025-01-27-graphs-random-walks %}) that is derived as follows:
 
 $$L_\text{rw} = D^{-1}L$$
 

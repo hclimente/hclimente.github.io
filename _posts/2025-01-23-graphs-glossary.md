@@ -78,6 +78,10 @@ In a directed graph, the destination _of an edge_ is the vertex at the head of t
 
 The distance _between two vertices_ is the shortest [path](#path) between them.
 
+## Hub
+
+A vertex with a high [degree](#degree).
+
 ## Neighborhood
 
 The neighborhood of vertex $$v$$ is the [induced subgraph](#induced-subgraph) containing all the vertices [adjacent](#adjacency) to $$v$$.
@@ -111,6 +115,10 @@ A directed graph.
 ## Multigraph
 
 A graph which can have multiple edges between the same pair of vertices.
+
+## Regular
+
+A graph in which every vertex has the same degree.
 
 ## Simple graph
 
