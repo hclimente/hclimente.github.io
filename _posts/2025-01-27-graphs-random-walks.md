@@ -34,7 +34,7 @@ $$
 
 That is, high [degree]({% post_url 2025-02-09-graph-properties %}#regular) vertices are more likely to be visited. If the graph is [regular]({% post_url 2025-01-23-graphs-glossary %}#regular), the stationary distribution is uniform. Because of this property, the initial vertex is not important in the long run: if we allow the RW to run indefinitely, the probability of being at any given vertex is uniform.
 
-> ***Lazy* random walks:** A stationary distribution does not always exists. For instance, consider the case of a random walk on a [bipartite]({% post_url 2025-01-23-graphs-glossary %}#bipartite) graph: at step $$t$$ the walker will be on one side or another, depending on the initial vertex and the parity of $$t$$. Such cases have a stationary distribution under the [*lazy* random walk](https://ocw.mit.edu/courses/18-409-topics-in-theoretical-computer-science-an-algorithmists-toolkit-fall-2009/100377025e8520aab9f61d8585e71cc5_MIT18_409F09_scribe4.pdf), in which the walker has a probability $$\frac 1 2$$ of remaining at the current vertex, and a probability $$\frac 1 2$$ of leaving it.
+> **_Lazy_ random walks:** A stationary distribution does not always exists. For instance, consider the case of a random walk on a [bipartite]({% post_url 2025-01-23-graphs-glossary %}#bipartite) graph: at step $$t$$ the walker will be on one side or another, depending on the initial vertex and the parity of $$t$$. Such cases have a stationary distribution under the [_lazy_ random walk](https://ocw.mit.edu/courses/18-409-topics-in-theoretical-computer-science-an-algorithmists-toolkit-fall-2009/100377025e8520aab9f61d8585e71cc5_MIT18_409F09_scribe4.pdf), in which the walker has a probability $$\frac 1 2$$ of remaining at the current vertex, and a probability $$\frac 1 2$$ of leaving it.
 
 {% details Proof %}
 
@@ -119,16 +119,16 @@ $$
 
 A **Markov chain** is a sequence of events in which the probability of each event only depends on the state attained in the previous event. A random walk is a Markov chain: the probability of visiting a vertex only depends on what the neighbors of the current vertex are, and what is the probability of visiting each of them. We can describe some of the properties of a Markov chain by describing the underlying graph:
 
-- *Time reversibility*
-- *Symmetry*: a Markov chain is symmetric when the underlying graph is [regular]({% post_url 2025-01-23-graphs-glossary %}#regular).
+- _Time reversibility_
+- _Symmetry_: a Markov chain is symmetric when the underlying graph is [regular]({% post_url 2025-01-23-graphs-glossary %}#regular).
 
 In the context of Markov chains, the transition matrix $$P$$ is known as the **right stochastic matrix**.
 
 {% details Types of stochastic matrices %}
 
-- ***Row/right* stochastic matrix**: square matrix with non-negative entries where each row sums to $$1$$.
-- ***Column/left* stochastic matrix**: square matrix with non-negative entries where each column sums to $$1$$.
-- ***Doubly* stochastic matrix**: square matrix with non-negative entries where each row and column sum to $$1$$.
+- **_Row/right_ stochastic matrix**: square matrix with non-negative entries where each row sums to $$1$$.
+- **_Column/left_ stochastic matrix**: square matrix with non-negative entries where each column sums to $$1$$.
+- **_Doubly_ stochastic matrix**: square matrix with non-negative entries where each row and column sum to $$1$$.
 
 {% enddetails %}
 
