@@ -59,9 +59,9 @@ ninja.data = [{
           window.location.href = "/blog/graphs-linear-algebra/";
         
       },
-    },{id: "post-properties-to-graphs",
+    },{id: "post-properties-of-graphs",
       
-        title: "Properties to Graphs",
+        title: "Properties of Graphs",
       
       description: "Multiscale ways to talk about graphs",
       section: "Posts",
