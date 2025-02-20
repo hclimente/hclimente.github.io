@@ -49,8 +49,8 @@ Each training example in our dataset consists on a feature vector $$\mathbf x$$,
 
 1. Correctable mis-classification: $$\tilde y$$ is wrong, but there is only one $$y^\ast$$.
 2. Multi-label: multiple $$y^\ast$$ are correct.
-3. Neither (potentially *out of distribution*): the $$y^\ast$$  is/are unknowable
-4. Non-agreement (*hard*): multiple $$y^\ast$$ are possible
+3. Neither (potentially _out of distribution_): the $$y^\ast$$ is/are unknowable
+4. Non-agreement (_hard_): multiple $$y^\ast$$ are possible
 
 We will tackle the first case using the **confident learning** framework. This label noise can occur in three ways:
 
@@ -58,7 +58,7 @@ We will tackle the first case using the **confident learning** framework. This l
 - Systematic: $$p\left(\tilde{y}=i \mid y^*=j\right)$$ follows any valid distribution
 - Instance-dependent: $$p\left(\tilde{y}=i \mid y^*=j, \boldsymbol{x}\right)$$ depends on the data
 
-The first case can be by-passed by good modeling, given enough data. However, it is hardly realistic. On the other hand, second form is a compromise between what is realistic and what is tractable, and will be our focus. In other words, we assume that $$p\left(\tilde{y}=i \mid y^\ast =j, \boldsymbol{x}\right) = p\left(\tilde{y}=i \mid y^\ast =j\right)$$, and hence the label noise only depends on the original class. For example, a *fox* is much more likely to be mislabeled as a *dog* than as a *banana*, but any *fox* is equally likely to be mislabeled as a *dog*. This is a core assumption of confident learning.
+The first case can be by-passed by good modeling, given enough data. However, it is hardly realistic. On the other hand, second form is a compromise between what is realistic and what is tractable, and will be our focus. In other words, we assume that $$p\left(\tilde{y}=i \mid y^\ast =j, \boldsymbol{x}\right) = p\left(\tilde{y}=i \mid y^\ast =j\right)$$, and hence the label noise only depends on the original class. For example, a _fox_ is much more likely to be mislabeled as a _dog_ than as a _banana_, but any _fox_ is equally likely to be mislabeled as a _dog_. This is a core assumption of confident learning.
 
 <aside>
 💡 **Confident learning** is a data-centric and model-agnostic framework. In other words, it allows to use **any** model’s predicted probability to find label errors. It is implemented in the Python library `cleanlab`, in the function `find_label_issues`.
@@ -137,12 +137,12 @@ Given $$\boldsymbol{ C_{\tilde y, y^\ast} }$$ and $$\boldsymbol{ Q_{\tilde y, y^
 
 A data-related issue in machine learning is **selection bias**. This happens when the training and the real-world distributions do not match. This can happen for several reasons.
 
-| **Reason** | **Validation set** |
-| --- | --- |
-| **Time:** the training data only considers the past | Most **recent** data |
-| **Overfitting:** e.g., we “over-curate” our data |  |
-| **Rare** events that do not make it to our dataset | **Oversample** rare events |
-| Collecting some datapoints is **inconvenient** |  |
+| **Reason**                                          | **Validation set**         |
+| --------------------------------------------------- | -------------------------- |
+| **Time:** the training data only considers the past | Most **recent** data       |
+| **Overfitting:** e.g., we “over-curate” our data    |                            |
+| **Rare** events that do not make it to our dataset  | **Oversample** rare events |
+| Collecting some datapoints is **inconvenient**      |                            |
 
 Selection bias can lead to **spurious correlations**, in which our models pick up “shortcuts”, rather than important features. To avoid this, we will pick the **validation data** which most closely resembles the real-world distribution.
 
@@ -152,15 +152,15 @@ Say we want to achieve 95% classification accuracy. What is the required sample 
 
 ## Annotator bias
 
-Our labels will often come from a team of annotators. Hence, each training example might have multiple, sometimes contradicting annotations. Moreover, not every annotator sees every sample. We can decide how much to trust each label and each annotator. *The best solution is to make the annotators label a few gold standards, for which we know the true label.*
+Our labels will often come from a team of annotators. Hence, each training example might have multiple, sometimes contradicting annotations. Moreover, not every annotator sees every sample. We can decide how much to trust each label and each annotator. _The best solution is to make the annotators label a few gold standards, for which we know the true label._
 
 Given such a multi-annotated dataset, our goals are:
 
 - Consensus label: pick the single, best label
 - Confidence in the consensus label: how confident we are in that label. That will depend on:
-    - The number of annotations for that example
-    - The disagreements between the annotations
-    - The quality of each annotator
+  - The number of annotations for that example
+  - The disagreements between the annotations
+  - The quality of each annotator
 - Quality of each annotator: the overall accuracy of their labels
 
 ### Majority vote
@@ -186,12 +186,12 @@ Solution: learn the probability distribution of what the true label should be gi
 
 # Data-centric evaluation of models
 
-The focus or data-centric ML is to improve models by improving the data. Crucially, this requires identifying the relevant evaluation metric(s) to improve. Such evaluation metrics (or, simply, metrics) measure prediction of the model on an *unseen* example by comparing it to its given label. (Although it is ideal to use multiple metrics, multi-objective problems are hard to tackle in practice.) The metric might use the **most likely** predicted class (e.g., accuracy, balanced accuracy, precision, recall); or the predicted **probabilities** for each class (e.g., log loss, auROC, calibration error).
+The focus or data-centric ML is to improve models by improving the data. Crucially, this requires identifying the relevant evaluation metric(s) to improve. Such evaluation metrics (or, simply, metrics) measure prediction of the model on an _unseen_ example by comparing it to its given label. (Although it is ideal to use multiple metrics, multi-objective problems are hard to tackle in practice.) The metric might use the **most likely** predicted class (e.g., accuracy, balanced accuracy, precision, recall); or the predicted **probabilities** for each class (e.g., log loss, auROC, calibration error).
 
 In practice, we will compute this metric for multiple unseen examples, then aggregate them by:
 
 - Averaging the metrics obtained over all the examples
-- Averaging the metrics obtained over all the examples *in each class* (e.g., per-class accuracy)
+- Averaging the metrics obtained over all the examples _in each class_ (e.g., per-class accuracy)
 - Computing the confusion matrix. Although attractive, since we access more granularity, it is hard to compare the matrices produced by different models.
 
 > 💡 Invest as much time thinking about model evaluation as about the models themselves. It has **huge** impact in real world applications. I list some common pitfalls below.
