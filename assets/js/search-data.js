@@ -202,6 +202,17 @@ ninja.data = [{
           window.location.href = "/blog/python-objects/";
         
       },
+    },{id: "post-data-centric-machine-learning",
+      
+        title: "Data-centric machine learning",
+      
+      description: "Notes from the MIT course",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/data-centric-ml/";
+        
+      },
     },{id: "post-mendelian-randomization",
       
         title: "Mendelian randomization",
