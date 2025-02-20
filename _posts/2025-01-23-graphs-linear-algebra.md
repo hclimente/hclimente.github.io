@@ -84,7 +84,7 @@ A = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-The adjacency matrix relates to the concept of [**paths**]({% post_url 2025-01-23-graphs-glossary %}#path) in an unweighted graph: $$(A^k)_{ij}$$ represents the number of paths of length $$k$$ from vertex $$i$$ to vertex $$j$$. In a weighted graph, it represents the sum of products of weights. For instance, if edge weights represent transition probabilities, $$(A^k)_{ij}$$ represents the probability of starting a walk at node $$i$$ and ending at node $$j$$ after $$k$$ steps.
+The adjacency matrix relates to the concept of [paths]({% post_url 2025-01-23-graphs-glossary %}#path) in an unweighted graph: $$(A^k)_{ij}$$ represents the number of paths of length $$k$$ from vertex $$i$$ to vertex $$j$$. In a weighted graph, it represents the sum of products of weights. For instance, if edge weights represent transition probabilities, $$(A^k)_{ij}$$ represents the probability of starting a [walk]({% post_url 2025-01-27-graphs-random-walks %}) at node $$i$$ and ending at node $$j$$ after $$k$$ steps.
 
 ## Laplacian matrix
 
@@ -108,11 +108,11 @@ L = D - A = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-The Laplacian relates to the connectedness of a graph, giving rise to [spectral graph theory](#spectral-graph-theory). It also is connected to [_flows_]({% post_url 2025-01-23-graphs-glossary %}#flow). The diagonal entries represent the total outflow capacity from a vertex, while off-diagonal entries encode pairwise connection strengths.
+The Laplacian relates to the connectedness of a graph, giving rise to [spectral graph theory](#spectral-graph-theory). It also is connected to [flows]({% post_url 2025-01-23-graphs-glossary %}#flow). The diagonal entries represent the total outflow capacity from a vertex, while off-diagonal entries encode pairwise connection strengths.
 
 ## Normalized Laplacian matrices
 
-The presence of [hubs]({% post_url 2025-01-23-graphs-glossary %}#hub) result in large diagonal entries in the Laplacian. There are normalized versions of the Laplacian that downweigh such vertices by dividing the entries by the vertex degree.
+The presence of [hubs]({% post_url 2025-01-23-graphs-glossary %}#hub) results in large diagonal entries in the Laplacian. There are normalized versions of the Laplacian that downweigh such vertices by dividing the entries by the vertex degree.
 
 The **symmetrically** normalized Laplacian $$L_\text{sym}$$ is a symmetric matrix derived as follows:
 
