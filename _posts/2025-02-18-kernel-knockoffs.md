@@ -1,8 +1,8 @@
 ---
 layout: post
-title: Controlling FDR with knockoffs
+title: Knockoffs
 date: 2025-02-18 12:00:00-0000
-description: An overview of knockoffs
+description: FDR-controlled feature selection
 tags: fdr knockoffs feature_selection
 giscus_comments: true
 related_posts: false
