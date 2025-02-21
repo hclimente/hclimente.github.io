@@ -37,11 +37,11 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-controlling-fdr-with-knockoffs",
+        },{id: "post-knockoffs",
       
-        title: "Controlling FDR with knockoffs",
+        title: "Knockoffs",
       
-      description: "An overview of knockoffs",
+      description: "FDR-controlled feature selection",
       section: "Posts",
       handler: () => {
         
