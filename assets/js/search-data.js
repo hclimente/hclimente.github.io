@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-random-walks-and-markov-chains",
+        },{id: "post-controlling-fdr-with-knockoffs",
+      
+        title: "Controlling FDR with knockoffs",
+      
+      description: "An overview of knockoffs",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/kernel-knockoffs/";
+        
+      },
+    },{id: "post-random-walks-and-markov-chains",
       
         title: "Random walks and Markov chains",
       
