@@ -427,6 +427,7 @@ person1 = Person("John", "Doe", 45)
 with open("obj.json", mode="w") as J:
     json.dump(person1, J)
 ```
+
 ```
 TypeError: Object of type Person is not JSON serializable
 ```
