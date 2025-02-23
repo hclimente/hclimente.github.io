@@ -378,6 +378,112 @@ dog.namme = "puppy"
 AttributeError: 'EfficientAnimal' object has no attribute 'namme'
 ```
 
+# Serialization
+
+**Serialization** is the process of converting a Python object into a file format that can be used to reconstruct the object later. This allows us to store objects, make them persistent across executions and distribute them. As the name implies, serialization consists on transforming the object, living in bits and pieces across the computer memory, into a linear sequence of bytes.
+
+Simple objects can be easily serialized into a text-based format like JSON:
+
+```python
+import json
+
+person1 = {
+    "name": "John",
+    "surname": "Doe",
+    "age": 45
+}
+
+# serialize
+with open("obj.json", mode="w") as J:
+    json.dump(person1, J)
+
+# deserialize
+with open("obj.json", mode="r") as J:
+    person2 = json.load(J)
+
+assert person1 == person2
+```
+
+Let's see what happens if we try to serialize a more complex object:
+
+```python
+import json
+
+class Person:
+    def __init__(self, name, surname, age):
+        self.name = name
+        self.surname = surname
+        self.age = age
+
+    def __eq__(self, other):
+        return (
+            self.name == other.name and
+            self.surname == other.surname and
+            self.age == other.age
+        )
+
+person1 = Person("John", "Doe", 45)
+
+with open("obj.json", mode="w") as J:
+    json.dump(person1, J)
+```
+```
+TypeError: Object of type Person is not JSON serializable
+```
+
+In such cases we need functions that assist Python in (de)serializing the object:
+
+```python
+def person_encoder(obj):
+    if isinstance(obj, Person):
+        obj_dict = {
+            "__person__": True,
+            "name": obj.name,
+            "surname": obj.surname,
+            "age": obj.age
+            }
+        return obj_dict
+
+    raise TypeError(f'Cannot serialize object of {type(obj)}')
+
+
+def person_decoder(dct):
+    if dct.get("__person__", False):
+        return Person(dct["name"], dct["surname"], dct["age"])
+
+    return dct
+
+# serialize
+with open("obj.json", mode="w") as J:
+    json.dump(person1, J, default=person_encoder)
+
+# deserialize
+with open("obj.json", mode="r") as J:
+    person2 = json.load(J, object_hook=person_decoder)
+
+assert person1 == person2
+```
+
+JSON is attractive because it is human-readable and interoperable. However (de)serializing sophisticated objects using JSON can be pretty involved due to the need of defining an encoder and a decoder. Binary serialization, like the one provided by `pickle`, is attrative, since it handle complex objects out of the box:
+
+```python
+import pickle
+
+person1 = Person("John", "Doe", 45)
+
+# serialize or "pickle"
+with open("obj.pkl", mode="wb") as P:
+    pickle.dump(person1, P)
+
+# deserialize or "unpickle"
+with open("obj.pkl", mode="rb") as P:
+    person2 = pickle.load(P)
+
+assert person1 == person2
+```
+
+An important downside is that pickle objects are able to execute arbitrary code during unpickling. Hence, unpickling untrusted files should be regarded as a security risk.
+
 # Further reading
 
 - D. Beazley, [Advanced Python Mastery](https://github.com/dabeaz-course/python-mastery)

@@ -210,7 +210,6 @@ TO EXPAND
 
 # TODO
 
-- Pickling
 - Scope resolution
 
 # Further reading
