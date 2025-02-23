@@ -1,7 +1,7 @@
 ---
 layout: post
 title: The Basics of Python
-date: 2024-02-11 11:59:00-0000
+date: 2024-01-08 11:59:00-0000
 description: Revisiting Python's properties
 tags: python coding
 giscus_comments: true
@@ -76,28 +76,7 @@ assert x == y
 assert x is y
 ```
 
-Interestingly, and as we saw when [examining the refcount]({% post_url 2024-01-07-python-objects %}#refcount), Python leverages this immutability:
-
-```python
-# two int(1) objects are created, each assigned a name
-x = 1
-y = 1
-
-assert x is not y
-```
-
-```
-AssertionError
-```
-
-In other words, 1 (and other common objects, like 0 or `True`) are **singletons**. This way Python does not need to keep allocating memory for new objects that are used very often. This does not happen for more unique immutable objects:
-
-```python
-x = 8457
-y = 8457
-
-assert x is not y
-```
+Immutability is leveraged to define singletons, which I discussed when [examining the refcount]({% post_url 2024-01-07-python-objects %}#refcount).
 
 Mutability also has implications on [memory allocation](#memory-management-in-python). Python knows at runtime how much memory an immutable data type requires. However, the memory requirements of mutable containers will change as we add and remove elements. Hence, to add new elements quickly if needed, Python allocates more memory than is strictly needed.
 

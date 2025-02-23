@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Python objects
-date: 2024-02-08 11:59:00-0000
+date: 2024-01-07 11:58:00-0000
 description: Everything is an object!
 tags: python coding objects
 giscus_comments: true
@@ -10,15 +10,17 @@ toc:
   sidebar: left
 ---
 
-It is often said that in Python everything is an object: builtins, functions, classes, instances, etc. Thus, improving our understanding of objects is key to mastering Python.
+An object is a data structure with an internal state (a set of variables) and a behavior (a set of functions). Everything in Python is an object: builtins, functions, classes, instances. Thus, improving our understanding of objects is the first step to mastering Python.
+
+> Note: not _everything_ in Python is an object.
 
 # Properties of an object
 
-Simply put, an object is a data structure with an internal state (a set of variables) and a behavior (a set of functions). The "class" is the template to create new objects or instances. Every object has, at least, three properties: a reference, a class, and a refcount.
+Every Python object has three builtin properties (a reference, a class, and a refcount) as well as additional, class-specific properties.
 
 ## Reference
 
-A _reference_ is a pointer, a way to access the memory address that stores the object. It can be associated to a name, or an element in a collection:
+A **reference** is a pointer, a way to access the memory address that stores the object. It can be associated to a name, or an element in a collection:
 
 ```python
 # create a new integer object, and
@@ -41,7 +43,9 @@ id(a)
 4342270592
 ```
 
-Note that the assignment operator (`=`) **never** makes a copy of the value being assigned, it just copies the reference. Similarly, the `del` operator never deletes an object, just the reference to it. We can check if two names point to the same memory location using `is`:
+> The assignment operator (`=`) just copies the reference to an object, not the object itself. Similarly, the deletion keyword (`del`) never deletes an object, just the reference to it.
+
+We can check if two names point to the same memory location using `is`:
 
 ```python
 x = [1, 2, 3]
@@ -59,7 +63,7 @@ assert x == y
 
 ## Class
 
-A _class_ is the type of the object (e.g., a float, or a str). Each object contains a pointer to its class, [as we will see below](#the-two-dictionaries-underlying-an-object). We can know an object's class using the `type` operator:
+A **class** is the type of the object (e.g., a float, or a string). Each object contains a pointer to its class, [as we will see below](#the-two-dictionaries-underlying-an-object). We can retrieve an object's class using the `type` function:
 
 ```python
 type(1)
@@ -85,7 +89,17 @@ type(1.)
 <class 'float'>
 ```
 
-Similarly, we can check if an object is an instance of a given class:
+```python
+class Dog:
+    pass
+print(type(Dog()))
+```
+
+```
+<class '__main__.Dog'>
+```
+
+We can use `isinstance` to verify if an object is an instance of a given class:
 
 ```python
 assert isinstance(1, int)
@@ -95,7 +109,7 @@ assert isinstance(1., float)
 
 ## Refcount
 
-The _refcount_ is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector]({% post_url 2024-02-11-python-basics %}#memory-management-in-python).
+The **refcount** is a counter that keeps track of how many references point to an object. Its value gets increased by 1 when, for instance, an object gets assigned to a new name. It gets decreased by 1 when a name goes out of scope or is explicitly deleted (`del`). When the refcount reaches 0, its object's memory will be [reclaimed by the garbage collector]({% post_url 2024-02-11-python-basics %}#memory-management-in-python).
 
 In principle, we can access the refcounts of a variable using `sys.getrefcount`:
 
@@ -108,39 +122,45 @@ sys.getrefcount(x)
 2
 ```
 
-Note that its output of `getrefcount` is always increased by 1, as the function itself contains a reference for the variable. Let's see another example:
+Note that despite `x` being the only reference to that empty list, the output of `getrefcount` is 2. This is because the function itself contains a new reference to the list, hence temporarily increasing its refcount by 1.
+
+Let's see another example:
 
 ```python
-sys.getrefcount(1)
+sys.getrefcount(True)
 ```
 
 ```
-218
+4294967295
 ```
 
-I expected that a newly created integer would have a `refcount` of 1. However, the actual number is much higher. [The explanation might involve optimizations happening under the hood.](https://stackoverflow.com/a/44096890) Accordingly, the refcount of more and more unique integers gets smaller:
+I expected that a newly created `bool(True)` object would have a `refcount` of 1. However, the actual number is much higher. This is because `True`, `False`, `None` and [a few others](https://docs.python.org/3/library/constants.html) are **singletons**, that is, only one such object can exist. By caching these common objects, Python can skip repeatedly instantiating them. Different Python implementations can have additional singletons for common objects. For instance, CPython pre-caches integers from -5 to 256:
 
 ```python
-assert sys.refcount(2) < sys.getrefcount(123456)
+# two integers are created
+# and each is assigned a name
+x = 256
+y = 256
+
+# but they both point to the same object
+assert x is y
+
+# two integers are created
+# and each is assigned a name
+x = 257
+y = 257
+
+# but they are not singletons
+assert x is not y
 ```
 
 ## Class' properties and methods
 
-On top of these three properties, objects have additional properties and methods that encode their state and behaviors. For instance, the `float` class has an additional property that stores the numerical value, as well as multiple methods that enable algebraic operations. A user-defined object will have an arbitrary number of attributes and methods.
-
-Notably, the `None` object has no other properties. It is a singleton: only one such object exists:
-
-```python
-a = None
-b = None
-
-# same object, despite independent assignments
-assert a is b
-```
+Objects have additional properties and methods that encode their state and behaviors. For instance, the `float` class has an additional property that stores the numerical value, as well as multiple methods that enable algebraic operations.
 
 # Objects are first-class citizens
 
-Objects are first-class citizens in Python. In other words, they can:
+Objects are first-class citizens in Python, meaning they can be treated like any other value. In other words, they can:
 
 - Be assigned a name:
 
@@ -186,97 +206,144 @@ Hey there.
 
 # Copying objects
 
-As mentioned above, `=` does not copy objects, only references. If we need to copy an object, we need to use the `copy` module. There are two kinds of copies:
+As mentioned above, the assignment operator `=` does not copy objects, only references. If we need to copy an object, we need to use the `copy` module. There are two types of copies: shallow and deep.
 
-- **Shallow copy:** `copy.copy` copies the object, but any reference it stores will just get copied, i.e., not the whole referenced object.
-- **Deep copy:** `copy.deepcopy` recursively copies the object, all the objects it references to, and so on.
+Shallow copies, made with `copy.copy`, duplicate the object. However any reference it stores will just get copied as a reference, i.e., the referenced object will not be duplicated.
 
 ```python
 from copy import copy
 
 x = [1, 2, [3, 4]]
-# copies the two first integers, but only
-# the reference to the 3rd element
-y = copy(x)
+# copy the two first integers
+# but only a reference to the
+# 3rd element
+x_copy = copy(x)
 
 x[2].append(5)
-print(y[2])
+
+assert x[2] is x_copy[2]
 ```
 
-```
-[3, 4, 5]
-```
+Deep copies, made with `copy.deepcopy`, recursively duplicates the object and all the referenced objects.
 
 ```python
 from copy import deepcopy
 
 x = [1, 2, [3, 4]]
-# copies the two first integers as
-# well as the list
-y = deepcopy(x)
+# copies the two first integers
+# as well as the list
+x_copy = deepcopy(x)
 
 x[2].append(5)
-print(y[2])
+
+assert x[2] is not x_copy[2]
+assert x[2] != x_copy[2]
 ```
 
-```
-[3, 4]
-```
+# Defining our own classes
 
-# Defining our own objects
-
-Python allows us to define our own classes. New objects are defined using the `class` operator, and instantiated using the class name. Let's see an example:
+Python allows us to define our own classes using the `class` keyword. New objects are instantiated using the class name. Let's see an example:
 
 ```python
 class Animal:
 
     phylum = "metazoan"
 
-    def __init__(self, name, weight):
-        self.name = name
-        self.weight = weight
+    def __init__(self, species, weight):
+        self.species    = species
+        self.weight     = weight
         self.__favorite = True
 
     def eat(self):
         self.weight += 1
         print("chompchomp")
+
+    def is_favorite(self):
+        return self.__favorite
+
+    def set_favorite(self, flag):
+        if isinstance(flag, bool):
+            self.__favorite = flag
+        else:
+            msg = "flag should be a bool;" \
+                f"{type(flag)} found."
+            raise Exception(msg)
 ```
 
-Let's zoom in on some interesting features.
+This is a defining an animal that can only eat while making cute noises. The animal also has some attributes: a phylum, a species, a weight and a boolean denoting if its my favorite or not. By default, they all are! But I have added two functions to read and change boolean. Let's zoom in on this simple example to understand some interesting properties of Python objects.
 
 ## Private and protected attributes
 
-In other languages, a class' attributes can be set as protected (only accessible within the class and subclasses) or as private (only accessible within the class). While you can always modify attributes from the outside in Python, the language emulates protected and private attributes by prepending one or two underscores respectively:
+In other languages, a class' attributes can be set as public (accessible to everyone), protected (only accessible within the class and subclasses) or as private (only accessible within the class). This is helpful to define what we expose to other classes and what should not be modified or readable externally.
+
+Python emulates protected and private attributes by prepending one or two underscores respectively. In our `Animal` example, `Animal.__favorite` is a private attribute:
 
 ```python
-whale = Animal("whale", 100000)
-whale.__favorite # a private attribute
+moby = Animal("whale", 100000)
+moby.__favorite
 ```
 
 ```
-AttributeError: 'Animal' object has no attribute '__favorite'
+AttributeError: 'Animal' object has no attribute
+'__favorite'. Did you mean: 'is_favorite'?
 ```
 
-If we want to access that attribute, we need to put some extra effort:
+We can read the private attribute using the public function `Animal.is_favorite()`, and modify it using the private function `Animal.set_favorite()`:
 
 ```python
-print(whale._Animal__favorite)
+moby.is_favorite()
 ```
 
 ```
 True
 ```
 
-However, as I learnt rather painfully, this is valid:
+```python
+# sorry, moby :(
+moby.set_favorite(False)
+
+moby.is_favorite()
+```
+
+```
+False
+```
+
+However, is just a convention: underscores signal intent, but access is not strictly restricted: you can _always_ modify attributes from the outside. However, we need to put some extra effort and by-pass the setter and getter:
 
 ```python
-whale.__favorite = False
-print(whale._Animal__favorite)
-print(whale.__favorite)
+print(moby._Animal__favorite)
+```
+
+```
+False
+```
+
+```python
+moby._Animal__favorite = True
+print(moby._Animal__favorite)
 ```
 
 ```
 True
+```
+
+Note that we can define a new, public `__favorite` attribute on the instantiated object, which is different from the `_Animal__favorite` attribute defined at the class level. Hence, this becomes possible, which has been a source of headaches in the past:
+
+```python
+moby.__favorite = False
+print(moby._Animal__favorite)
+```
+
+```
+True
+```
+
+```python
+print(moby.__favorite)
+```
+
+```
 False
 ```
 
@@ -285,13 +352,13 @@ False
 Underlying every object there are two dictionaries. They are accessible, respectively, using `{instance}.__dict__` and `{Class}.__dict__`. The first one is an instance-specific dictionary containing its writable attributes:
 
 ```python
-whale = Animal("whale", 100000)
+moby = Animal("whale", 100000)
 
-print(whale.__dict__)
+print(moby.__dict__)
 ```
 
 ```
-{'name': 'whale', 'weight': 100000, '_Animal__favorite': True}
+{'species': 'whale', 'weight': 100000, '_Animal__favorite': True}
 ```
 
 Note that private attributes like `__favorite` appear with an altered name of the form `_{class name}{attribute}`.
@@ -303,7 +370,17 @@ Animal.__dict__
 ```
 
 ```
-mappingproxy({'__module__': '__main__', 'phylum': 'metazoan', '__init__': <function Animal.__init__ at 0x103236b90>, 'eat': <function Animal.eat at 0x103236c20>, '__dict__': <attribute '__dict__' of 'Animal' objects>, '__weakref__': <attribute '__weakref__' of 'Animal' objects>, '__doc__': None})
+mappingproxy({'__module__': '__main__',
+              '__firstlineno__': 1,
+              'phylum': 'metazoan',
+              '__init__': <function Animal.__init__ at 0x1019277e0>,
+              'eat': <function Animal.eat at 0x1019274c0>,
+              'is_favorite': <function Animal.is_favorite at 0x101927c40>,
+              'set_favorite': <function Animal.set_favorite at 0x101927b00>,
+              '__static_attributes__': ('__favorite', 'species', 'weight'),
+              '__dict__': <attribute '__dict__' of 'Animal' objects>,
+              '__weakref__': <attribute '__weakref__' of 'Animal' objects>,
+              '__doc__': None})
 ```
 
 For instance, this is where the `Animal.eat()` method lives. This dictionary is shared by all the instances, which is why every non-static method requires the instance to be passed as the first argument. Under the hood, when we call an instance's method, Python finds the method in the class dictionary and passes the instance as first argument. But we can also do it explicitly:
@@ -319,7 +396,7 @@ TypeError: Animal.eat() missing 1 required positional argument: 'self'
 ```
 
 ```python
-Animal.__dict__["eat"](whale)
+Animal.__dict__["eat"](moby)
 ```
 
 ```
@@ -329,53 +406,58 @@ chompchomp
 Both dictionaries are linked by `instance.__class__`, which is assigned to the class object:
 
 ```python
-assert whale.__class__.__dict__ == Animal.__dict__
+assert moby.__class__.__dict__ == Animal.__dict__
 ```
 
 As we saw, an attribute might exist in either dictionary. To find an attribute at runtime, Python will first search `instance.__dict__`; if unsuccessful, it will search `Class.__dict__`.
 
 ## `__slots__` helps with memory optimization
 
-The instance's dictionary keeps the class flexible, allowinf to add new attributes at any time:
+The instance's dictionary keeps the class flexible, allowing to add new attributes at any time:
 
 ```python
-whale.medium = "water"
-print(whale.__dict__)
+moby.medium = "water"
+print(moby.__dict__)
 ```
 
 ```
-{'name': 'whale', 'weight': 100000, '_Animal__favorite': True, 'medium': 'water'}
+{'species': 'whale',
+ 'weight': 100000,
+ '_Animal__favorite': False,
+ 'medium': 'water'}
 ```
 
-`__slots__` allows us to fix the possible attributes a priori, allowing Python to reserve the exact amoung of memory needed and to bypass the creation of the dictionary:
+`__slots__` allows us to fix the possible attributes a priori, allowing Python to reserve the exact amount of memory needed and to bypass the creation of the dictionary:
 
 ```python
 class EfficientAnimal:
 
-    __slots__ = ["name", "weight", "__favorite"]
+    __slots__ = ["species", "weight", "__favorite"]
     phylum = "metazoan"
 
-    def __init__(self, name, weight):
-        self.name = name
-        self.weight = weight
+    def __init__(self, species, weight):
+        self.species    = species
+        self.weight     = weight
         self.__favorite = True
 
-dog = EfficientAnimal("dog", 10)
-dog.__dict__
+wasabi = EfficientAnimal("dog", 10)
+wasabi.__dict__
 ```
 
 ```
-AttributeError: 'EfficientAnimal' object has no attribute '__dict__'. Did you mean: '__dir__'?
+AttributeError: 'EfficientAnimal' object has no
+attribute '__dict__'. Did you mean: '__dir__'?
 ```
 
-In addition to the memory optimizations, this approach also helps to prevent bugs caused by typos in variable names:
+This mainly optimizes memory, though it also blocks new attributes, helping to prevent bugs caused by typos in variable names:
 
 ```python
-dog.namme = "puppy"
+wasabi.wwweight = 8
 ```
 
 ```
-AttributeError: 'EfficientAnimal' object has no attribute 'namme'
+AttributeError: 'EfficientAnimal' object has no
+attribute 'wwweight'
 ```
 
 # Serialization
@@ -445,12 +527,19 @@ def person_encoder(obj):
             }
         return obj_dict
 
-    raise TypeError(f'Cannot serialize object of {type(obj)}')
+    msg = f'Cannot serialize object of {type(obj)}'
+
+    raise TypeError(msg)
 
 
 def person_decoder(dct):
     if dct.get("__person__", False):
-        return Person(dct["name"], dct["surname"], dct["age"])
+
+        name    = dct["name"]
+        surname = dct["surname"]
+        age     = dct["age"]
+
+        return Person(name, surname, age)
 
     return dct
 
@@ -465,7 +554,7 @@ with open("obj.json", mode="r") as J:
 assert person1 == person2
 ```
 
-JSON is attractive because it is human-readable and interoperable. However (de)serializing sophisticated objects using JSON can be pretty involved due to the need of defining an encoder and a decoder. Binary serialization, like the one provided by `pickle`, is attrative, since it handle complex objects out of the box:
+JSON is attractive because it is human-readable and interoperable. However (de)serializing sophisticated objects using JSON can be pretty involved due to the need to define an encoder and a decoder. Binary serialization, like the one provided by `pickle`, is attractive, since it handles complex objects out of the box:
 
 ```python
 import pickle
