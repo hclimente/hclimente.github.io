@@ -10,15 +10,11 @@ toc:
   sidebar: left
 ---
 
-_Python has been the programming language I used most in the past decade. In this series, I explore its more advanced features._
-
-It is often said that in Python, everything is an object: builtins, functions, classes, instances, etc. Thus, improving our understanding of objects will is key to mastering Python. In this first post I explore some general concepts related to objects.
+It is often said that in Python everything is an object: builtins, functions, classes, instances, etc. Thus, improving our understanding of objects is key to mastering Python.
 
 # Properties of an object
 
-Simply put, an object is a data structure with an internal state (a set of variables) and a behaviour (a set of functions). The "class" is the template to create new objects or instances. New objects are defined using the `class` operator, and instantiated using the class name.
-
-Every object has, at least, three properties: a reference, a class, and a refcount.
+Simply put, an object is a data structure with an internal state (a set of variables) and a behavior (a set of functions). The "class" is the template to create new objects or instances. Every object has, at least, three properties: a reference, a class, and a refcount.
 
 ## Reference
 
@@ -45,16 +41,16 @@ id(a)
 4342270592
 ```
 
-Note that the assignment operator (`=`) **never** makes a copy of the value being assigned, it just copies the reference. Similarly, the `del` operator never deletes an object, just a reference to it. We can check if two names point to the same memory location using `is`:
+Note that the assignment operator (`=`) **never** makes a copy of the value being assigned, it just copies the reference. Similarly, the `del` operator never deletes an object, just the reference to it. We can check if two names point to the same memory location using `is`:
 
 ```python
 x = [1, 2, 3]
 y = [1, 2, 3]
-z = x
+x_copy = x
 
 # same reference?
-assert x is z
-assert id(x) == id(z)
+assert x is x_copy
+assert id(x) == id(x_copy)
 assert x is not y
 
 # same value?
@@ -128,7 +124,7 @@ I expected that a newly created integer would have a `refcount` of 1. However, t
 assert sys.refcount(2) < sys.getrefcount(123456)
 ```
 
-## Other properties
+## Class' properties and methods
 
 On top of these three properties, objects have additional properties and methods that encode their state and behaviors. For instance, the `float` class has an additional property that stores the numerical value, as well as multiple methods that enable algebraic operations. A user-defined object will have an arbitrary number of attributes and methods.
 
@@ -229,7 +225,7 @@ print(y[2])
 
 # Defining our own objects
 
-Python allows us to define our own classes:
+Python allows us to define our own classes. New objects are defined using the `class` operator, and instantiated using the class name. Let's see an example:
 
 ```python
 class Animal:
@@ -246,7 +242,7 @@ class Animal:
         print("chompchomp")
 ```
 
-Below I zoom in on some interesting features.
+Let's zoom in on some interesting features.
 
 ## Private and protected attributes
 
@@ -271,7 +267,7 @@ print(whale._Animal__favorite)
 True
 ```
 
-However, and rather confusingly, this is valid:
+However, as I learnt rather painfully, this is valid:
 
 ```python
 whale.__favorite = False
@@ -286,7 +282,7 @@ False
 
 ## The two dictionaries underlying an object
 
-Two dictionaries underlie each object, and are accessible using `instance.__dict__` and `Class.__dict__`. The first one is the instance-specific dictionary, unique to that instance and containing its writable attributes:
+Underlying every object there are two dictionaries. They are accessible, respectively, using `{instance}.__dict__` and `{Class}.__dict__`. The first one is an instance-specific dictionary containing its writable attributes:
 
 ```python
 whale = Animal("whale", 100000)
@@ -300,7 +296,7 @@ print(whale.__dict__)
 
 Note that private attributes like `__favorite` appear with an altered name of the form `_{class name}{attribute}`.
 
-Similarly, each class has its own dictionary, containing the data and functions used by all instances (class' methods, the attributes defined at the class level, etc.):
+Similarly, each class has its own dictionary, containing the data and functions used by all instances (class' methods, attributes defined at the class level, etc.):
 
 ```python
 Animal.__dict__
@@ -336,11 +332,11 @@ Both dictionaries are linked by `instance.__class__`, which is assigned to the c
 assert whale.__class__.__dict__ == Animal.__dict__
 ```
 
-As we saw, an attribute might exist in either dictionary. To find an attribute at runtime, Python will first search `instance.__dict__`, and then `Class.__dict__` if unsuccessful.
+As we saw, an attribute might exist in either dictionary. To find an attribute at runtime, Python will first search `instance.__dict__`; if unsuccessful, it will search `Class.__dict__`.
 
 ## `__slots__` helps with memory optimization
 
-The instance's dictionary keeps the class flexible, since we can add new attributes at any time:
+The instance's dictionary keeps the class flexible, allowinf to add new attributes at any time:
 
 ```python
 whale.medium = "water"

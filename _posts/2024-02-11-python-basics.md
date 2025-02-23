@@ -10,24 +10,24 @@ toc:
   sidebar: left
 ---
 
-# Basic properties and concepts
+Let's start by defining some of Python's essential qualities as a programming language.
 
-## Python is dynamically typed
+# Python is dynamically typed
 
-A language is statically typed when variables have types, i.e., the type of the variables are checked before execution (usually at compilation). In contrast, in dynamycally typed languages variable names don't have types, runtime values (objects) do, i.e., the variable types are checked during execution.
+A language is **statically typed** when variables have types, i.e., the type of the variables are checked before execution (usually at compilation). In contrast, in **dynamically typed** languages variable names do not have types, runtime values (objects) do, i.e., the variable types are checked during execution. Python belongs to the second class.
 
-## (C)Python is interpreted
+# (C)Python is interpreted
 
-It is often said that whether a language is compiled or interpreted is an "implementation detail". That is, we should separate Python, the programming language itself, from its specific implementation (like [CPython](https://github.com/python/cpython), [IronPython](https://ironpython.net/) or [PyPy](https://www.pypy.org/)). Nonetheless, the most popular implementations, indeed, behave like interpreters. More specifically, they execute code in two steps:
+It is often said that whether a language is compiled or interpreted is an "implementation detail". That is, we should separate Python, the programming language itself, from its specific implementation (like [CPython](https://github.com/python/cpython), [IronPython](https://ironpython.net/) or [PyPy](https://www.pypy.org/)). Nonetheless, the most popular implementations are, indeed, **interpreted**. More specifically, CPython executes Python code in two steps:
 
-1. "Compile" the source code into a Python-specific lower level code (`*.pyc`, stored in `__pycahce__`), called "bytecode".
-1. Execution by the Python Virtual Machine. Essentially, an infinite evaluation loop containing a switch over all possible bytecode instructions.
+1. "Compile" the source code into a Python-specific lower level code (`*.pyc`, stored in `__pycache__`), called _bytecode_.
+1. Execute the bytecode by the Python Virtual Machine. This is an infinite evaluation loop that goes over all the lines, containing a switch over all possible bytecode instructions.
 
-Note that the "compilation" step is quite different from what it would involve for a so-called compiled language, like C or C++. For the latter, we would end up with an independent executable. Furthermore, CPython's puts emphasis in quickly executing the code. Hence, it spends little time in optimizing the executable. On the other hand, compilation in C/C++ can take a significant amount of time, as these optimizations take place.
+Note that I wrote compilation in quotes, to mean that it is qualitatively different from what happens with so so-called compiled languages, like C or C++, in which a standalone executable is produced. Another difference is that CPython's seeks to execute the code as soon as possible. Hence, it spends little time in optimizing the executable. In contrast, C/C++ compilers spend a significant amount of time carrying optimizations.
 
-## Python types
+# Python types
 
-The Python interpreter comes with some predefined types:
+The Python interpreter comes with some **predefined types**. They are:
 
 - Numeric Types (`int`, `float`, `complex`)
 - Boolean Type (`bool`)
@@ -41,13 +41,10 @@ The Python interpreter comes with some predefined types:
 - Type Annotation Types (`Generic Alias`, `Union`)
 - Other Built-in Types (modules, classes, `None` and others)
 
-## Mutability
-
-Python has two kinds of data types, mutable and immutable, which respectively can and cannot be modified after being created. Mutable data types include lists, dictionaries and sets; immutable data types, integers, floats, booleans, strings and tuples. Let's see an example:
+Python has two kinds of data types, **mutable** and **immutable**, which respectively can and cannot be modified after being created. Examples of mutable data types are lists, dictionaries and sets; examples of immutable data types are integers, floats, booleans, strings and tuples. Let's see this mutability in practice:
 
 ```python
-# and (immutable) int(1) object is created
-# both x and y point at it
+# an int(1) object is created and both x and y point at it
 x = y = 1
 
 assert x is y
@@ -57,7 +54,7 @@ assert x is y
 # x is assigned that new reference
 x += 1
 
-# x and y don't refer to the same object anymore
+# x and y do not point to the same object anymore
 assert x != y
 assert x is not y
 ```
@@ -65,7 +62,7 @@ assert x is not y
 Let's compare this behaviour to that of a mutable object:
 
 ```python
-# an list is created, and both x and y point at it
+# a list is created and both x and y point at it
 x = y = [1]
 
 assert x is y
@@ -79,7 +76,7 @@ assert x == y
 assert x is y
 ```
 
-Interestingly, and as we saw when [examining the _refcount_]({% post_url 2024-01-07-python-objects %}#refcount), Python leverages this immutability:
+Interestingly, and as we saw when [examining the refcount]({% post_url 2024-01-07-python-objects %}#refcount), Python leverages this immutability:
 
 ```python
 # two int(1) objects are created, each assigned a name
@@ -93,7 +90,7 @@ assert x is not y
 AssertionError
 ```
 
-In other words, 1 (and other common objects, like 0 or `True`) are singletons. That way, Python does not need to keep allocating memory for new objects that are used very often. This does not happen for more unique immutable objects:
+In other words, 1 (and other common objects, like 0 or `True`) are **singletons**. This way Python does not need to keep allocating memory for new objects that are used very often. This does not happen for more unique immutable objects:
 
 ```python
 x = 8457
@@ -106,7 +103,7 @@ Mutability also has implications on [memory allocation](#memory-management-in-py
 
 # Scopes and namespaces
 
-A namespace is a mapping from names to objects. In fact, underlying a namespace there is a dictionary: its keys are symbolic names (e.g., `x`) and its values, the object they reference (e.g., an integer with a value of 8). During the execution of a typical Python program, multiple namespaces are created, each with its own lifetime. There are four types of namespaces:
+A **namespace** is a mapping from names to objects. In fact, underlying a namespace there is a dictionary: its keys are symbolic names (e.g., `x`) and its values are the object they reference (e.g., an integer with a value of 8). During the execution of a typical Python program, multiple namespaces are created, each with its own lifetime. There are four types of namespaces:
 
 - **Builtin** namespace: it is created when the interpreter starts up. It contain names such as `print`, `int` or `len`.
 - **Global** namespaces:
@@ -182,9 +179,9 @@ x.append(x)
 del x
 ```
 
-# The infamous Global Interpreter Lock (GIL)
+# The Global Interpreter Lock
 
-GIL is a mechanism to make CPython's thread safe, by only allows one thread to execute Python bytecode at a time. This vastly simplifies CPython's implementation and writing extensions for it, since thread safety is not a concern. It also leads to faster single-thread applications. However, CPU-bound tasks cannot be sped up by multithreading, since nonetheless the threads will run sequentially, never in parallel. However, it can be used to speed up I/O-bound operations.
+The Global Interpreter Lock (GIL) is a mechanism to make CPython's thread safe, by only allows one thread to execute Python bytecode at a time. This vastly simplifies CPython's implementation and writing extensions for it, since thread safety is not a concern. It also leads to faster single-thread applications. However, CPU-bound tasks cannot be sped up by multithreading, since nonetheless the threads will run sequentially, never in parallel. However, it can be used to speed up I/O-bound operations.
 
 When parallel processing is needed, Python can still do that via:
 
