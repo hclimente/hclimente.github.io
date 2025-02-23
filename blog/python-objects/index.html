@@ -132,7 +132,85 @@ TypeError: Animal.eat() missing 1 required positional argument: 'self'
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AttributeError: 'EfficientAnimal' object has no attribute '__dict__'. Did you mean: '__dir__'?
 </code></pre></div></div> <p>In addition to the memory optimizations, this approach also helps to prevent bugs caused by typos in variable names:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">dog</span><span class="p">.</span><span class="n">namme</span> <span class="o">=</span> <span class="sh">"</span><span class="s">puppy</span><span class="sh">"</span>
 </code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>AttributeError: 'EfficientAnimal' object has no attribute 'namme'
-</code></pre></div></div> <h1 id="further-reading">Further reading</h1> <ul> <li>D. Beazley, <a href="https://github.com/dabeaz-course/python-mastery" rel="external nofollow noopener" target="_blank">Advanced Python Mastery</a> </li> <li>https://www.interviewbit.com/python-interview-questions/#freshers</li> <li>More on classes: <a href="https://docs.python.org/3/tutorial/classes.html" rel="external nofollow noopener" target="_blank">https://docs.python.org/3/tutorial/classes.html</a> </li> <li>More on <code class="language-plaintext highlighter-rouge">__slots__</code>: <a href="https://wiki.python.org/moin/UsingSlots" rel="external nofollow noopener" target="_blank">https://wiki.python.org/moin/UsingSlots</a> </li> </ul> </div> </article> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <script>
+</code></pre></div></div> <h1 id="serialization">Serialization</h1> <p><strong>Serialization</strong> is the process of converting a Python object into a file format that can be used to reconstruct the object later. This allows us to store objects, make them persistent across executions and distribute them. As the name implies, serialization consists on transforming the object, living in bits and pieces across the computer memory, into a linear sequence of bytes.</p> <p>Simple objects can be easily serialized into a text-based format like JSON:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">json</span>
+
+<span class="n">person1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">John</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">surname</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">Doe</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="mi">45</span>
+<span class="p">}</span>
+
+<span class="c1"># serialize
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">w</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">J</span><span class="p">:</span>
+    <span class="n">json</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">person1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span>
+
+<span class="c1"># deserialize
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">J</span><span class="p">:</span>
+    <span class="n">person2</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">J</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">person1</span> <span class="o">==</span> <span class="n">person2</span>
+</code></pre></div></div> <p>Let’s see what happens if we try to serialize a more complex object:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">json</span>
+
+<span class="k">class</span> <span class="nc">Person</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">surname</span><span class="p">,</span> <span class="n">age</span><span class="p">):</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">surname</span> <span class="o">=</span> <span class="n">surname</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="nf">return </span><span class="p">(</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="p">.</span><span class="n">name</span> <span class="ow">and</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">surname</span> <span class="o">==</span> <span class="n">other</span><span class="p">.</span><span class="n">surname</span> <span class="ow">and</span>
+            <span class="n">self</span><span class="p">.</span><span class="n">age</span> <span class="o">==</span> <span class="n">other</span><span class="p">.</span><span class="n">age</span>
+        <span class="p">)</span>
+
+<span class="n">person1</span> <span class="o">=</span> <span class="nc">Person</span><span class="p">(</span><span class="sh">"</span><span class="s">John</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Doe</span><span class="sh">"</span><span class="p">,</span> <span class="mi">45</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">w</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">J</span><span class="p">:</span>
+    <span class="n">json</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">person1</span><span class="p">,</span> <span class="n">J</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TypeError: Object of type Person is not JSON serializable
+</code></pre></div></div> <p>In such cases we need functions that assist Python in (de)serializing the object:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">person_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Person</span><span class="p">):</span>
+        <span class="n">obj_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sh">"</span><span class="s">__person__</span><span class="sh">"</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">:</span> <span class="n">obj</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">surname</span><span class="sh">"</span><span class="p">:</span> <span class="n">obj</span><span class="p">.</span><span class="n">surname</span><span class="p">,</span>
+            <span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">:</span> <span class="n">obj</span><span class="p">.</span><span class="n">age</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">obj_dict</span>
+
+    <span class="k">raise</span> <span class="nc">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">'</span><span class="s">Cannot serialize object of </span><span class="si">{</span><span class="nf">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="si">}</span><span class="sh">'</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">person_decoder</span><span class="p">(</span><span class="n">dct</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">dct</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">__person__</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nc">Person</span><span class="p">(</span><span class="n">dct</span><span class="p">[</span><span class="sh">"</span><span class="s">name</span><span class="sh">"</span><span class="p">],</span> <span class="n">dct</span><span class="p">[</span><span class="sh">"</span><span class="s">surname</span><span class="sh">"</span><span class="p">],</span> <span class="n">dct</span><span class="p">[</span><span class="sh">"</span><span class="s">age</span><span class="sh">"</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">dct</span>
+
+<span class="c1"># serialize
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">w</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">J</span><span class="p">:</span>
+    <span class="n">json</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">person1</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">person_encoder</span><span class="p">)</span>
+
+<span class="c1"># deserialize
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.json</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">r</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">J</span><span class="p">:</span>
+    <span class="n">person2</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="n">person_decoder</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">person1</span> <span class="o">==</span> <span class="n">person2</span>
+</code></pre></div></div> <p>JSON is attractive because it is human-readable and interoperable. However (de)serializing sophisticated objects using JSON can be pretty involved due to the need of defining an encoder and a decoder. Binary serialization, like the one provided by <code class="language-plaintext highlighter-rouge">pickle</code>, is attrative, since it handle complex objects out of the box:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">pickle</span>
+
+<span class="n">person1</span> <span class="o">=</span> <span class="nc">Person</span><span class="p">(</span><span class="sh">"</span><span class="s">John</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">Doe</span><span class="sh">"</span><span class="p">,</span> <span class="mi">45</span><span class="p">)</span>
+
+<span class="c1"># serialize or "pickle"
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.pkl</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">wb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">P</span><span class="p">:</span>
+    <span class="n">pickle</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">person1</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span>
+
+<span class="c1"># deserialize or "unpickle"
+</span><span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="sh">"</span><span class="s">obj.pkl</span><span class="sh">"</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">rb</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">P</span><span class="p">:</span>
+    <span class="n">person2</span> <span class="o">=</span> <span class="n">pickle</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="n">P</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">person1</span> <span class="o">==</span> <span class="n">person2</span>
+</code></pre></div></div> <p>An important downside is that pickle objects are able to execute arbitrary code during unpickling. Hence, unpickling untrusted files should be regarded as a security risk.</p> <h1 id="further-reading">Further reading</h1> <ul> <li>D. Beazley, <a href="https://github.com/dabeaz-course/python-mastery" rel="external nofollow noopener" target="_blank">Advanced Python Mastery</a> </li> <li>https://www.interviewbit.com/python-interview-questions/#freshers</li> <li>More on classes: <a href="https://docs.python.org/3/tutorial/classes.html" rel="external nofollow noopener" target="_blank">https://docs.python.org/3/tutorial/classes.html</a> </li> <li>More on <code class="language-plaintext highlighter-rouge">__slots__</code>: <a href="https://wiki.python.org/moin/UsingSlots" rel="external nofollow noopener" target="_blank">https://wiki.python.org/moin/UsingSlots</a> </li> </ul> </div> </article> <div id="giscus_thread" style="max-width: 930px; margin: 0 auto;"> <script>
       let giscusTheme = determineComputedTheme();
       let giscusAttributes = {
         src: 'https://giscus.app/client.js',
