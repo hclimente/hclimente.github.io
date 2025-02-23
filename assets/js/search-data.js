@@ -147,17 +147,6 @@ ninja.data = [{
           window.location.href = "/blog/python-quirks/";
         
       },
-    },{id: "post-the-basics-of-python",
-      
-        title: "The Basics of Python",
-      
-      description: "Revisiting Python&#39;s properties",
-      section: "Posts",
-      handler: () => {
-        
-          window.location.href = "/blog/python-basics/";
-        
-      },
     },{id: "post-how-computers-work",
       
         title: "How computers work",
@@ -200,6 +189,17 @@ ninja.data = [{
       handler: () => {
         
           window.location.href = "/blog/python-vectors/";
+        
+      },
+    },{id: "post-the-basics-of-python",
+      
+        title: "The Basics of Python",
+      
+      description: "Revisiting Python&#39;s properties",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/python-basics/";
         
       },
     },{id: "post-python-objects",
