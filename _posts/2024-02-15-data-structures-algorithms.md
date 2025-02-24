@@ -495,6 +495,7 @@ print(find_middle(a))
 ## Search problems
 
 {% comment %}
+
 ### Linear search
 
 TODO
@@ -595,6 +596,7 @@ find_k_smallest(root, 2)
 ```
 
 {% comment %}
+
 ### Search and delete
 
 TODO
@@ -740,6 +742,7 @@ A topological sort (or _top sort_) is an algorithm whose input is a DAG, and who
 Put together, the time complexity of top sort is $$O(\|V\| + \|E\|)$$, and the space complexity, $$O(\|V\|)$$.
 
 {% comment %}
+
 ### Union find
 
 TODO
@@ -975,6 +978,7 @@ The space complexity of recursion will be, at least, the length of the stack whi
 **Note:** CPython's recursion limit is 1,000. This can limit to the depth of the problems we can tackle.
 
 {% comment %}
+
 #### Memoization
 
 TODO
@@ -1007,6 +1011,7 @@ The computational complexity will be impacted by two factors:
 **Memoized:** memoization reduces the branching factor by storing previous results. In other words, it trades time complexity for space complexity; usually both become polynomial.
 
 {% comment %}
+
 ### Tabulation
 
 TODO

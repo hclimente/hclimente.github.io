@@ -136,6 +136,7 @@ dtype: int64
 ```
 
 {% comment %}
+
 # Views and copies
 
 [As NumPy]({% post_url 2024-02-04-python-vectors %}#views-copies-and-in-place-operations), Pandas distinguishes between _viewing_ an object and _copying_ it.

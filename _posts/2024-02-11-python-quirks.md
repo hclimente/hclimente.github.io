@@ -303,6 +303,7 @@ assert round(.1 + .2, ndigits=1) == round(.3, ndigits=1)
 ```
 
 {% comment %}
+
 # Generators
 
 TODO

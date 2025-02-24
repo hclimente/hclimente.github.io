@@ -191,7 +191,7 @@ TO EXPAND
 # TODO
 
 - Scope resolution
-{% endcomment %}
+  {% endcomment %}
 
 # Further reading
 

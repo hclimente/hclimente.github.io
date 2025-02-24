@@ -22,7 +22,7 @@ A [trail](#trail) in which the first and last vertices are equal. In contrast to
 
 ## Cycle
 
-A [trail](#trail) in which *only* the first and last vertices are equal. Except for the tails and in contrast to the [circuit](#circuit), vertices cannot be repeated.
+A [trail](#trail) in which _only_ the first and last vertices are equal. Except for the tails and in contrast to the [circuit](#circuit), vertices cannot be repeated.
 
 ## Euler circuit
 
