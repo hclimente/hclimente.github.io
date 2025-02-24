@@ -48,8 +48,10 @@ a = [1, 2, 3]
 b = [1, 2, 3]
 ```
 
+{% comment %}
 TODO decorators
 TODO lambda functions
+{% endcomment %}
 
 # Arguments
 
@@ -71,9 +73,11 @@ print(append_three())
 [3, 3]
 ```
 
+{% comment %}
 ## Starred expressions and functions
 
 TODO
+{% endcomment %}
 
 ## Force the use of keyword arguments
 

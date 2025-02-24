@@ -14,11 +14,23 @@ toc:
 
 ## Component
 
-In an undirected graph, a [connected](#connected-graph) [subgraph](#subgraph) that is not part of a larger connected subgraph.
+In an [undirected](#undirected-graph) graph, a [connected](#connected-graph) [subgraph](#subgraph) that is not part of a larger connected subgraph.
+
+## Circuit
+
+A [trail](#trail) in which the first and last vertices are equal. In contrast to the [cycle](#cycle), any vertex can be repeated.
 
 ## Cycle
 
-A [trail](#trail) in which only the first and last vertices are equal.
+A [trail](#trail) in which *only* the first and last vertices are equal. Except for the tails and in contrast to the [circuit](#circuit), vertices cannot be repeated.
+
+## Euler circuit
+
+A [circuit](#circuit) that visits every edge of the graph.
+
+## Euler trail
+
+A [trail](#trail) that visits every edge of the graph.
 
 ## Flow
 
@@ -30,7 +42,7 @@ A [subgraph](#subgraph) whose vertices are densely connected to each other, and 
 
 ## Orientation
 
-An orientation of an undirected graph is the directed graph resulting of assigning a direction to each of its vertices. A directed graph is oriented if no two vertices form a 2-cycle.
+An orientation of an [undirected](#undirected-graph) graph is the [directed](#directed-graph) graph resulting of assigning a direction to each of its vertices. A [directed](#directed-graph) graph is oriented if no two vertices form a 2-cycle.
 
 ## Path
 
@@ -68,11 +80,11 @@ A vertex is adjacent with _another vertex_ if they are connected by an edge. $$u
 
 ## Degree
 
-The degree of a vertex in a (simple) undirected graph is the number of edges [incident](#incidence) with that vertex. In a (simple) directed graph we distinguish the indegree (number of edges with the vertex as their [destination](#destination)) and the outdegree (number of edges with the vertex as their [source](#source)).
+The degree of a vertex in a (simple) [undirected](#undirected-graph) graph is the number of edges [incident](#incidence) with that vertex. In a (simple) [directed](#directed-graph) graph we distinguish the indegree (number of edges with the vertex as their [destination](#destination)) and the outdegree (number of edges with the vertex as their [source](#source)).
 
 ## Destination
 
-In a directed graph, the destination _of an edge_ is the vertex at the head of the edge.
+In a [directed](#directed-graph) graph, the destination _of an edge_ is the vertex at the head of the edge.
 
 ## Distance
 
@@ -92,7 +104,7 @@ A vertex is incident _with an edge_ if the vertex is one of the two vertices the
 
 ## Source
 
-In a directed graph, the source _of an edge_ is the vertex at the tail of the edge.
+In a [directed](#directed-graph) graph, the source _of an edge_ is the vertex at the tail of the edge.
 
 # Types of graphs
 
@@ -100,9 +112,13 @@ In a directed graph, the source _of an edge_ is the vertex at the tail of the ed
 
 A graph without [cycles](#cycle).
 
+## Bipartite graph
+
+A [acyclical](#acyclical-graph) graph whose vertices can be divided into two sets such that no pair of vertices in the same set are [adjacent](#adjacency). Often, each of these sets are referred to as colors, and so we say that "there is no edge between two vertices of the same color."
+
 ## Complete graph
 
-A simple, undirected graph in which every pair of vertices are connected by an edge.
+A simple, [undirected](#undirected-graph) graph in which every pair of vertices are connected by an edge. Complete graph are usually denoted by letter $$K$$ with a subindex that indicates the total number of vertices. For instance, $$K_6$$ represents the complete graph with 6 vertices.
 
 ## Connected graph
 
@@ -110,7 +126,15 @@ A graph in which a [path](#path) exists between every pair of vertices.
 
 ## Digraph
 
-A directed graph.
+A [directed](#directed-graph) graph.
+
+## Directed graph
+
+See [Introduction to Graphs]({% post_url 2025-01-23-graphs-basics %}).
+
+## Forest
+
+An [undirected](#undirected-graph) graph in which any two vertices are connected by at most one path. That is, a disjoint union of [trees](#tree).
 
 ## Multigraph
 
@@ -124,9 +148,17 @@ A graph in which every vertex has the same degree.
 
 A graph with at most one edge between any pair of vertices and no loops.
 
-### Triangle graph
+## Tree
+
+An [undirected](#undirected-graph) graph in which there is only one [path](#path) between every pair of nodes.
+
+## Triangle graph
 
 A [triplet](#triplet) with 3 edges. It consists of _three_ closed triplets, each centered around each of the vertices.
+
+## Undirected graph
+
+See [Introduction to Graphs]({% post_url 2025-01-23-graphs-basics %}).
 
 # Spectral graph theory
 

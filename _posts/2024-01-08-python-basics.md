@@ -185,11 +185,13 @@ There are multiple things that Python recognizes as modules:
 1. Python source code and bytecode files
 1. Directories
 
+{% comment %}
 TO EXPAND
 
 # TODO
 
 - Scope resolution
+{% endcomment %}
 
 # Further reading
 

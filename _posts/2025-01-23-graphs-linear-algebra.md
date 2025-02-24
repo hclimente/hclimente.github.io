@@ -170,6 +170,7 @@ The goal of **spectral clustering** is finding a partition of the graph into $$k
 
 > **Note:** spectral clustering is often applied as a clustering technique on datasets. The aim is to divide the observation into $$k$$ groups based on their pairwise similarities. In that case, the first step consists on obtaining the graph. It will be a complete weighted graph in which the vertices are the different observations and the edges are weighted according to the similarity between each pair of vertices, as measured by an arbitrary function.
 
+{% comment %}
 ## Graph partitioning
 
 TODO
@@ -177,6 +178,7 @@ TODO
 # Graph Fourier Transform
 
 TODO
+{% endcomment %}
 
 # Further reading
 

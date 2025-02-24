@@ -74,7 +74,7 @@ $$
 
 This is the stationary distribution of the random walk. It formalizes the intuitive result that high [degree]({% post_url 2025-02-09-graph-properties %}#degree) vertices are more likely to be visited. If the graph is [regular]({% post_url 2025-01-23-graphs-glossary %}#regular), the stationary distribution is uniform. Note that this is a property of the matrix, and not of $$\pi_0$$. This implies that the starting vertex is not important in the long run: if the random walk is allowed to run indefinitely, the probability of ending up in each vertex will converge to $$\pi$$.
 
-> **Ergodicity and _lazy_ random walks:** A unique stationary distribution does not always exists. A random walk is _ergodic_ if a stationary distribution exists and is the same for any $$\pi_0$$. For the random walk to be ergodic, the graph needs to be connected and non [bipartite]({% post_url 2025-01-23-graphs-glossary %}#bipartite). If the graph has multiple components, starting in different components will produce different stationary distributions. If the graph is bipartite, at step $$t$$ the walker will be on one side or another, depending on the initial vertex and the parity of $$t$$. Bipartite graphs have a ergodic [_lazy_ random walk](https://people.orie.cornell.edu/dpw/orie6334/Fall2016/lecture11.pdf), in which the walker has a probability $$\frac 1 2$$ of remaining at the current vertex and a probability $$\frac 1 2$$ of leaving it.
+> **Ergodicity and _lazy_ random walks:** A unique stationary distribution does not always exists. A random walk is _ergodic_ if a stationary distribution exists and is the same for any $$\pi_0$$. For the random walk to be ergodic, the graph needs to be connected and non [bipartite]({% post_url 2025-01-23-graphs-glossary %}#bipartite-graph). If the graph has multiple components, starting in different components will produce different stationary distributions. If the graph is bipartite, at step $$t$$ the walker will be on one side or another, depending on the initial vertex and the parity of $$t$$. Bipartite graphs have a ergodic [_lazy_ random walk](https://people.orie.cornell.edu/dpw/orie6334/Fall2016/lecture11.pdf), in which the walker has a probability $$\frac 1 2$$ of remaining at the current vertex and a probability $$\frac 1 2$$ of leaving it.
 
 {% details Connection to the Laplacian %}
 
@@ -115,11 +115,13 @@ $$
 \lim_{t \to \infty} \mathbf{\pi}_{t} = \pi
 $$
 
+{% comment %}
 {% details Personalized PageRank %}
 
 TODO
 
 {% enddetails %}
+{% endcomment %}
 
 # Markov chains
 

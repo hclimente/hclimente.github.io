@@ -42,10 +42,12 @@ $$Z_i = \frac {\kappa_i - \bar \kappa_k} {\sigma_{\kappa_k}}$$
 
 where $$\kappa_i$$ is within-module degree (the number of edges between $$i$$ and other vertices in module $$k$$); $$\bar \kappa_k$$ is the average within-module degree; and $$\sigma_{\kappa_k}$$ is the standard deviation of the within module degrees.
 
+{% comment %}
 ## Participation
 
 The **participation coefficient** of a vertex... TODO
 It is a mesoscale measure of [centrality](#centrality).
+{% endcomment %}
 
 # Global properties
 
