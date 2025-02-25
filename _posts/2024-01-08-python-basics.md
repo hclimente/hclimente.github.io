@@ -18,12 +18,12 @@ A language is **statically typed** when variables have types, i.e., the type of 
 
 # (C)Python is interpreted
 
-It is often said that whether a language is compiled or interpreted is an "implementation detail". That is, we should separate Python, the programming language itself, from its specific implementation (like [CPython](https://github.com/python/cpython), [IronPython](https://ironpython.net/) or [PyPy](https://www.pypy.org/)). Nonetheless, the most popular implementations are, indeed, **interpreted**. More specifically, CPython executes Python code in two steps:
+No programming language is either interpreted or compiled. A language is just a set of instructions to tell a computer how to perform tasks. And this language can be implemented in different ways. For instance, while Python's reference implementation is [CPython](https://github.com/python/cpython), other implementations exist, like [IronPython](https://ironpython.net/) or [PyPy](https://www.pypy.org/). It is a fact, however, that most implementations of Python are **interpreted**. For instance, CPython executes a Python script in a two-step process:
 
 1. "Compile" the source code into a Python-specific lower level code (`*.pyc`, stored in `__pycache__`), called _bytecode_.
 1. Execute the bytecode by the Python Virtual Machine. This is an infinite evaluation loop that goes over all the lines, containing a switch over all possible bytecode instructions.
 
-Note that I wrote compilation in quotes, to mean that it is qualitatively different from what happens with so so-called compiled languages, like C or C++, in which a standalone executable is produced. Another difference is that CPython's seeks to execute the code as soon as possible. Hence, it spends little time in optimizing the executable. In contrast, C/C++ compilers spend a significant amount of time carrying optimizations.
+> Step 1's "compilation" is qualitatively different from the compilation of so-called compiled languages. For starters compiling a C code results in a standalone executable. Another difference is that CPython's aims to going from source code to execution as quickly as possible. Hence, it spends little time performing optimizations that would result in faster runtimes. In contrast, C compilers spend a significant amount of time optimizing the final binary, resulting in faster programs.
 
 # Python types
 
@@ -41,20 +41,24 @@ The Python interpreter comes with some **predefined types**. They are:
 - Type Annotation Types (`Generic Alias`, `Union`)
 - Other Built-in Types (modules, classes, `None` and others)
 
-Python has two kinds of data types, **mutable** and **immutable**, which respectively can and cannot be modified after being created. Examples of mutable data types are lists, dictionaries and sets; examples of immutable data types are integers, floats, booleans, strings and tuples. Let's see this mutability in practice:
+Python has two kinds of data types, **mutable** and **immutable**, which respectively can and cannot be modified after being created. Examples of mutable data types are lists, dictionaries and sets; examples of immutable data types are integers, floats and tuples. Let's see how mutability works through an example:
 
 ```python
-# an int(1) object is created and both x and y point at it
+# an int(1) object is created and
+# both x and y point at it
 x = y = 1
 
 assert x is y
 
-# we change the value of x. since integers are immutable,
-# a new int(x + 1) is created to store that value, and
-# x is assigned that new reference
+# we change the value of x. since
+# integers are immutable, a new
+# int(x + 1) is created to store
+# that value, and x is assigned
+# that new reference
 x += 1
 
-# x and y do not point to the same object anymore
+# x and y do not point to the same
+# object anymore
 assert x != y
 assert x is not y
 ```
@@ -62,81 +66,127 @@ assert x is not y
 Let's compare this behaviour to that of a mutable object:
 
 ```python
-# a list is created and both x and y point at it
+# a list is created and both x
+# and y point at it
 x = y = [1]
 
 assert x is y
 
-# we change the value of x. since lists are mutable,
+# we change the value of x
+# since lists are mutable,
 # the original list gets altered
 x.append(2)
 
-# x and y still refer to the same object
+# x and y still refer to the
+# same object
 assert x == y
 assert x is y
 ```
 
 Immutability is leveraged to define singletons, which I discussed when [examining the refcount]({% post_url 2024-01-07-python-objects %}#refcount).
 
-Mutability also has implications on [memory allocation](#memory-management-in-python). Python knows at runtime how much memory an immutable data type requires. However, the memory requirements of mutable containers will change as we add and remove elements. Hence, to add new elements quickly if needed, Python allocates more memory than is strictly needed.
+Mutability also has implications on [memory allocation](#memory-management-in-python). Python knows at runtime how much memory an immutable data type requires. However, the memory requirements of mutable containers will change as we add and remove elements. Hence, to add new elements quickly if needed, Python allocates more memory than is strictly needed, as we saw in our close look [lists and tuples]({% post_url 2024-01-20-python-lists %}#the-inner-workings-of-lists-and-tuples).
 
 # Scopes and namespaces
 
 A **namespace** is a mapping from names to objects. In fact, underlying a namespace there is a dictionary: its keys are symbolic names (e.g., `x`) and its values are the object they reference (e.g., an integer with a value of 8). During the execution of a typical Python program, multiple namespaces are created, each with its own lifetime. There are four types of namespaces:
 
-- **Builtin** namespace: it is created when the interpreter starts up. It contain names such as `print`, `int` or `len`.
-- **Global** namespaces:
-  - _The_ global namespace contains every name created at the main level of the program. This dictionary can be examined using `globals()`.
-  - Weirdly, _other_ global namespaces are possible: each imported module will create its own.
+- **Builtin** namespaces: it is created when the interpreter starts up. It contain names such as `print`, `int` or `len`.
+- **Global** namespaces: _The_ global namespace contains every name created at the main level of the program. This dictionary can be examined using `globals()`. But, _other_ global namespaces are possible: each imported module will create its own.
 - **Local** namespaces: one is created every time a function is called, and is "forgotten" when it terminates. This dictionary can be examined using `locals()`.
 - **Enclosed** namespaces: when a function calls another function, the child has access to its parent's namespace.
 
-Namespaces are related to scopes, which are the parts of the code in which a specific set of namespaces can be accessed. When a Python needs to lookup a name, if resolves it by examining the namespaces using the LEGB rule: it starts at the Local namespace; if unsuccessful, it moves to the Enclosing namespace; then the Global, and lastly the Builtin. By default, assignments and deletions happen on the local namespace. However, this behaviour can be altered using the `nonlocal` and `global` statements:
+Namespaces are related to scopes, which are the parts of the code in which a specific set of namespaces can be accessed. When a Python needs to lookup a name, if resolves it by examining the namespaces using the LEGB rule: it starts at the Local namespace; if unsuccessful, it moves to the Enclosing namespace; then the Global, and lastly the Builtin. By default, assignments and deletions happen on the local namespace. However, this behaviour can be altered using the `nonlocal` and `global` statements.
+
+Let's tie it all together with an example:
 
 ```python
-def enclosing_test():
-    foo = "enclosed"
-    print(f"Inside enclosing_test, foo = {foo}")
+def f_enclosed():
+	foo = "enclosed"
 
-    def local_test():
-        foo = "local"
-        print(f"Inside local_test, foo = {foo}")
+	# use foo defined within f_enclosed
+	print("\tInside f_enclosed():")
+	print(f"\tfoo = {foo}")
 
-    local_test()
-    print(f"After local_test, foo = {foo}")
+	def f_local():
+		foo = "local"
 
-    def nonlocal_test():
-        nonlocal foo
-        foo = "nonlocal"
-        print(f"Inside nonlocal_test, foo = {foo}")
+		# use foo defined within f_local
+		print("\t\tInside f_local():")
+		print(f"\t\tfoo = {foo}")
 
-    nonlocal_test()
-    print(f"After nonlocal_test, foo = {foo}")
+	f_local()
 
-    def global_test():
-        global foo
-        foo = "global"
-        print(f"Inside global_test, foo = {foo}")
+	# f_local's foo is gone
+	# we are back to f_enclosed's
+	print("\tAfter f_local():")
+	print(f"\tfoo = {foo}")
 
-    global_test()
-    print(f"After global_test, foo = {foo}")
+	def f_non_local():
+
+		# modifies the foo from the
+		# enclosing namespace
+		# i.e., f_enclosed's
+		nonlocal foo
+		print("\t\tInside f_non_local():")
+		print(f"\t\toriginally, foo = {foo}")
+
+		foo = "non_local"
+		print(f"\t\tbut then, foo = {foo}")
+
+	f_non_local()
+
+	# f_enclosed's foo is changed even
+	# outside of f_non_local
+	print("\tAfter f_non_local():")
+	print(f"\tfoo = {foo}")
+
+	def f_global():
+
+		# modifies the foo from the
+		# global namespace
+		global foo
+		print("\t\tInside f_global():")
+		print(f"\t\toriginally, foo = {foo}")
+
+		foo = "global"
+		print(f"\t\tbut then, foo = {foo}")
+
+	f_global()
+
+	# f_enclosed's remains unchanged
+	print("\tAfter f_global():")
+	print(f"\tfoo = {foo}")
 
 foo = "original"
-print(f"At the beginning, foo = {foo}")
-enclosing_test()
-print(f"Finally, foo = {foo}")
+print("At the beginning:")
+print(f"foo = {foo}")
+f_enclosed()
+print("Finally:")
+print(f"foo = {foo}")
 ```
 
 ```
-At the beginning, foo = original
-Inside enclosing_test, foo = enclosed
-Inside local_test, foo = local
-After local_test, foo = enclosed
-Inside nonlocal_test, foo = nonlocal
-After nonlocal_test, foo = nonlocal
-Inside global_test, foo = global
-After global_test, foo = nonlocal
-Finally, foo = global
+At the beginning:
+foo = original
+	Inside f_enclosed():
+	foo = enclosed
+		Inside f_local():
+		foo = local
+	After f_local():
+	foo = enclosed
+		Inside f_non_local():
+		originally, foo = enclosed
+		but then, foo = non_local
+	After f_non_local():
+	foo = non_local
+		Inside f_global():
+		originally, foo = original
+		but then, foo = global
+	After f_global():
+	foo = non_local
+Finally:
+foo = global
 ```
 
 # Memory management in Python
@@ -148,19 +198,27 @@ When an object is created, the memory manager allocates some memory for it in th
 Conversely, the garbage collector is an algorithm that deallocates objects when they are no longer needed. The main mechanism uses the [reference count]({% post_url 2024-01-07-python-objects %}#refcount) of the object: when it falls to 0, its memory is deallocated. However, the garbage collector also watches for objects that still have a non-zero refcount, but have become inaccessible, for instance:
 
 ```python
-# create a list - refcount = 1
+# create a list
+# refcount = 1
 x = []
 
-# add a reference to itself - refcount = 2
+# add a reference to itself
+# refcount = 2
 x.append(x)
 
-# delete the original reference - refcount = 1
+# delete the original reference
+# refcount = 1
 del x
+
+# any reference to the list is lost
+# the garbage collector will remove it
 ```
 
-# The Global Interpreter Lock
+# The global interpreter lock
 
-The Global Interpreter Lock (GIL) is a mechanism to make CPython's thread safe, by only allows one thread to execute Python bytecode at a time. This vastly simplifies CPython's implementation and writing extensions for it, since thread safety is not a concern. It also leads to faster single-thread applications. However, CPU-bound tasks cannot be sped up by multithreading, since nonetheless the threads will run sequentially, never in parallel. However, it can be used to speed up I/O-bound operations.
+> Since Python 3.13, the GIL can be disabled
+
+The global interpreter lock (GIL) is a mechanism to make CPython's thread safe, by only allows one thread to execute Python bytecode at a time. This vastly simplifies CPython's implementation and writing extensions for it, since thread safety is not a concern. It also leads to faster single-thread applications. However, CPU-bound tasks cannot be sped up by multithreading, since nonetheless the threads will run sequentially, never in parallel. However, it can be used to speed up I/O-bound operations.
 
 When parallel processing is needed, Python can still do that via:
 
