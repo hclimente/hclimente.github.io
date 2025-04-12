@@ -36,18 +36,13 @@ The **Fixed-X** paradigm makes no assumptions on the distribution of the explana
 
 # The knockoff procedure
 
-Intuitively, by comparing the association measure computed for each original feature against its knockoff, one can determine which features provide true signals. Specifically, the knockoff-based feature selection consists of the following steps:
+Intuitively, by comparing the association measure computed for each original feature against its knockoff, one can determine which features provide true signals. Specifically, the knockoff-based feature selection consists of four steps.
 
-1. [Generate knockoffs](#generate-knockoffs)
-1. [Compute association measures](#compute-association-measures)
-1. [Compute the knockoff statistic](#compute-the-knockoff-statistic)
-1. [Select a threshold](#select-a-threshold)
-
-## Generate knockoffs
+## 1. Generate knockoffs
 
 Create synthetic copies of the features that retain the original correlation structure without any outcome information. An obvious question is how to synthesize such knockoff copies.
 
-## Compute association measures
+## 2. Compute association measures
 
 For each feature, calculate the association measure $$D(\mathbf{Y}, \mathbf{X_k})$$ and its counterpart $$D(\mathbf{Y}, \tilde{\mathbf{X}_k})$$ on the knockoff.
 
@@ -61,11 +56,11 @@ These measures satisfy the sure independence screening property under bounded ke
 
 > A potential limitation of kernel knockoffs is its sometimes overly conservative nature. To keep the FDR low, the procedure may end up selecting very few—or even no—features. This suggests that the chosen association measure might not be sufficiently sensitive. One possible remedy is to explore alternative kernel choices or optimize feature screening steps before applying knockoff filtering.
 
-## Compute the knockoff statistic
+## 3. Compute the knockoff statistic
 
 Define the statistic as $$w_k = D(Y, X_k) - D(Y, \tilde{X}_k)$$. A larger $$w_k$$ indicates stronger evidence that the original feature is associated with the outcome.
 
-## Select a threshold
+## 4. Select a threshold and select features
 
 Identify the smallest threshold $$t$$ such that $$\frac{\#\{w_k \le -t\}}{\#\{w_k \ge t\}} \le \alpha$$ where $$\alpha$$ is the desired FDR level. Retain all features with $$w_k \ge t$$.
 
