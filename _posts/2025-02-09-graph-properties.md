@@ -22,7 +22,7 @@ In an undirected network, the **degree** of a vertex $$u$$ ($$\deg u$$) refers t
 
 The **(local) clustering coefficient** _of a vertex_ measures the probability that its [neighbors]({% post_url 2025-01-23-graphs-glossary %}#neighborhood) are connected. It is computed as the ratio between number of [triangles]({% post_url 2025-01-23-graphs-glossary %}#triangle-graph) involving a vertex, and the number of [triplets]({% post_url 2025-01-23-graphs-glossary %}#triplet) involving that same vertex.
 
-[Often](https://igraph.org/r/doc/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
+[Often](https://r.igraph.org/reference/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
 
 # Mesoscale properties
 
@@ -62,7 +62,7 @@ The **global clustering coefficient** _of a graph_ is the ratio between closed a
 
 $$C = \frac {3 \times \text{triangles}} {\text{triplets}}$$
 
-[Often](https://igraph.org/r/doc/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
+[Often](https://r.igraph.org/reference/transitivity.html), the clustering coefficient of a directed graph is computed without considering the direction of the edges.
 
 ## Centrality
 
