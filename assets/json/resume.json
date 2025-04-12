@@ -2,7 +2,7 @@
   "basics": {
     "name": "Hector Climente-Gonzalez",
     "label": "Applied Machine Learning Researcher",
-    "summary": "Applied machine learning researcher with 10+ years of experience in biology. Leveraging genetics, epigenetics and genomics to tackle open questions in human health.",
+    "summary": "Lead scientist with 12+ years of experience in computational biology & bioML. Leveraging genetics, epigenetics and genomics to inform early target discovery and precision medicine.",
     "image": ""
   },
   "education": [
@@ -37,31 +37,30 @@
   ],
   "work": [
     {
-      "name": "Novo Nordisk, Center of Excellence for Human Genetics",
-      "position": "Senior Data Scientist",
-      "startDate": "2023-03",
-      "endDate": "2024-11",
-      "location": "London, UK",
-      "summary": "Key skills: Human genetics, Sequence learning, Pipeline development",
-      "highlights": [
-        "Developed machine learning models for SNP interpretation, drug target discovery and disease risk prediction",
-        "Data mined large scale datasets (UK Biobank, GTEx, GWAS Catalog)"
-      ]
-    },
-    {
-      "name": "Novo Nordisk, Center of Excellence for Human Genetics",
+      "name": "Novo Nordisk, Research & Early Development",
       "position": "Lead Data Scientist",
       "startDate": "2024-11",
       "endDate": "Present",
       "location": "London, UK",
-      "summary": "Key skills: Human genetics, Sequence learning, Pipeline development",
+      "summary": "Key skills: Human genetics, AI/ML, Real-world data, Strategy development",
       "highlights": [
-        "Developing machine learning models for SNP interpretation, drug target discovery and disease risk prediction",
-        "Data mining large scale datasets (UK Biobank, GTEx, GWAS Catalog)"
+        "Develop, deploy and mine AI/ML models for SNP interpretation, early target discovery and precision medicine. Influenced decisions on target progression."
       ]
     },
     {
-      "name": "RIKEN AIP",
+      "name": "Novo Nordisk, Research & Early Development",
+      "position": "Senior Data Scientist",
+      "startDate": "2023-03",
+      "endDate": "2024-11",
+      "location": "London, UK",
+      "summary": "Key skills: Human genetics, AI/ML, Pipeline development, Real-world data",
+      "highlights": [
+        "Developed the 2-year VP area strategy on AI/ML for genetics-based target discovery",
+        "Developed Nextflow pipelines for large-scale genetics analysis (e.g., colocalization, Mendelian randomization) following best nf-core practices. Massively decreased compute time and human effort for common workflows."
+      ]
+    },
+    {
+      "name": "RIKEN,Center for AI Project (AIP)",
       "position": "Special Postdoctoral Researcher",
       "startDate": "2020-05",
       "endDate": "2023-02",
@@ -74,7 +73,7 @@
       ]
     },
     {
-      "name": "Institut Curie & Mines ParisTech",
+      "name": "Institut Curie & Mines ParisTech, Centre for Computational Biology",
       "position": "Ph.D. student",
       "startDate": "2016-10",
       "endDate": "2020-04",
@@ -87,7 +86,7 @@
       ]
     },
     {
-      "name": "Pompeu Fabra University",
+      "name": "Pompeu Fabra University, Research programme on biomedical informatics",
       "position": "Research assistant",
       "startDate": "2013-12",
       "endDate": "2016-08",
@@ -95,7 +94,7 @@
       "highlights": ["Conducted a large scale study of the involvement of alternative splicing in cancer"]
     },
     {
-      "name": "Anaxomics Biotech Ltd.",
+      "name": "Anaxomics Biotech Ltd., Biocomputing department",
       "position": "Head of Biocomputing",
       "startDate": "2014-09",
       "endDate": "2015-05",
@@ -120,7 +119,7 @@
   "skills": [
     {
       "name": "Programming",
-      "keywords": ["Python (numpy, pandas, scikit-learn)", "Deep learning (PyTorch)", "R", "nextflow", "C++", "Bash"]
+      "keywords": ["Python (numpy, pandas, scikit-learn)", "Deep learning (PyTorch)", "nextflow (nf-core, nf-test)", "R"]
     },
     {
       "name": "Big Data",
@@ -137,9 +136,9 @@
     {
       "name": "Professional Skills",
       "keywords": [
-        "Communication: Lead writer of articles and proposals, Speaker in international conferences, Conductor of tech workshops",
-        "Project management: Managed projects within and across teams, Coordinated AI-driven research project with external partner (Microsoft)",
-        "Interpersonal: Active listener, knowledge sharing, initiated study groups and coding practice improvements"
+        "Communication: Lead writer of articles, project proposals & documentation; engaging speaker at global conferences & senior leadership briefings; proactive at seeking and disseminating best practices.",
+        "Project management: Management of projects within and between teams, and across companies; experience with Scrum, including sprint planning, stand-ups and retrospectives.",
+        "Interpersonal: Active listener, interested in knowledge sharing; onboarding and mentoring of junior colleagues."
       ]
     }
   ],
