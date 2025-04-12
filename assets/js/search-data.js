@@ -280,6 +280,9 @@ ninja.data = [{
           section: "News",},{id: "news-our-model-for-cardiovascular-disease-risk-prediction-got-highlighted-in-novo-nordisk-s-capital-markets-day",
           title: 'Our model for cardiovascular disease risk prediction got highlighted in Novo Nordisk’s Capital...',
           description: "",
+          section: "News",},{id: "news-i-was-promoted-to-lead-data-scientist-i-will-be-working-on-ai-ml-for-target-and-biomarker-discovery",
+          title: 'I was promoted to Lead Data Scientist. I will be working on AI/ML...',
+          description: "",
           section: "News",},{
         id: 'social-bluesky',
         title: 'Bluesky',
