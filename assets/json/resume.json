@@ -131,7 +131,7 @@
     },
     {
       "name": "DevOps",
-      "keywords": ["Virtual environments (Docker, conda)", "Testing", "CI/CD", "Open source", "git"]
+      "keywords": ["Virtual environments (Docker, conda)", "MLOps (Azure ML, MLFlow)", "Testing", "CI/CD", "Open source", "git"]
     },
     {
       "name": "Professional Skills",
