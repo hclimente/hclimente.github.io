@@ -15,22 +15,25 @@
 # ---
 
 # %%
+import matplotlib.pyplot as plt
 import shap
 import sklearn
 
 X, y = shap.datasets.diabetes()
-X = X.rename(columns={
-    "age": "Age",
-    "sex": "Sex",
-    "bmi": "BMI",
-    "bp": "Blood pressure",
-    "s1": "Total cholesterol",
-    "s2": "LDL cholesterol",
-    "s3": "HDL cholesterol",
-    "s4": "Total cholesterol/HDL ratio",
-    "s5": "Triglycerides",
-    "s6": "Blood sugar",
-})
+X = X.rename(
+    columns={
+        "age": "Age",
+        "sex": "Sex",
+        "bmi": "BMI",
+        "bp": "Blood pressure",
+        "s1": "Total cholesterol",
+        "s2": "LDL cholesterol",
+        "s3": "HDL cholesterol",
+        "s4": "Total cholesterol/HDL ratio",
+        "s5": "Triglycerides",
+        "s6": "Blood sugar",
+    }
+)
 
 
 # %%
@@ -46,7 +49,13 @@ explanation = explainer(X, check_additivity=False)
 assert explanation.values.shape == X.shape
 
 # %%
-shap.plots.beeswarm(explanation)
+shap.plots.beeswarm(explanation, show=False)
+plt.savefig("img/beeswarm_diabetes.jpg", bbox_inches="tight", dpi=300)
+plt.show()
 
 # %%
-shap.plots.waterfall(explanation[0, ...])
+shap.plots.waterfall(explanation[0, ...], show=False)
+plt.savefig("img/waterfall_diabetes.jpg", bbox_inches="tight", dpi=300)
+plt.show()
+
+# %%
