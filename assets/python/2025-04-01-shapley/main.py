@@ -59,3 +59,6 @@ plt.savefig("img/waterfall_diabetes.jpg", bbox_inches="tight", dpi=300)
 plt.show()
 
 # %%
+shap.plots.bar(explanation, show=False)
+plt.savefig("img/global_diabetes.jpg", bbox_inches="tight", dpi=300)
+plt.show()
