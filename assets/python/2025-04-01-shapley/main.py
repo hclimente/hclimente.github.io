@@ -16,8 +16,10 @@
 
 # %%
 import matplotlib.pyplot as plt
+import pandas as pd
 import shap
 import sklearn
+from sklearn.decomposition import PCA
 
 X, y = shap.datasets.diabetes()
 X = X.rename(
@@ -62,3 +64,25 @@ plt.show()
 shap.plots.bar(explanation, show=False)
 plt.savefig("img/global_diabetes.jpg", bbox_inches="tight", dpi=300)
 plt.show()
+
+# %%
+experiment = {
+    "Unsupervised": (X, "original features"),
+    "Supervised": (explanation.values, "SHAP values"),
+}
+
+for clust_type, (data, features) in experiment.items():
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(data)
+    X_pca = pd.DataFrame(data=X_pca, columns=["PC1", "PC2"])
+    X_pca["Diabetes Progression"] = y
+
+    plt.figure(figsize=(10, 6))
+    plt.gca().set_axis_off()
+    plt.scatter(X_pca["PC1"], X_pca["PC2"], c=y, cmap="viridis", s=50, alpha=0.5)
+    plt.colorbar(label="Diabetes Progression", orientation="horizontal")
+    plt.title(f"PCA on the {features}", fontsize=16)
+    plt.xlabel("PC1")
+    plt.ylabel("PC2")
+    plt.savefig(f"img/{clust_type.lower()}_pca.jpg", bbox_inches="tight", dpi=300)
+    plt.show()
