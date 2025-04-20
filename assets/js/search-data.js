@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-knockoffs",
+        },{id: "post-shap-values",
+      
+        title: "SHAP values",
+      
+      description: "A model-agnostic framework for explaining predictions",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/shapley/";
+        
+      },
+    },{id: "post-knockoffs",
       
         title: "Knockoffs",
       
