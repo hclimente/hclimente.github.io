@@ -21,6 +21,11 @@ import pandas as pd
 import shap
 import sklearn
 from sklearn.decomposition import PCA
+import sys
+
+sys.path.append("../")
+
+from utils import save_fig
 
 X, y = shap.datasets.diabetes()
 X = X.rename(
@@ -37,17 +42,6 @@ X = X.rename(
         "s6": "Blood sugar",
     }
 )
-
-
-# %%
-def save_fig(fig, basename):
-    fig.savefig(f"img/{basename}.webp", bbox_inches="tight", dpi=300)
-    dpi_800 = 800 / fig.get_size_inches()[0]
-    fig.savefig(f"img/{basename}-800.webp", bbox_inches="tight", dpi=dpi_800)
-    dpi_1600 = 1600 / fig.get_size_inches()[0]
-    fig.savefig(f"img/{basename}-1600.webp", bbox_inches="tight", dpi=dpi_1600)
-    plt.show()
-    plt.close(fig)
 
 
 # %%
