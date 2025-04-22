@@ -9,7 +9,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.11.2
 #   kernelspec:
-#     display_name: x-VW6uKvAAFJ6FbaR1Atg
+#     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
@@ -21,6 +21,11 @@ import pandas as pd
 import shap
 import sklearn
 from sklearn.decomposition import PCA
+import sys
+
+sys.path.append("../")
+
+from utils import save_fig
 
 X, y = shap.datasets.diabetes()
 X = X.rename(
@@ -64,18 +69,15 @@ assert explanation.values.shape == X.shape
 
 # %%
 shap.plots.beeswarm(explanation, show=False)
-plt.savefig("img/beeswarm_diabetes.jpg", bbox_inches="tight", dpi=300)
-plt.show()
+save_fig(plt.gcf(), "beeswarm_diabetes")
 
 # %%
 shap.plots.waterfall(explanation[0, ...], show=False)
-plt.savefig("img/waterfall_diabetes.jpg", bbox_inches="tight", dpi=300)
-plt.show()
+save_fig(plt.gcf(), "waterfall_diabetes")
 
 # %%
 shap.plots.bar(explanation, show=False)
-plt.savefig("img/global_diabetes.jpg", bbox_inches="tight", dpi=300)
-plt.show()
+save_fig(plt.gcf(), "global_diabetes")
 
 # %%
 experiment = {
@@ -96,8 +98,7 @@ for clust_type, (data, features) in experiment.items():
     plt.title(f"PCA on the {features}", fontsize=16)
     plt.xlabel("PC1")
     plt.ylabel("PC2")
-    plt.savefig(f"img/{clust_type.lower()}_pca.jpg", bbox_inches="tight", dpi=300)
-    plt.show()
+    save_fig(plt.gcf(), f"{clust_type.lower()}_pca")
 
 # %% [markdown]
 # # SHAP limitations
@@ -121,8 +122,7 @@ explainer = shap.Explainer(model)
 explanation = explainer(X_sim_tr, check_additivity=False)
 
 shap.plots.beeswarm(explanation, show=False)
-plt.savefig("img/beeswarm_random.jpg", bbox_inches="tight", dpi=300)
-plt.show()
+save_fig(plt.gcf(), "beeswarm_random")
 
 # plot prediction on test set
 y_pred = model.predict(X_sim_te)
@@ -135,8 +135,7 @@ plt.title("Random Forest predictions on test set", fontsize=16)
 plt.plot([0, 1], [0, 1], color="red", linestyle="--")
 plt.xlim(0, 1)
 plt.ylim(0, 1)
-plt.savefig("img/random_forest_test.jpg", bbox_inches="tight", dpi=300)
-plt.show()
+save_fig(plt.gcf(), "random_forest_test")
 
 # %%
 y_intx = np.logical_xor(X_sim[:, 0] > 0.5, X_sim[:, 1] > 0.5)
@@ -150,13 +149,4 @@ explainer = shap.Explainer(model)
 explanation = explainer(X_sim, check_additivity=False)
 
 shap.plots.beeswarm(explanation[1, :], show=False)
-plt.savefig("img/beeswarm_interaction.jpg", bbox_inches="tight", dpi=300)
-plt.show()
-
-# %%
-explanation
-
-# %%
-explanation
-
-# %%
+save_fig(plt.gcf(), "beeswarm_interaction")
