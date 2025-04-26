@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-shap-values",
+        },{id: "post-an-intro-to-uv",
+      
+        title: "An intro to uv",
+      
+      description: "A Swiss Army Knife for Python data science",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/python-uv/";
+        
+      },
+    },{id: "post-shap-values",
       
         title: "SHAP values",
       
