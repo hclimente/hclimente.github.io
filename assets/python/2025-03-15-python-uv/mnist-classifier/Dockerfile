@@ -3,7 +3,7 @@ FROM ghcr.io/astral-sh/uv:python3.10-bookworm-slim
 RUN mkdir -p /mnist_classifier/data
 WORKDIR /mnist_classifier
 
-# ensure that uv.lock is not modified
+# ensure uv.lock isn't modified
 ENV UV_LOCKED=1
 
 # copy the minimum required files:
@@ -15,6 +15,6 @@ COPY predict.py .
 COPY data/mnist_cnn.pt data/
 
 # recreate the environment
-RUN uv sync
+RUN uv sync --no-dev
 
 CMD ["uv", "run", "predict.py"]
