@@ -305,6 +305,9 @@ ninja.data = [{
           section: "News",},{id: "news-i-was-promoted-to-lead-data-scientist-i-will-be-working-on-ai-ml-for-target-and-biomarker-discovery",
           title: 'I was promoted to Lead Data Scientist. I will be working on AI/ML...',
           description: "",
+          section: "News",},{id: "news-our-preprint-on-deep-learning-based-genetic-risk-prediction-is-out-this-work-was-driven-by-taiyu-zhu-from-the-university-of-oxford",
+          title: 'Our preprint on deep learning-based genetic risk prediction is out! This work was...',
+          description: "",
           section: "News",},{
         id: 'social-bluesky',
         title: 'Bluesky',
