@@ -18,6 +18,8 @@ $$
 
 where $\mathbf{y}$ is the trait, $\beta_0$ is the intercept, $\beta_1$ is the effect size of the variant, $\mathbf{x}$ is the genotype of the variant, and $\epsilon$ is the error term. The model assumes that the error term follows a normal distribution with mean 0 and variance $\sigma^2$. Typically, the genotype is coded as 0, 1, or 2, depending on the number of minor alleles carried by the individual. The effect size $\beta_1$ is estimated using maximum likelihood estimation (MLE) or restricted maximum likelihood estimation (REML).
 
+In a GWAS metaanalysis, the effect sizes from multiple studies are combined to obtain a more precise estimate of the effect size. The GWASs to be combined using a **fixed effects model**, which assumes that the effect size is the same across all studies. This is in contrast to a **random effects model**, which assumes that the effect size varies across studies. The fixed effects model is appropriate when the studies are similar in design and population, while the random effects model is more appropriate when the studies are heterogeneous.
+
 # Fixed effects
 
 $$
