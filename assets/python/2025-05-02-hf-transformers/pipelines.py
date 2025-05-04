@@ -1,0 +1,92 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     custom_cell_magics: kql
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.11.2
+#   kernelspec:
+#     display_name: .venv
+#     language: python
+#     name: python3
+# ---
+
+# %%
+from typing import List, Dict, Tuple, Union, Optional, Any
+
+import numpy as np
+from transformers import Pipeline
+
+
+# %%
+class DNAEmbeddingPipeline(Pipeline):
+    def _sanitize_parameters(
+        self,
+        **kwargs,
+    ) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+        preprocess_params = {}
+
+        if "max_length" in kwargs:
+            preprocess_params["max_length"] = kwargs["max_length"]
+
+        return preprocess_params, {}, {}
+
+    def preprocess(
+        self,
+        model_inputs: Union[str, List[str]],
+        max_length: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        if max_length is None:
+            max_length = self.tokenizer.model_max_length
+
+        tokens_ids = self.tokenizer.batch_encode_plus(
+            model_inputs,
+            return_tensors="pt",
+            padding="max_length",
+            max_length=max_length,
+        )["input_ids"]
+
+        return tokens_ids
+
+    def _forward(
+        self,
+        model_inputs: Union[str, List[str]],
+    ) -> Dict[str, Any]:
+        attention_mask = model_inputs != self.tokenizer.pad_token_id
+
+        return self.model(
+            model_inputs,
+            attention_mask=attention_mask,
+            encoder_attention_mask=attention_mask,
+            output_hidden_states=True,
+        )
+
+    def postprocess(
+        self,
+        model_outputs: Dict[str, Any],
+    ) -> Union[np.ndarray, List[np.ndarray]]:
+        return model_outputs["hidden_states"][-1].detach().numpy()
+
+
+# %%
+if __name__ == "__main__":
+    from transformers import AutoTokenizer, AutoModelForMaskedLM
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        "InstaDeepAI/nucleotide-transformer-v2-500m-multi-species",
+        trust_remote_code=True,
+    )
+    model = AutoModelForMaskedLM.from_pretrained(
+        "InstaDeepAI/nucleotide-transformer-v2-500m-multi-species",
+        trust_remote_code=True,
+    )
+
+    pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
+
+    sequences = ["ATTCCGATTCCGATTCCG", "ATTTCTCTCTCTCTCTGAGATCGATCGATCGAT"]
+    embeddings = pipeline(sequences, max_length=33)
+
+    print(embeddings)
