@@ -13,14 +13,13 @@ repos:
     hooks:
       - id: prettier
         stages: [pre-commit]
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
-    hooks:
-      - id: black
-        language_version: python3.10
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.11.5
     hooks:
       - id: ruff
         args: [--fix]
-      - id: ruff-format
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3.10
