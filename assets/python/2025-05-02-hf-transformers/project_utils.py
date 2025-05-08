@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Tuple
 
+from datasets import load_dataset, concatenate_datasets
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -91,3 +92,19 @@ def plot_confusion_matrix(
     plt.xticks(rotation=45)
 
     return plt.gcf()
+
+
+def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
+
+    dataset = []
+
+    for label_id, (filename, label_name) in enumerate(ds_list):
+        ds = load_dataset("text", data_files=f"{prefix}/{filename}.txt", split="train")
+        # give every example in this split the same integer label
+        ds = ds.map(lambda ex, idx=label_id: {"label": idx})
+        dataset.append(ds)
+
+    # stitch them all back together
+    dataset = concatenate_datasets(dataset)
+
+    return dataset

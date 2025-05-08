@@ -17,6 +17,8 @@ mermaid:
 
 HuggingFace (🤗) has become a staple of LLM work. In this post I will explore this library with a different use case: handling DNA LLMs.
 
+TODO What is inference
+
 <!-- https://colab.research.google.com/github/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb -->
 
 # The Nucleotide Transformer

@@ -22,7 +22,7 @@ from transformers import Pipeline
 
 
 # %%
-class DNAEmbeddingPipeline(Pipeline):
+class DNAPipeline(Pipeline):
     def _sanitize_parameters(
         self,
         **kwargs,
@@ -75,6 +75,10 @@ class DNAEmbeddingPipeline(Pipeline):
 
         return out
 
+
+# %%
+class DNAEmbeddingPipeline(DNAPipeline):
+
     def postprocess(
         self,
         model_outputs: Dict[str, Any],
@@ -86,6 +90,16 @@ class DNAEmbeddingPipeline(Pipeline):
         mean_sequence_embeddings = masked_embeddings.sum(1) / attention_mask.sum(1)
 
         return mean_sequence_embeddings.cpu().numpy()
+
+
+# %%
+class DNAClassificationPipeline(DNAPipeline):
+
+    def postprocess(
+        self,
+        model_outputs: Dict[str, Any],
+    ) -> Union[np.ndarray, List[np.ndarray]]:
+        return model_outputs
 
 
 # %%

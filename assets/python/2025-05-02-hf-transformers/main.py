@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -17,14 +18,25 @@
 # %%
 import sys
 
-from datasets import load_dataset
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from transformers import AutoTokenizer, AutoModelForMaskedLM
+from transformers import (
+    AutoTokenizer,
+    AutoModelForMaskedLM,
+    AutoModelForSequenceClassification,
+    TrainingArguments,
+    Trainer,
+    DataCollatorWithPadding,
+)
 from transformers.pipelines.pt_utils import KeyDataset
 
 from pipelines import DNAEmbeddingPipeline
-from project_utils import plot_umap, plot_confusion_matrix, compute_accuracy
+from project_utils import (
+    plot_umap,
+    plot_confusion_matrix,
+    compute_accuracy,
+    create_dataset,
+)
 
 sys.path.append("../")
 
@@ -46,24 +58,18 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 model = AutoModelForMaskedLM.from_pretrained(MODEL, trust_remote_code=True)
 
 pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
+# %%
+train_emb = []
+train_ds = create_dataset("data/train/", DATASETS)
+
+for e in pipeline(KeyDataset(train_ds, "text"), max_length=30):
+    train_emb.append(e)
+
+train_emb = np.concatenate(train_emb, axis=0)
 
 # %%
-tr_embeddings = []
 labels = [label for _, label in DATASETS for _ in range(1000)]
-
-for filename, label in DATASETS:
-    print(f"Processing {label}...")
-    tr_data = load_dataset(
-        "text", data_files=f"data/train/{filename}.txt", split="train"
-    )
-
-    for e in pipeline(KeyDataset(tr_data, "text"), max_length=30):
-        tr_embeddings.append(e)
-
-tr_embeddings = np.concatenate(tr_embeddings, axis=0)
-
-# %%
-fig = plot_umap(tr_embeddings, labels)
+fig = plot_umap(train_emb, labels)
 save_fig(fig, "umap_embeddings")
 
 # %% [markdown]
@@ -71,29 +77,24 @@ save_fig(fig, "umap_embeddings")
 
 # %%
 model = LogisticRegression()
-model.fit(tr_embeddings, labels)
+model.fit(train_emb, labels)
 
-tr_pred = model.predict(tr_embeddings)
+tr_pred = model.predict(train_emb)
 accuracy = compute_accuracy(labels, tr_pred)
 print(f"Train Accuracy: {accuracy:.2f}")
 
 fig = plot_confusion_matrix(labels, tr_pred)
 
 # %%
-te_embeddings = []
+test_emb = []
+test_ds = create_dataset("data/train/", DATASETS)
 
-for filename, label in DATASETS:
-    print(f"Processing {label}...")
-    tr_data = load_dataset(
-        "text", data_files=f"data/test/{filename}.txt", split="train"
-    )
+for e in pipeline(KeyDataset(test_ds, "text"), max_length=30):
+    test_emb.append(e)
 
-    for e in pipeline(KeyDataset(tr_data, "text"), max_length=30):
-        te_embeddings.append(e)
+test_emb = np.concatenate(test_emb, axis=0)
 
-te_embeddings = np.concatenate(te_embeddings, axis=0)
-
-te_pred = model.predict(te_embeddings)
+te_pred = model.predict(test_emb)
 accuracy = compute_accuracy(labels, te_pred)
 print(f"Test Accuracy: {accuracy:.2f}")
 fig = plot_confusion_matrix(labels, te_pred)
@@ -106,6 +107,66 @@ print(f"(Random Accuracy: {random_accuracy:.2f})")
 # # Fine-tune the model on the training set
 
 # %%
+# 1. Load model + tokenizer
+model = AutoModelForSequenceClassification.from_pretrained(
+    MODEL, num_labels=6, trust_remote_code=True
+)
+tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
+
+
+# 2. Prepare your datasets (train/test) as 🤗 Datasets with a “label” column of 0–5
+def tokenize_batch(batch):
+    return tokenizer(batch["text"], truncation=True, padding="longest", max_length=30)
+
+
+train_ds = train_ds.map(tokenize_batch, batched=True, remove_columns=["text"])
+
+test_ds = test_ds.map(tokenize_batch, batched=True, remove_columns=["text"])
+
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
+# 3. (Optional) Freeze the bottom N transformer layers to speed up / regularize
+for param in model.base_model.embeddings.parameters():
+    param.requires_grad = False
+
+for layer_idx, layer_module in enumerate(model.base_model.encoder.layer):
+    if layer_idx < 10:
+        for param in layer_module.parameters():
+            param.requires_grad = False
+
+
+# 4. Set up Trainer
+training_args = TrainingArguments(
+    output_dir="finetune_out",
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=64,
+    num_train_epochs=3,
+    learning_rate=5e-5,
+    eval_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+    metric_for_best_model="accuracy",
+)
+
+
+def compute_metrics(p):
+    preds = p.predictions.argmax(-1)
+    return {"accuracy": (preds == p.label_ids).mean()}
+
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_ds,
+    eval_dataset=test_ds,
+    data_collator=data_collator,
+    compute_metrics=compute_metrics,
+)
+
+# 5. Train & evaluate
+trainer.train()
+trainer.evaluate()
+
 
 # %%
 # variants = pd.read_csv("41586_2018_461_MOESM3_ESM.tsv", sep="\t")
