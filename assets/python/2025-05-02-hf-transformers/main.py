@@ -30,7 +30,7 @@ from transformers import (
 )
 from transformers.pipelines.pt_utils import KeyDataset
 
-from pipelines import DNAEmbeddingPipeline
+from pipelines import DNAEmbeddingPipeline, DNAClassificationPipeline
 from project_utils import (
     plot_umap,
     plot_confusion_matrix,
@@ -58,16 +58,17 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 model = AutoModelForMaskedLM.from_pretrained(MODEL, trust_remote_code=True)
 
 pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
+
+train_ds = create_dataset("data/train/", DATASETS)
+test_ds = create_dataset("data/test/", DATASETS)
 # %%
 train_emb = []
-train_ds = create_dataset("data/train/", DATASETS)
 
 for e in pipeline(KeyDataset(train_ds, "text"), max_length=30):
     train_emb.append(e)
 
 train_emb = np.concatenate(train_emb, axis=0)
 
-# %%
 labels = [label for _, label in DATASETS for _ in range(1000)]
 fig = plot_umap(train_emb, labels)
 save_fig(fig, "umap_embeddings")
@@ -87,7 +88,6 @@ fig = plot_confusion_matrix(labels, tr_pred)
 
 # %%
 test_emb = []
-test_ds = create_dataset("data/train/", DATASETS)
 
 for e in pipeline(KeyDataset(test_ds, "text"), max_length=30):
     test_emb.append(e)
@@ -107,22 +107,39 @@ print(f"(Random Accuracy: {random_accuracy:.2f})")
 # # Fine-tune the model on the training set
 
 # %%
-# 1. Load model + tokenizer
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL, num_labels=6, trust_remote_code=True
 )
-tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 
 
-# 2. Prepare your datasets (train/test) as 🤗 Datasets with a “label” column of 0–5
-def tokenize_batch(batch):
-    return tokenizer(batch["text"], truncation=True, padding="longest", max_length=30)
+# %%
+def preprocess(ds):
+
+    def tokenize_batch(batch):
+        batch = tokenizer(
+            batch["text"],
+            truncation=True,
+            padding="longest",
+            max_length=30,
+            return_tensors="pt",
+        )
+        return batch
+
+    tokenized_ds = ds.map(tokenize_batch, batched=True, remove_columns=["text"])
+
+    return tokenized_ds
 
 
-train_ds = train_ds.map(tokenize_batch, batched=True, remove_columns=["text"])
+tokenized_train_ds = preprocess(train_ds)
+split = tokenized_train_ds.train_test_split(test_size=0.1, seed=42)
 
-test_ds = test_ds.map(tokenize_batch, batched=True, remove_columns=["text"])
+# train - validation split
+tr_train_ds = split["train"]
+tr_val_ds = split["test"]
 
+tokenized_test_ds = preprocess(test_ds)
+
+# %%
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 # 3. (Optional) Freeze the bottom N transformer layers to speed up / regularize
@@ -140,12 +157,13 @@ training_args = TrainingArguments(
     output_dir="finetune_out",
     per_device_train_batch_size=32,
     per_device_eval_batch_size=64,
-    num_train_epochs=3,
+    num_train_epochs=10,
     learning_rate=5e-5,
     eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,
     metric_for_best_model="accuracy",
+    dataloader_pin_memory=False,  # not supported by mps
 )
 
 
@@ -157,16 +175,41 @@ def compute_metrics(p):
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=train_ds,
-    eval_dataset=test_ds,
+    train_dataset=tr_train_ds,
+    eval_dataset=tr_val_ds,
     data_collator=data_collator,
     compute_metrics=compute_metrics,
 )
 
 # 5. Train & evaluate
-trainer.train()
-trainer.evaluate()
+perf = trainer.evaluate(tokenized_test_ds)
+print(f"Test accuracy before training: {perf['eval_accuracy']:.2f}")
 
+trainer.train()
+
+perf = trainer.evaluate(tokenized_test_ds)
+print(f"Test accuracy after training: {perf['eval_accuracy']:.2f}")
+
+
+# %%
+emb_pipe = DNAClassificationPipeline(model=trainer.model, tokenizer=tokenizer)
+
+test_emb_ft = []
+test_pred_ft = []
+
+for e in emb_pipe(KeyDataset(test_ds, "text"), max_length=30):
+    test_emb_ft.append(e["embedding"])
+    test_pred_ft.append(e["logits"])
+
+test_emb_ft = np.concatenate(test_emb_ft, axis=0)
+test_pred_ft = np.concatenate(test_pred_ft, axis=0)
+
+# %%
+fig = plot_umap(test_emb_ft, labels)
+
+# %%
+accuracy = compute_accuracy(test_ds["labels"], test_pred_ft.argmax(1))
+print(f"Test Accuracy: {accuracy:.2f}")
 
 # %%
 # variants = pd.read_csv("41586_2018_461_MOESM3_ESM.tsv", sep="\t")

@@ -54,6 +54,10 @@ class DNAPipeline(Pipeline):
 
         return tokens_ids
 
+
+# %%
+class DNAEmbeddingPipeline(DNAPipeline):
+
     def _forward(
         self,
         model_inputs: Union[str, List[str]],
@@ -75,10 +79,6 @@ class DNAPipeline(Pipeline):
 
         return out
 
-
-# %%
-class DNAEmbeddingPipeline(DNAPipeline):
-
     def postprocess(
         self,
         model_outputs: Dict[str, Any],
@@ -95,11 +95,41 @@ class DNAEmbeddingPipeline(DNAPipeline):
 # %%
 class DNAClassificationPipeline(DNAPipeline):
 
+    def _forward(
+        self,
+        model_inputs: Union[str, List[str]],
+    ) -> Dict[str, Any]:
+        # find out which of the tokens are padding tokens
+        # these tokens will be ignored by the model
+        attention_mask = model_inputs != self.tokenizer.pad_token_id
+
+        out = self.model(
+            model_inputs,
+            attention_mask=attention_mask,
+            output_hidden_states=True,
+        )
+        if "attention_mask" in out:
+            raise ValueError("Output contains attention_mask, which is unexpected.")
+        out["attention_mask"] = attention_mask
+
+        return out
+
     def postprocess(
         self,
         model_outputs: Dict[str, Any],
     ) -> Union[np.ndarray, List[np.ndarray]]:
-        return model_outputs
+
+        out = {}
+        out["logits"] = model_outputs["logits"]
+
+        embeddings = model_outputs["hidden_states"][-1].detach()
+        attention_mask = model_outputs["attention_mask"].unsqueeze(-1).cpu()
+        masked_embeddings = attention_mask * embeddings
+
+        mean_sequence_embeddings = masked_embeddings.sum(1) / attention_mask.sum(1)
+        out["embedding"] = mean_sequence_embeddings
+
+        return out
 
 
 # %%

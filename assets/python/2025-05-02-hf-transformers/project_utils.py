@@ -101,7 +101,7 @@ def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
     for label_id, (filename, label_name) in enumerate(ds_list):
         ds = load_dataset("text", data_files=f"{prefix}/{filename}.txt", split="train")
         # give every example in this split the same integer label
-        ds = ds.map(lambda ex, idx=label_id: {"label": idx})
+        ds = ds.map(lambda ex, idx=label_id: {"labels": idx})
         dataset.append(ds)
 
     # stitch them all back together
