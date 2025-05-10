@@ -20,17 +20,17 @@ for URL in "${URLS[@]}"; do
     SPECIES=$(basename "${URL}" | cut -d. -f1)
     echo "Processing ${SPECIES}"
 
-    echo -e "\tDownloading genome..."
-    curl -s -o tmp.fa.gz "${URL}" && gunzip tmp.fa.gz
+    echo -e "\tDownloading coding DNA sequences..."
+    curl -s -o cds.fa.gz "${URL}" && gunzip cds.fa.gz
 
     echo -e "\tRemoving headers and shorter sequences..."
-    grep -v ">" tmp.fa | awk 'length($0) == 60' | shuf >shuf.fa
+    grep -v ">" cds.fa | awk 'length($0) == 60' | shuf >filt_shuff_cds.fa
 
     echo -e "\tCreating train and test sets, with ${N_SAMPLES} sequences each..."
-    head -n $N_SAMPLES shuf.fa > data/train/"${SPECIES}".txt
-    tail -n $N_SAMPLES shuf.fa > data/test/"${SPECIES}".txt
+    head -n $N_SAMPLES filt_shuff_cds.fa > data/train/"${SPECIES}".txt
+    tail -n $N_SAMPLES filt_shuff_cds.fa > data/test/"${SPECIES}".txt
 
     echo -e "\tRemoving temporary files..."
-    rm tmp.fa shuf.fa
+    rm cds.fa filt_shuff_cds.fa
 
 done
