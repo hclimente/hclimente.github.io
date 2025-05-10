@@ -54,6 +54,7 @@ DATASETS = [
 ]
 
 # %%
+# trust_remote_code is needed since the model is not native to the library
 tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
 model = AutoModelForMaskedLM.from_pretrained(MODEL, trust_remote_code=True)
 

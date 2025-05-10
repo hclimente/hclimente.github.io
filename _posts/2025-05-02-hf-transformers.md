@@ -19,25 +19,27 @@ HuggingFace (🤗) has become a staple of LLM work. In this post I will explore 
 
 TODO What is inference
 
+[HuggingFace's 🤗 `transformers`](https://huggingface.co/docs/transformers/index) is a powerful library for working with transformer models, providing a wide range of pre-trained models and utilities for fine-tuning and deploying them. Problem that is solved: different models have different APIs. The `transformers` library provides a unified API for all transformer models, making it easy to switch between them without having to learn a new API each time.
+
 <!-- https://colab.research.google.com/github/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb -->
 
 # The Nucleotide Transformer
 
-I will focus on the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z), developed by [InstaDeep](https://www.instadeep.com/). InstaDeep shows a commendable commitment to open science, regularly publishing articles, models, documentation and code. A big part of this article is based off their work, which I have re-used to some degree. In this article I use [a small, 50 million parameter Nucleotide Transformer](https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species), available from [their 🤗 organization](https://huggingface.co/InstaDeepAI).
+I will focus on the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z), developed by [InstaDeep](https://www.instadeep.com/). InstaDeep shows a commendable commitment to open science, regularly publishing articles, models, documentation and code. In this article I use [a small, 50 million parameter Nucleotide Transformer](https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species), available from [their 🤗 organization](https://huggingface.co/InstaDeepAI).
 
-The Nucleotide Transformer was produces as TODO
+TODO The Nucleotide Transformer was produced by....
 
 {% include figure.liquid path="assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid rounded z-depth-1" %}
 
 <div class="caption">
-  Training of the Nucleotide Transformer using masked language modelling. Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">Nucleotide Transformer article</a>.
+  Training of the Nucleotide Transformer using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">Nucleotide Transformer article</a>.
 </div>
 
-Inputs and outputs
+TODO Describe inputs and outputs
 
-# The 🤗 `transformers` library
+# Loading a pre-trained model
 
-[HuggingFace's 🤗 `transformers`](https://huggingface.co/docs/transformers/index) is a powerful library for working with transformer models, providing a wide range of pre-trained models and utilities for fine-tuning and deploying them. Problem that is solved: different models have different APIs. The `transformers` library provides a unified API for all transformer models, making it easy to switch between them without having to learn a new API each time. For instance, fetching the Nucleotide Transformer is as easy as running:
+For instance, fetching the Nucleotide Transformer adapted for masked language modeling is as easy as running:
 
 ```python
 model = AutoModelForMaskedLM.from_pretrained(
@@ -46,9 +48,12 @@ model = AutoModelForMaskedLM.from_pretrained(
 )
 ```
 
-The model cannot be applied directly to a DNA sequence. Usually, the workflow is:
+This is facilitated by `AutoModelForMaskedLM`, one of the many [`transformers` AutoClasses](https://huggingface.co/docs/transformers/model_doc/auto).
+TODO Elaborate
 
-Attention masks
+# Building an inference pipeline
+
+The model cannot be applied directly to a DNA sequence. Usually, the workflow is:
 
 ```mermaid
 ---
@@ -87,7 +92,10 @@ flowchart LR
 
 [HuggingFace's 🤗 `pipelines`](https://huggingface.co/docs/transformers/pipeline_tutorial) exist to encapsulate these inference steps while cutting the boilerplate code.
 
-# Predicting the species
+TODO show code
+TODO discuss some specific adaptations, e.g., attention masks
+
+# Embedding DNA sequences
 
 I will be using this model to embed protein-coding DNA sequences from six species: three animals (human, mouse and fruit fly); one plant (arabidopsis); one bacteria (_E. coli_); and one yeast (_S. cerevisae_).
 
@@ -105,6 +113,16 @@ Even with these constraints, sequences from the same species tend to inhabit sim
 
 # Fine-tuning the model
 
+The Nucleotide Transformer has been trained via self-supervised learning, it's not too surprising that it can't separate different species right off the bat. Fine-tuning it to this task should provide more relevant representations. `transformers` 🤗 also provides an easy way of doing that using `transformers.Trainer`.
+
+TODO Importing the model
+
+TODO Fine-tuning
+
+TODO Pipeline
+
+TODO Improved embeddings
+
 # Conclusions
 
-[The role of HuggingFace's 🤗 in a ML stack]
+TODO The role of HuggingFace's 🤗 in a ML stack
