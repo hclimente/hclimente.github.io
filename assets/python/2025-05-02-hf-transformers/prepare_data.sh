@@ -1,9 +1,12 @@
 #!/bin/bash
+set -o errexit
+set -o pipefail
 
 mkdir -p data/train
 mkdir -p data/test
 
-urls=(
+N_SAMPLES=1000
+URLS=(
     "https://ftp.ensembl.org/pub/release-113/fasta/homo_sapiens/cds/Homo_sapiens.GRCh38.cds.all.fa.gz"
     "https://ftp.ensembl.org/pub/release-113/fasta/mus_musculus/cds/Mus_musculus.GRCm39.cds.all.fa.gz"
     "https://ftp.ensembl.org/pub/release-113/fasta/drosophila_melanogaster/cds/Drosophila_melanogaster.BDGP6.46.cds.all.fa.gz"
@@ -12,24 +15,22 @@ urls=(
     "https://ftp.ensemblgenomes.ebi.ac.uk/pub/plants/release-60/fasta/arabidopsis_thaliana/cds/Arabidopsis_thaliana.TAIR10.cds.all.fa.gz"
 )
 
-for url in "${urls[@]}"; do
+for URL in "${URLS[@]}"; do
 
-    species=$(basename "$url" | cut -d. -f1)
-    echo "Processing ${species}..."
+    SPECIES=$(basename "${URL}" | cut -d. -f1)
+    echo "Processing ${SPECIES}"
 
-    curl -o tmp.fa.gz "$url"
-    echo "Downloaded ${species} data."
+    echo -e "\tDownloading genome..."
+    curl -s -o tmp.fa.gz "${URL}" && gunzip tmp.fa.gz
 
-    gunzip tmp.fa.gz
-
-    # remove headers and shorter sequences
+    echo -e "\tRemoving headers and shorter sequences..."
     grep -v ">" tmp.fa | awk 'length($0) == 60' | shuf >shuf.fa
-    echo "Processed ${species} data."
 
-    head -n 1000 shuf.fa > data/train/${species}.txt
-    tail -n 1000 shuf.fa > data/test/${species}.txt
-    echo "Split ${species} data into train and test sets."
+    echo -e "\tCreating train and test sets, with ${N_SAMPLES} sequences each..."
+    head -n $N_SAMPLES shuf.fa > data/train/"${SPECIES}".txt
+    tail -n $N_SAMPLES shuf.fa > data/test/"${SPECIES}".txt
 
+    echo -e "\tRemoving temporary files..."
     rm tmp.fa shuf.fa
-    echo "Cleaned up temporary files."
+
 done
