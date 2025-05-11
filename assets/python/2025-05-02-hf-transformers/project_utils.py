@@ -19,43 +19,64 @@ palette = {
 }
 
 
-def plot_umap(embeddings: np.ndarray, labels: List[str]) -> matplotlib.figure.Figure:
-    # compute UMAP
+def plot_umap(
+    embeddings: np.ndarray, labels: List[str], palette: str = "tab10"
+) -> plt.Figure:
+    # Compute UMAP
     umap_model = umap.UMAP(
         n_neighbors=15,
         n_components=2,
         metric="cosine",
         random_state=42,
         low_memory=True,
-        verbose=True,
     )
     umap_embeddings = umap_model.fit_transform(embeddings)
 
-    # prepare the data for plotting
-    df = pd.DataFrame(umap_embeddings, columns=["x", "y"])
-    df["species"] = labels
-
-    ## shuffle the data
+    # Prepare DataFrame
+    df = pd.DataFrame(umap_embeddings, columns=["UMAP 1", "UMAP 2"])
+    df["Label"] = labels
     df = df.sample(frac=1, random_state=42).reset_index(drop=True)
 
-    # plot
-    sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(3, 3))
+    # Set plot style
+    sns.set_theme(style="white", context="notebook", font_scale=1.2)
+
+    # Create plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Scatterplot
     sns.scatterplot(
-        x="x",
-        y="y",
-        hue="species",
+        x="UMAP 1",
+        y="UMAP 2",
+        hue="Label",
         data=df,
-        alpha=0.5,
-        s=10,
+        alpha=0.6,
+        s=40,
         palette=palette,
+        edgecolor="none",
+        ax=ax,
     )
 
-    plt.xlabel("UMAP 1")
-    plt.ylabel("UMAP 2")
-    plt.gca().legend(loc="center left", bbox_to_anchor=(1, 0.5))
+    # Move legend outside to bottom-right
+    box = ax.get_position()
+    ax.set_position(
+        [box.x0, box.y0 + 0.1, box.width * 0.85, box.height]
+    )  # shrink width a bit
 
-    return plt.gcf()
+    ax.legend(
+        title="",
+        loc="lower left",
+        bbox_to_anchor=(1.02, 0),  # bottom right, just outside
+        borderaxespad=0.0,
+        frameon=False,
+        fontsize="medium",
+        labelspacing=0.4,
+        handletextpad=0.5,
+    )
+
+    sns.despine(trim=True)
+    plt.tight_layout()
+
+    return fig
 
 
 def compute_accuracy(true_labels: np.ndarray, predicted_labels: np.ndarray) -> float:

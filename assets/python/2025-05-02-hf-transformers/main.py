@@ -207,6 +207,7 @@ test_pred_ft = np.concatenate(test_pred_ft, axis=0)
 
 # %%
 fig = plot_umap(test_emb_ft, labels)
+save_fig(fig, "umap_embeddings_ft-model")
 
 # %%
 accuracy = compute_accuracy(test_ds["labels"], test_pred_ft.argmax(1))

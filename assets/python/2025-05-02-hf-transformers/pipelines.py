@@ -48,8 +48,9 @@ class DNAPipeline(Pipeline):
         tokens_ids = self.tokenizer.batch_encode_plus(
             model_inputs,
             return_tensors="pt",
-            padding="max_length",
+            padding="longest",
             max_length=max_length,
+            truncation=True,
         )["input_ids"]
 
         return tokens_ids
@@ -74,7 +75,7 @@ class DNAEmbeddingPipeline(DNAPipeline):
         )
 
         if "attention_mask" in out:
-            raise ValueError("Output contains attention_mask, which is unexpected.")
+            raise ValueError("Output contains attention_mask, " "which is unexpected.")
         out["attention_mask"] = attention_mask
 
         return out
@@ -109,7 +110,7 @@ class DNAClassificationPipeline(DNAPipeline):
             output_hidden_states=True,
         )
         if "attention_mask" in out:
-            raise ValueError("Output contains attention_mask, which is unexpected.")
+            raise ValueError("Output contains attention_mask, " "which is unexpected.")
         out["attention_mask"] = attention_mask
 
         return out
@@ -147,7 +148,18 @@ if __name__ == "__main__":
 
     pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
 
-    sequences = ["ATTCCGATTCCGATTCCG", "ATTTCTCTCTCTCTCTGAGATCGATCGATCGAT"]
-    embeddings = pipeline(sequences, max_length=33)
+    sequence = ["ATGGTAGCTACATCATCTG"]
+    # embeddings = pipeline(sequence, max_length=33)
 
-    print(embeddings)
+    # print(embeddings)
+
+    tok_out = tokenizer(sequence, return_tensors="pt")
+    print(tok_out)
+
+    print("--- Summary with dictionary input ---")
+    model(**tok_out)
+    # model_summary = summary(model,
+    #                         input_data={'input_ids': tok_out["input_ids"], 'attention_mask': tok_out["attention_mask"]},
+    #                         col_names=["input_size", "output_size", "num_params", "mult_adds"],
+    #                         verbose=1)
+    # print(model_summary)
