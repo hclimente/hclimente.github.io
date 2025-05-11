@@ -20,6 +20,7 @@ import sys
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+import torch
 from transformers import (
     AutoTokenizer,
     AutoModelForMaskedLM,
@@ -28,13 +29,13 @@ from transformers import (
     Trainer,
     DataCollatorWithPadding,
 )
-from transformers.pipelines.pt_utils import KeyDataset
 
 from pipelines import DNAEmbeddingPipeline, DNAClassificationPipeline
 from project_utils import (
     compute_accuracy,
     create_dataset,
     compute_trainer_metrics,
+    extract_embeddings_from_pipeline,
     plot_umap,
     plot_confusion_matrix,
 )
@@ -43,7 +44,8 @@ sys.path.append("../")
 
 from utils import save_fig
 
-# configuration
+# global parameters
+MAX_LENGTH = 15
 MODEL = "InstaDeepAI/nucleotide-transformer-v2-50m-multi-species"
 DATASETS = [
     ("Arabidopsis_thaliana", "A. thaliana"),
@@ -53,56 +55,57 @@ DATASETS = [
     ("Mus_musculus", "M. musculus"),
     ("Saccharomyces_cerevisiae", "S. cerevisiae"),
 ]
+SEED = 42
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+
+# fine-tuning parameters
+BATCH_SIZE = 64
+N_EPOCHS = 10
+N_LAYERS_TO_FREEZE_FINETUNE = 10
+VALIDATION_SPLIT_SIZE = 0.1
 
 # %%
 # trust_remote_code is needed since the model is not native to the library
-tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
-model = AutoModelForMaskedLM.from_pretrained(MODEL, trust_remote_code=True)
+tokenizer_nt = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
+embedder_nt = AutoModelForMaskedLM.from_pretrained(MODEL, trust_remote_code=True)
 
-pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
+pipe = DNAEmbeddingPipeline(model=embedder_nt, tokenizer=tokenizer_nt)
 
 train_ds = create_dataset("data/train/", DATASETS)
+tr_labels = [DATASETS[x][1] for x in train_ds["labels"]]
+
 test_ds = create_dataset("data/test/", DATASETS)
+te_labels = [DATASETS[x][1] for x in test_ds["labels"]]
 # %%
-train_emb = []
+train_emb, _ = extract_embeddings_from_pipeline(pipe, train_ds, max_length=MAX_LENGTH)
 
-for e in pipeline(KeyDataset(train_ds, "text"), max_length=30):
-    train_emb.append(e)
-
-train_emb = np.concatenate(train_emb, axis=0)
-
-labels = [label for _, label in DATASETS for _ in range(1000)]
-fig = plot_umap(train_emb, labels)
+fig = plot_umap(train_emb, tr_labels, seed=SEED)
 save_fig(fig, "umap_embeddings")
 
 # %% [markdown]
 # # Predict the species from the embedding
 
 # %%
-model = LogisticRegression()
-model.fit(train_emb, labels)
+lr = LogisticRegression(random_state=SEED)
+lr.fit(train_emb, tr_labels)
 
-tr_pred = model.predict(train_emb)
-accuracy = compute_accuracy(labels, tr_pred)
+tr_pred = lr.predict(train_emb)
+accuracy = compute_accuracy(tr_labels, tr_pred)
 print(f"Train Accuracy: {accuracy:.2f}")
 
-fig = plot_confusion_matrix(labels, tr_pred)
+fig = plot_confusion_matrix(tr_labels, tr_pred)
 
 # %%
-test_emb = []
+test_emb, _ = extract_embeddings_from_pipeline(pipe, test_ds, max_length=MAX_LENGTH)
 
-for e in pipeline(KeyDataset(test_ds, "text"), max_length=30):
-    test_emb.append(e)
-
-test_emb = np.concatenate(test_emb, axis=0)
-
-te_pred = model.predict(test_emb)
-accuracy = compute_accuracy(labels, te_pred)
+te_pred = lr.predict(test_emb)
+accuracy = compute_accuracy(te_labels, te_pred)
 print(f"Test Accuracy: {accuracy:.2f}")
-fig = plot_confusion_matrix(labels, te_pred)
+fig = plot_confusion_matrix(te_labels, te_pred)
 save_fig(fig, "confusion_matrix_test")
 
-random_accuracy = compute_accuracy(labels, np.random.permutation(labels))
+random_accuracy = compute_accuracy(te_labels, np.random.permutation(te_labels))
 print(f"(Random Accuracy: {random_accuracy:.2f})")
 
 # %% [markdown]
@@ -111,8 +114,8 @@ print(f"(Random Accuracy: {random_accuracy:.2f})")
 # ## Load model
 
 # %%
-model = AutoModelForSequenceClassification.from_pretrained(
-    MODEL, num_labels=6, trust_remote_code=True
+classif_nt = AutoModelForSequenceClassification.from_pretrained(
+    MODEL, num_labels=len(DATASETS), trust_remote_code=True
 )
 
 
@@ -124,10 +127,10 @@ model = AutoModelForSequenceClassification.from_pretrained(
 def preprocess(ds):
 
     def tokenize_batch(batch):
-        batch = tokenizer(
+        batch = tokenizer_nt(
             batch["text"],
             padding="longest",
-            max_length=tokenizer.model_max_length,
+            max_length=MAX_LENGTH,
             truncation=True,
             return_tensors="pt",
         )
@@ -139,7 +142,7 @@ def preprocess(ds):
 
 
 tokenized_train_ds = preprocess(train_ds)
-split = tokenized_train_ds.train_test_split(test_size=0.1, seed=42)
+split = tokenized_train_ds.train_test_split(test_size=VALIDATION_SPLIT_SIZE, seed=SEED)
 
 # train - validation split
 tr_train_ds = split["train"]
@@ -152,29 +155,30 @@ tokenized_test_ds = preprocess(test_ds)
 
 # %%
 # Freeze the bottom N transformer layers to speed up / regularize
-for param in model.base_model.embeddings.parameters():
+for param in classif_nt.base_model.embeddings.parameters():
     param.requires_grad = False
 
-for layer_idx, layer_module in enumerate(model.base_model.encoder.layer):
-    if layer_idx < 10:
+for layer_idx, layer_module in enumerate(classif_nt.base_model.encoder.layer):
+    if layer_idx < N_LAYERS_TO_FREEZE_FINETUNE:
         for param in layer_module.parameters():
             param.requires_grad = False
 
 # Set up Trainer
 training_args = TrainingArguments(
-    per_device_train_batch_size=64,
-    per_device_eval_batch_size=64,
-    num_train_epochs=10,
+    per_device_train_batch_size=BATCH_SIZE,
+    per_device_eval_batch_size=BATCH_SIZE,
+    num_train_epochs=N_EPOCHS,
     eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,
     metric_for_best_model="accuracy",
+    seed=SEED,
     dataloader_pin_memory=False,  # not supported by mps
 )
-data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer_nt)
 
 trainer = Trainer(
-    model=model,
+    model=classif_nt,
     args=training_args,
     train_dataset=tr_train_ds,
     eval_dataset=tr_val_ds,
@@ -200,20 +204,14 @@ print(f"Test accuracy after training: {perf['eval_accuracy']:.2f}")
 # ## Downstream tasks
 
 # %%
-emb_pipe = DNAClassificationPipeline(model=trainer.model, tokenizer=tokenizer)
+pipe = DNAClassificationPipeline(model=trainer.model, tokenizer=tokenizer_nt)
 
-test_emb_ft = []
-test_pred_ft = []
-
-for e in emb_pipe(KeyDataset(test_ds, "text"), max_length=30):
-    test_emb_ft.append(e["embedding"])
-    test_pred_ft.append(e["logits"])
-
-test_emb_ft = np.concatenate(test_emb_ft, axis=0)
-test_pred_ft = np.concatenate(test_pred_ft, axis=0)
+test_emb_ft, test_pred_ft = extract_embeddings_from_pipeline(
+    pipe, test_ds, max_length=MAX_LENGTH
+)
 
 # %%
-fig = plot_umap(test_emb_ft, labels)
+fig = plot_umap(test_emb_ft, te_labels, seed=SEED)
 save_fig(fig, "umap_embeddings_ft-model")
 
 # %%

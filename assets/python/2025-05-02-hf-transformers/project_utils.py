@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from transformers.pipelines.pt_utils import KeyDataset
 import umap
 
 
@@ -16,14 +17,14 @@ def compute_trainer_metrics(p):
 
 
 def plot_umap(
-    embeddings: np.ndarray, labels: List[str], palette: str = "tab10"
+    embeddings: np.ndarray, labels: List[str], palette: str = "tab10", seed: int = 42
 ) -> plt.Figure:
     # Compute UMAP
     umap_model = umap.UMAP(
         n_neighbors=15,
         n_components=2,
         metric="cosine",
-        random_state=42,
+        random_state=seed,
         low_memory=True,
     )
     umap_embeddings = umap_model.fit_transform(embeddings)
@@ -31,7 +32,7 @@ def plot_umap(
     # Prepare DataFrame
     df = pd.DataFrame(umap_embeddings, columns=["UMAP 1", "UMAP 2"])
     df["Label"] = labels
-    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
+    df = df.sample(frac=1, random_state=seed).reset_index(drop=True)
 
     # Set plot style
     sns.set_theme(style="white", context="notebook", font_scale=1.2)
@@ -125,3 +126,21 @@ def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
     dataset = concatenate_datasets(dataset)
 
     return dataset
+
+
+def extract_embeddings_from_pipeline(pipeline, dataset, **pipeline_kwargs):
+
+    embeddings = []
+    predictions = []
+
+    for e in pipeline(KeyDataset(dataset, "text"), **pipeline_kwargs):
+        if "embedding" in e:
+            embeddings.append(e["embedding"])
+        if "logits" in e:
+            predictions.append(e["logits"])
+
+    embeddings = np.concatenate(embeddings, axis=0)
+    if predictions:
+        predictions = np.concatenate(predictions, axis=0)
+
+    return embeddings, predictions

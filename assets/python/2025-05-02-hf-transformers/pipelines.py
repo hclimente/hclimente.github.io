@@ -84,13 +84,17 @@ class DNAEmbeddingPipeline(DNAPipeline):
         self,
         model_outputs: Dict[str, Any],
     ) -> Union[np.ndarray, List[np.ndarray]]:
+
+        out = {}
+
         embeddings = model_outputs["hidden_states"][-1].detach()
         attention_mask = model_outputs["attention_mask"].unsqueeze(-1).cpu()
         masked_embeddings = attention_mask * embeddings
 
         mean_sequence_embeddings = masked_embeddings.sum(1) / attention_mask.sum(1)
+        out["embedding"] = mean_sequence_embeddings.cpu().numpy()
 
-        return mean_sequence_embeddings.cpu().numpy()
+        return out
 
 
 # %%
