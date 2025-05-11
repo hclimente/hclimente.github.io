@@ -9,14 +9,10 @@ import seaborn as sns
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import umap
 
-palette = {
-    "H. sapiens": "#1f77b4",  # blue
-    "M. musculus": "#6baed6",  # light blue
-    "D. melanogaster": "#8c6bb1",  # violet
-    "A. thaliana": "#2ca02c",  # green
-    "S. cerevisiae": "#d62728",  # red
-    "E. coli": "#ff7f0e",  # orange
-}
+
+def compute_trainer_metrics(p):
+    preds = p.predictions.argmax(-1)
+    return {"accuracy": (preds == p.label_ids).mean()}
 
 
 def plot_umap(

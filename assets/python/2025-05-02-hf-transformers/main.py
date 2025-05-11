@@ -32,10 +32,11 @@ from transformers.pipelines.pt_utils import KeyDataset
 
 from pipelines import DNAEmbeddingPipeline, DNAClassificationPipeline
 from project_utils import (
-    plot_umap,
-    plot_confusion_matrix,
     compute_accuracy,
     create_dataset,
+    compute_trainer_metrics,
+    plot_umap,
+    plot_confusion_matrix,
 )
 
 sys.path.append("../")
@@ -106,11 +107,17 @@ print(f"(Random Accuracy: {random_accuracy:.2f})")
 
 # %% [markdown]
 # # Fine-tune the model on the training set
+#
+# ## Load model
 
 # %%
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL, num_labels=6, trust_remote_code=True
 )
+
+
+# %% [markdown]
+# ## Prepare data
 
 
 # %%
@@ -119,9 +126,9 @@ def preprocess(ds):
     def tokenize_batch(batch):
         batch = tokenizer(
             batch["text"],
-            truncation=True,
             padding="longest",
-            max_length=30,
+            max_length=tokenizer.model_max_length,
+            truncation=True,
             return_tensors="pt",
         )
         return batch
@@ -140,10 +147,11 @@ tr_val_ds = split["test"]
 
 tokenized_test_ds = preprocess(test_ds)
 
-# %%
-data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+# %% [markdown]
+# ## Prepare trainer
 
-# 3. (Optional) Freeze the bottom N transformer layers to speed up / regularize
+# %%
+# Freeze the bottom N transformer layers to speed up / regularize
 for param in model.base_model.embeddings.parameters():
     param.requires_grad = False
 
@@ -152,26 +160,18 @@ for layer_idx, layer_module in enumerate(model.base_model.encoder.layer):
         for param in layer_module.parameters():
             param.requires_grad = False
 
-
-# 4. Set up Trainer
+# Set up Trainer
 training_args = TrainingArguments(
-    output_dir="finetune_out",
-    per_device_train_batch_size=32,
+    per_device_train_batch_size=64,
     per_device_eval_batch_size=64,
     num_train_epochs=10,
-    learning_rate=5e-5,
     eval_strategy="epoch",
     save_strategy="epoch",
     load_best_model_at_end=True,
     metric_for_best_model="accuracy",
     dataloader_pin_memory=False,  # not supported by mps
 )
-
-
-def compute_metrics(p):
-    preds = p.predictions.argmax(-1)
-    return {"accuracy": (preds == p.label_ids).mean()}
-
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
 trainer = Trainer(
     model=model,
@@ -179,10 +179,14 @@ trainer = Trainer(
     train_dataset=tr_train_ds,
     eval_dataset=tr_val_ds,
     data_collator=data_collator,
-    compute_metrics=compute_metrics,
+    compute_metrics=compute_trainer_metrics,
 )
 
-# 5. Train & evaluate
+
+# %% [markdown]
+# ## Train and evaluate
+
+# %%
 perf = trainer.evaluate(tokenized_test_ds)
 print(f"Test accuracy before training: {perf['eval_accuracy']:.2f}")
 
@@ -191,6 +195,9 @@ trainer.train()
 perf = trainer.evaluate(tokenized_test_ds)
 print(f"Test accuracy after training: {perf['eval_accuracy']:.2f}")
 
+
+# %% [markdown]
+# ## Downstream tasks
 
 # %%
 emb_pipe = DNAClassificationPipeline(model=trainer.model, tokenizer=tokenizer)
@@ -212,55 +219,3 @@ save_fig(fig, "umap_embeddings_ft-model")
 # %%
 accuracy = compute_accuracy(test_ds["labels"], test_pred_ft.argmax(1))
 print(f"Test Accuracy: {accuracy:.2f}")
-
-# %%
-# variants = pd.read_csv("41586_2018_461_MOESM3_ESM.tsv", sep="\t")
-
-# variants = variants[["chromosome", "position (hg19)", "reference", "alt"]]
-# variants = variants.rename(
-#     columns={
-#         "chromosome": "chrom",
-#         "position (hg19)": "pos",
-#         "reference": "ref",
-#         "alt": "alt",
-#     }
-# )
-# variants["chrom"] = variants["chrom"].apply(lambda x: "chr" + str(x))
-
-# sequences = []
-
-# for v in variants.itertuples(index=False):
-#     ref_seq, alt_seq = variant.variant_to_seqs(
-#         seq_len=max_length,
-#         genome="hg19",
-#         chrom=v.chrom,
-#         pos=v.pos,
-#         ref=v.ref,
-#         alt=v.alt,
-#     )
-
-#     sequences.append(ref_seq)
-#     sequences.append(alt_seq)
-
-# # Compute the embeddings
-# attention_mask = tokens_ids != tokenizer.pad_token_id
-# torch_outs = model(
-#     tokens_ids,
-#     attention_mask=attention_mask,
-#     encoder_attention_mask=attention_mask,
-#     output_hidden_states=True,
-# )
-
-# # Compute sequences embeddings
-# embeddings = torch_outs["hidden_states"][-1].detach().numpy()
-# print(f"Embeddings shape: {embeddings.shape}")
-# print(f"Embeddings per token: {embeddings}")
-
-# # Add embed dimension axis
-# attention_mask = torch.unsqueeze(attention_mask, dim=-1)
-
-# # Compute mean embeddings per sequence
-# mean_sequence_embeddings = torch.sum(attention_mask * embeddings, axis=-2) / torch.sum(
-#     attention_mask, axis=1
-# )
-# print(f"Mean sequence embeddings: {mean_sequence_embeddings}")
