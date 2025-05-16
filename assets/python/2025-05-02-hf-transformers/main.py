@@ -42,7 +42,12 @@ from project_utils import (
 
 sys.path.append("../")
 
-from utils import save_fig
+from utils import (
+    PLOTLY_AXIS_ATTR_DICT,
+    PLOTLY_LEGEND_ATTR_DICT,
+    save_fig,
+    save_plotly,
+)
 
 # global parameters
 MAX_LENGTH = 15
@@ -81,7 +86,14 @@ te_labels = [DATASETS[x][1] for x in test_ds["labels"]]
 train_emb, _ = extract_embeddings_from_pipeline(pipe, train_ds, max_length=MAX_LENGTH)
 
 fig = plot_umap(train_emb, tr_labels, seed=SEED)
-save_fig(fig, "umap_embeddings")
+
+xaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+xaxis_attr_dict["title"] = "UMAP 1"
+yaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+yaxis_attr_dict["title"] = "UMAP 2"
+save_plotly(
+    fig, "umap_embeddings", xaxis_attr_dict, yaxis_attr_dict, PLOTLY_LEGEND_ATTR_DICT
+)
 
 # %% [markdown]
 # # Predict the species from the embedding
@@ -212,7 +224,13 @@ test_emb_ft, test_pred_ft = extract_embeddings_from_pipeline(
 
 # %%
 fig = plot_umap(test_emb_ft, te_labels, seed=SEED)
-save_fig(fig, "umap_embeddings_ft-model")
+save_plotly(
+    fig,
+    "umap_embeddings_ft-model",
+    xaxis_attr_dict,
+    yaxis_attr_dict,
+    PLOTLY_LEGEND_ATTR_DICT,
+)
 
 # %%
 accuracy = compute_accuracy(test_ds["labels"], test_pred_ft.argmax(1))

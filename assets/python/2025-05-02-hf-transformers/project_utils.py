@@ -1,10 +1,10 @@
 from typing import List, Tuple
 
 from datasets import load_dataset, concatenate_datasets
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 import seaborn as sns
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from transformers.pipelines.pt_utils import KeyDataset
@@ -34,44 +34,29 @@ def plot_umap(
     df["Label"] = labels
     df = df.sample(frac=1, random_state=seed).reset_index(drop=True)
 
-    # Set plot style
-    sns.set_theme(style="white", context="notebook", font_scale=1.2)
+    fig = go.Figure()
+    unique_labels = df["Label"].unique()
 
-    # Create plot
-    fig, ax = plt.subplots(figsize=(8, 6))
+    # Ensure all traces have a name based on the label
+    for label in unique_labels:
+        df_subset = df[df["Label"] == label]
 
-    # Scatterplot
-    sns.scatterplot(
-        x="UMAP 1",
-        y="UMAP 2",
-        hue="Label",
-        data=df,
-        alpha=0.6,
-        s=40,
-        palette=palette,
-        edgecolor="none",
-        ax=ax,
-    )
-
-    # Move legend outside to bottom-right
-    box = ax.get_position()
-    ax.set_position(
-        [box.x0, box.y0 + 0.1, box.width * 0.85, box.height]
-    )  # shrink width a bit
-
-    ax.legend(
-        title="",
-        loc="lower left",
-        bbox_to_anchor=(1.02, 0),  # bottom right, just outside
-        borderaxespad=0.0,
-        frameon=False,
-        fontsize="medium",
-        labelspacing=0.4,
-        handletextpad=0.5,
-    )
-
-    sns.despine(trim=True)
-    plt.tight_layout()
+        fig.add_trace(
+            go.Scattergl(
+                x=df_subset["UMAP 1"],
+                y=df_subset["UMAP 2"],
+                mode="markers",
+                name=label,  # Explicitly set the name for the legend
+                marker=dict(opacity=0.8, size=6, line_width=0),
+                hoverinfo="text",
+                hovertext=[
+                    f"UMAP1: {x:.2f}<br>UMAP2: {y:.2f}<br>Label: {lbl}"
+                    for x, y, lbl in zip(
+                        df_subset["UMAP 1"], df_subset["UMAP 2"], df_subset["Label"]
+                    )
+                ],
+            )
+        )
 
     return fig
 
@@ -92,24 +77,39 @@ def compute_accuracy(true_labels: np.ndarray, predicted_labels: np.ndarray) -> f
 
 
 def plot_confusion_matrix(
-    true_labels: np.ndarray,
-    predicted_labels: np.ndarray,
-) -> matplotlib.figure.Figure:
+    true_labels: np.ndarray, predicted_labels: np.ndarray, cmap: str = "Blues"
+) -> plt.Figure:
     """
-    Plot the confusion matrix.
-    :param true_labels: List of true labels
-    :param predicted_labels: List of predicted labels
+    Plot a styled confusion matrix.
+    :param true_labels: Ground truth labels
+    :param predicted_labels: Predicted labels
+    :param normalize: Whether to normalize the confusion matrix (by true label counts)
+    :param cmap: Color map for the plot
+    :return: Matplotlib figure object
     """
 
-    all_labels = list(set(true_labels) | set(predicted_labels))
+    # Clean plot style
+    sns.set_theme(style="white", context="notebook", font_scale=1.2)
 
+    # Unique sorted labels for consistent axis order
+    all_labels = sorted(set(true_labels) | set(predicted_labels))
+
+    # Compute confusion matrix
     cm = confusion_matrix(true_labels, predicted_labels, labels=all_labels)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=all_labels)
-    disp.plot(cmap="Blues")
-    plt.grid(False)
-    plt.xticks(rotation=45)
 
-    return plt.gcf()
+    # Plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=all_labels)
+    disp.plot(cmap=cmap, ax=ax, colorbar=False)
+
+    # Improve text and layout
+    ax.set_xlabel("Predicted Label", fontsize=12)
+    ax.set_ylabel("True Label", fontsize=12)
+    ax.xaxis.set_tick_params(rotation=45)
+    ax.grid(False)
+
+    plt.tight_layout()
+    return fig
 
 
 def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
