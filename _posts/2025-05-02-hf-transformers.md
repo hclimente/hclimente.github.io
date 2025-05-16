@@ -15,15 +15,11 @@ mermaid:
   enabled: true
 ---
 
-Hugging Face 🤗 has become a staple of LLM work. In this post I will explore this library with a different use case: handling genomics language models.
+Hugging Face 🤗 has become a staple of LLM work. In particular, [Hugging Face's `transformers`](https://huggingface.co/docs/transformers/index) is a powerful library for working with transformer models, providing a wide range of pre-trained models and utilities for fine-tuning and deploying them. Different models have different interfaces, computational backends, etc. `transformers` provides a unified API for many models, making it easy to switch between them without having to learn a new API each time.
 
-TODO What is inference
+Although the AI world is going crazy over LLMs, DNA language models are where the money is.<d-footnote>Citation required</d-footnote> In this post, I use `transformers` to showcase an application of the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT), a DNA language model. And I use the NT to showcase `transformers`.
 
-[Hugging Face's `transformers`](https://huggingface.co/docs/transformers/index) is a powerful library for working with transformer models, providing a wide range of pre-trained models and utilities for fine-tuning and deploying them. Problem that is solved: different models have different APIs. The `transformers` library provides a unified API for all transformer models, making it easy to switch between them without having to learn a new API each time.
-
-In this post, I use `transformers` to showcase the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT), a DNA large language model. And I use the NT to showcase `transformers`.
-
-As always, the code is available in the repo. I will be showing snippets for illustration purposes, but skipping important bits, like the imports.
+As always, all the code used in this article is available [on Github](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).
 
 <!-- https://colab.research.google.com/github/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb -->
 
@@ -34,7 +30,7 @@ The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z)
 {% include figure.liquid path="assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid rounded z-depth-1" %}
 
 <div class="caption">
-  Training of the NT using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">NT article</a>.
+    Training of the NT using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">NT article</a>.
 </div>
 
 ## A worked-out training example
@@ -253,11 +249,17 @@ To this end, I downloaded the DNA sequences of all protein coding genes for the 
 
 This is the UMAP of the embedded sequences:
 
-{% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/umap_embeddings.webp" class="img-fluid rounded z-depth-1" %}
+<div class="l-page">
+    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
+</div>
+
+<div class="caption">
+    Scatter plot of the two UMAP dimensions from the embeddings computed by applying the pre-trained NT to the test dataset.
+</div>
 
 Some disclaimers need to be made. First, I took a minuscule sample of all protein coding sequences, which is somewhat biased towards the beginning of the protein. Second, I am using the smallest NT, and its likely that larger models can represent these sequences more richly.
 
-Even with these constraints, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes. For those of you still unconvinced, I trained a muticlass logistic regression tasked with predicting the species using only the embeddings. This classifier achieved an accuracy of $$0.47$$, pretty good compared to the accuracy $$\frac 1 6 = 0.16$$ of the random choice. Furthermore, some of the errors are clearly between the most similar species: human and mouse.
+Even with these constraints, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes. But maybe I can bo better. I trained a muticlass logistic regression tasked with predicting the species using only the embeddings. The goal was to measure how much relevant information the embeddings contain that can be used to predict the species. This classifier achieved an accuracy of $$0.47$$, pretty good compared to the accuracy $$\frac 1 6 = 0.16$$ of the random choice. Furthermore, some of the errors are clearly between the most similar species: human and mouse.
 
 {% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" class="img-fluid rounded z-depth-1" %}
 
@@ -265,15 +267,27 @@ Even with these constraints, sequences from the same species tend to inhabit sim
 
 The NT has been trained via self-supervised learning, it's not too surprising that it can't separate different species right off the bat. Fine-tuning it to this task should provide more relevant representations. `transformers` also provides an easy way of doing that using `transformers.Trainer`.
 
-TODO Importing the model
+We will start by importing the model using a different AutoClass which will automatically add a classification head:
 
-TODO Fine-tuning
+```python
+tokenizer = AutoTokenizer.from_pretrained(
+  "InstaDeepAI/nucleotide-transformer-v2-50m-multi-species",
+  num_labels=6,
+  trust_remote_code=True
+)
+```
 
-TODO Pipeline
+Hugging Face provides a `Trainer` to help fine-tuning the model. The task is to predict the species from the sequence. I froze the first few layers from the NT, which should capture low level features of the sequences, and will only train the last layers. After the model is trained, we can create a new inference pipeline focus around classification. The pipeline will output both the probability of each class, as well as the embeddings, obtained from the last layer. Since this model is tasked explicitly with telling apart sequences coming from different species, the embedding should provides a much better separation:
 
-TODO Improved embeddings
+<div class="l-page">
+    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings_ft-model.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
+</div>
 
-{% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/umap_embeddings_ft-model.webp" class="img-fluid rounded z-depth-1" %}
+<div class="caption">
+    Scatter plot of the two UMAP dimensions from the embeddings computed by applying the _fine-tuned_ NT to the test dataset.
+</div>
+
+Maybe you won't need to squint your eyes to agree!
 
 # Conclusions
 
