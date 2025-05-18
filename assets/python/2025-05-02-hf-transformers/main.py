@@ -83,9 +83,9 @@ tr_labels = [DATASETS[x][1] for x in train_ds["labels"]]
 test_ds = create_dataset("data/test/", DATASETS)
 te_labels = [DATASETS[x][1] for x in test_ds["labels"]]
 # %%
-train_emb, _ = extract_embeddings_from_pipeline(pipe, train_ds, max_length=MAX_LENGTH)
+test_emb, _ = extract_embeddings_from_pipeline(pipe, test_ds, max_length=MAX_LENGTH)
 
-fig = plot_umap(train_emb, tr_labels, seed=SEED)
+fig = plot_umap(test_emb, te_labels, seed=SEED)
 
 xaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
 xaxis_attr_dict["title"] = "UMAP 1"
@@ -100,6 +100,7 @@ save_plotly(
 
 # %%
 lr = LogisticRegression(random_state=SEED)
+train_emb, _ = extract_embeddings_from_pipeline(pipe, train_ds, max_length=MAX_LENGTH)
 lr.fit(train_emb, tr_labels)
 
 tr_pred = lr.predict(train_emb)
@@ -109,8 +110,6 @@ print(f"Train Accuracy: {accuracy:.2f}")
 fig = plot_confusion_matrix(tr_labels, tr_pred)
 
 # %%
-test_emb, _ = extract_embeddings_from_pipeline(pipe, test_ds, max_length=MAX_LENGTH)
-
 te_pred = lr.predict(test_emb)
 accuracy = compute_accuracy(te_labels, te_pred)
 print(f"Test Accuracy: {accuracy:.2f}")

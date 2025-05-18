@@ -18,6 +18,7 @@
 from typing import List, Dict, Tuple, Union, Optional, Any
 
 import numpy as np
+import torch as pt
 from transformers import Pipeline
 
 
@@ -27,10 +28,27 @@ class DNAPipeline(Pipeline):
         self,
         **kwargs,
     ) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+        """
+        Sanitize the parameters for the pipeline.
+
+        Args:
+            **kwargs: The parameters to be sanitized.
+
+        Returns:
+            Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]: A tuple containing
+                the sanitized parameters for preprocessing, model forward pass, and
+                postprocessing, respectively.
+        """
         preprocess_params = {}
+
+        recognized_params = set(["max_length"])
 
         if "max_length" in kwargs:
             preprocess_params["max_length"] = kwargs["max_length"]
+
+        unrecognized_params = set(kwargs.keys()) - recognized_params
+        if unrecognized_params:
+            raise ValueError(f"Unrecognized pipeline parameters: {unrecognized_params}")
 
         return preprocess_params, {}, {}
 
@@ -38,7 +56,18 @@ class DNAPipeline(Pipeline):
         self,
         model_inputs: Union[str, List[str]],
         max_length: Optional[int] = None,
-    ) -> Dict[str, Any]:
+    ) -> List[pt.Tensor]:
+        """
+        Preprocess the input sequences before passing them to the model.
+
+        Args:
+            model_inputs (Union[str, List[str]]): The input sequence(s) to be tokenized.
+            max_length (Optional[int]): The maximum length of the tokenized sequences.
+                If None, the maximum length of the tokenizer is used.
+
+        Returns:
+            List[pt.Tensor]: The tokenized input sequences.
+        """
         if max_length is None:
             max_length = self.tokenizer.model_max_length
 
@@ -61,8 +90,17 @@ class DNAEmbeddingPipeline(DNAPipeline):
 
     def _forward(
         self,
-        model_inputs: Union[str, List[str]],
+        model_inputs: pt.Tensor,
     ) -> Dict[str, Any]:
+        """
+        Forward pass through the model.
+
+        Args:
+            model_inputs (pt.Tensor): The tokenized input sequence(s).
+
+        Returns:
+            Dict[str, Any]: The model outputs.
+        """
         # find out which of the tokens are padding tokens
         # these tokens will be ignored by the model
         attention_mask = model_inputs != self.tokenizer.pad_token_id
@@ -83,8 +121,16 @@ class DNAEmbeddingPipeline(DNAPipeline):
     def postprocess(
         self,
         model_outputs: Dict[str, Any],
-    ) -> Union[np.ndarray, List[np.ndarray]]:
+    ) -> dict[str, np.ndarray]:
+        """
+        Compute the mean sequence embedding from the model outputs.
 
+        Args:
+            model_outputs (Dict[str, Any]): The model outputs.
+
+        Returns:
+            dict[str, np.ndarray]: The mean sequence embeddings for each input sequence.
+        """
         out = {}
 
         embeddings = model_outputs["hidden_states"][-1].detach()
@@ -102,8 +148,17 @@ class DNAClassificationPipeline(DNAPipeline):
 
     def _forward(
         self,
-        model_inputs: Union[str, List[str]],
+        model_inputs: pt.Tensor,
     ) -> Dict[str, Any]:
+        """
+        Forward pass through the model.
+
+        Args:
+            model_inputs (pt.Tensor): The tokenized input sequence(s).
+
+        Returns:
+            Dict[str, Any]: The model outputs.
+        """
         # find out which of the tokens are padding tokens
         # these tokens will be ignored by the model
         attention_mask = model_inputs != self.tokenizer.pad_token_id
@@ -122,8 +177,17 @@ class DNAClassificationPipeline(DNAPipeline):
     def postprocess(
         self,
         model_outputs: Dict[str, Any],
-    ) -> Union[np.ndarray, List[np.ndarray]]:
+    ) -> dict[str, np.ndarray]:
+        """
+        Compute the logits and mean sequence embedding from the model outputs.
 
+        Args:
+            model_outputs (Dict[str, Any]): The model outputs.
+
+        Returns:
+            dict[str, np.ndarray]: The logits and mean sequence embeddings for each
+                input sequence.
+        """
         out = {}
         out["logits"] = model_outputs["logits"]
 
@@ -152,18 +216,6 @@ if __name__ == "__main__":
 
     pipeline = DNAEmbeddingPipeline(model=model, tokenizer=tokenizer)
 
-    sequence = ["ATGGTAGCTACATCATCTG"]
-    # embeddings = pipeline(sequence, max_length=33)
+    embeddings = pipeline("ATGGTAGCTACATCATCTG")
 
-    # print(embeddings)
-
-    tok_out = tokenizer(sequence, return_tensors="pt")
-    print(tok_out)
-
-    print("--- Summary with dictionary input ---")
-    model(**tok_out)
-    # model_summary = summary(model,
-    #                         input_data={'input_ids': tok_out["input_ids"], 'attention_mask': tok_out["attention_mask"]},
-    #                         col_names=["input_size", "output_size", "num_params", "mult_adds"],
-    #                         verbose=1)
-    # print(model_summary)
+    print(embeddings)
