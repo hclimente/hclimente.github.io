@@ -1,13 +1,19 @@
 ---
-layout: post
+layout: distill
 title: DNA language model fine-tuning and inference
-date: 2025-05-02 11:59:00-0000
+date: 2025-05-22 11:59:00-0000
 description: Using Hugging Face transformers
 tags: python machine_learning huggingface
 giscus_comments: true
 related_posts: false
 toc:
-  sidebar: left
+  - name: A worked-out training example
+  - name: A worked-out training example
+  - name: Loading a pre-trained model
+  - name: Building an inference pipeline
+  - name: Embedding DNA sequences
+  - name: Fine-tuning the model
+  - name: Conclusions
 images:
   compare: true
   slider: true
@@ -37,7 +43,7 @@ The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z)
 
 Here’s how MLM training breaks down in four steps:
 
-1. **Tokenizer:** First, we convert the input DNA sequence into a sequence of integers (_tokens_), each representing a subsequence of length 6 nucleotides ("6-mers"). The total number of tokens is 4,107: one for each of the $$4^6 = 4096$$ possible 6-mers and 11 special tokens ([CLS](https://en.wikipedia.org/wiki/Sentence_embedding), MASK, PAD and a few others).<d-footnote>You can learn more about the tokenizer in the [supplementary notes](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).</d-footnote> The tokenizer transforms our 18-nucleotide sequence `ATGGTAGCTACATCATCT` into a tokenized sequence of length 4: `[3, 506, 3662, 1567]`. This includes the CLS token (`3`) and three tokens representing three 6-mers. During training, a random subset of 15% of the tokens are replaced by the MASK token (`2`). These are the parts of the sequence that the model will try to recover. Let's mask the last token in our example: `[3, 506, 3662, 2]`.
+1. **Tokenizer:** First, we convert the input DNA sequence into a sequence of integers (_tokens_), each representing a subsequence of length 6 nucleotides ("6-mers"). The total number of tokens is 4,107: one for each of the $$4^6 = 4096$$ possible 6-mers and 11 special tokens ([CLS](https://en.wikipedia.org/wiki/Sentence_embedding), MASK, PAD and a few others).<d-footnote>You can learn more about the tokenizer in the <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb">supplementary notes</a>.</d-footnote> The tokenizer transforms our 18-nucleotide sequence `ATGGTAGCTACATCATCT` into a tokenized sequence of length 4: `[3, 506, 3662, 1567]`. This includes the CLS token (`3`) and three tokens representing three 6-mers. During training, a random subset of 15% of the tokens are replaced by the MASK token (`2`). These are the parts of the sequence that the model will try to recover. Let's mask the last token in our example: `[3, 506, 3662, 2]`.
 
 2. **Embedding layer:** An embedding layer transforms the tokenized sequence of integers into an fixed-length vector of real values (_embedding_). On this embedding, a positional encoding is added to preserve information about the position of each token.
 
