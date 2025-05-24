@@ -15,7 +15,9 @@ mermaid:
   enabled: true
 ---
 
-When working with large transformer models programatically, different public models are stored in different formats, have different interfaces, are implemented in different backends, etc. Migrating from one to another can be a real pain. That's the problem that Hugging Face 🤗 and its [`transformers`](https://huggingface.co/docs/transformers/index) Python library aim to solve. `transformers` provides a unified API to fetch, use and fine-tune many models, making it easy to switch between them without having to learn a new API each time, which has turned it into a staple of LLM work.
+Picture this. A relevant model was just published. The results look compelling. You want to give it a try on your own data. If you have ever been there, the next steps will be painfully familiar: search for code in the paper; find a Zenodo hyperlink; download a tarball, extract it; look for a README, find none; cry; crawl through Jupyter notebooks to understand how the code is meant to be run; et cetera. After a couple of hours, maybe you can get the code working with a nagging discomfort that you might have missed something.
+
+This is the workflow that Hugging Face 🤗 and its [`transformers`](https://huggingface.co/docs/transformers/index) Python library aim to eradicate. `transformers` provides a unified API to fetch, use and fine-tune many models, making it easy to switch between them without having to learn a new API each time, which has turned it into a staple of LLM work.
 
 Let's dive into the `transformers` library. Although big tech is going crazy over LLMs, DNA language models are where the money is.<d-footnote>Citation required</d-footnote> In this post, I use `transformers` to showcase an application of the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT), a DNA language model. And I use the NT to showcase `transformers`.
 
@@ -25,7 +27,7 @@ I will be providing snippets of code along with the text. If you are still curio
 
 # A worked-out training example
 
-The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT) was developed by [InstaDeep](https://www.instadeep.com/). It's an encoder-only transformer, essentially a [BERT model](<https://en.wikipedia.org/wiki/BERT_(language_model)>) trained on the genomes of 850 species via masked language modelling (MLM). The figure below gives the basic idea.
+The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT) is an encoder-only transformer, essentially a [BERT model](<https://en.wikipedia.org/wiki/BERT_(language_model)>) trained on the genomes of 850 species via masked language modelling (MLM). In short, a fraction of the input DNA sequence (say `ATGGTAGCTACATCATCT`) will be hidden from the model. The task of the model is to retrieve the masked subsequences using the rest of the sequence. For instance, the model could receive as input `ATGGTAGCTACA<MASK>` and we expect it to correctly guess that `<MASK>` equals `TCATCT`. The figure below gives the basic idea.
 
 {% include figure.liquid path="assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid rounded z-depth-1" %}
 
@@ -33,23 +35,23 @@ The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z)
     Training of the NT using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">NT article</a>.
 </div>
 
-Let's walk through the process using a random DNA sequence: `ATGGTAGCTACATCATCT`. In short, a fraction of the input DNA sequence is hidden from the model. The task of the model is to retrieve the masked subsequences using the rest of the sequence. For instance, the model could receive as input `ATGGTAGCTACA<MASK>` and we expect it to correctly guess that `<MASK>` equals `TCATCT`.
+Here’s how MLM training breaks down in four steps:
 
-1. **Tokenizer:** First, we convert the input DNA sequence into a sequence of integers (_tokens_), each representing a subsequence of length 6 nucleotides ("6-mers"). The total number of tokens is 4,107: one for each of the $$4^6 = 4096$$ possible 6-mers and 11 special tokens ([CLS](https://en.wikipedia.org/wiki/Sentence_embedding), MASK, PAD and a few others). (You can learn more about the tokenizer in the [supplementary notes](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).) The tokenizer transforms our 18-nucleotide sequence into a tokenized sequence of length 4: `[3, 506, 3662, 1567]`. This includes the CLS token (`3`) and three tokens representing three 6-mers. During training, a random subset of 15% of the tokens are replaced by the MASK token (`2`). These are the parts of the sequence that the model will try to recover. Let's mask the last token in our example: `[3, 506, 3662, 2]`.
+1. **Tokenizer:** First, we convert the input DNA sequence into a sequence of integers (_tokens_), each representing a subsequence of length 6 nucleotides ("6-mers"). The total number of tokens is 4,107: one for each of the $$4^6 = 4096$$ possible 6-mers and 11 special tokens ([CLS](https://en.wikipedia.org/wiki/Sentence_embedding), MASK, PAD and a few others).<d-footnote>You can learn more about the tokenizer in the [supplementary notes](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).</d-footnote> The tokenizer transforms our 18-nucleotide sequence `ATGGTAGCTACATCATCT` into a tokenized sequence of length 4: `[3, 506, 3662, 1567]`. This includes the CLS token (`3`) and three tokens representing three 6-mers. During training, a random subset of 15% of the tokens are replaced by the MASK token (`2`). These are the parts of the sequence that the model will try to recover. Let's mask the last token in our example: `[3, 506, 3662, 2]`.
 
-2. **Embedding layer:** Afterwards, an embedding layer transforms the tokenized sequence of integers into an fixed-length vector of real values (_embedding_). On this embedding, a positional encoding is added.
+2. **Embedding layer:** An embedding layer transforms the tokenized sequence of integers into an fixed-length vector of real values (_embedding_). On this embedding, a positional encoding is added to preserve information about the position of each token.
 
-3. **Transformer encoder:** Then comes the main event: the stacked Transformer encoder blocks (since the NT is an encoder-only model, remember?). These blocks are where the magic actually happens, processing the initial embeddings to create context-aware representations. Each block uses self-attention mechanisms to let tokens interact across the sequence and feed-forward networks for position-specific processing.
+3. **Transformer encoder:** Here comes the main event: the stacked Transformer encoder blocks (since the NT is an encoder-only model, remember?). These blocks are where the magic actually happens, processing the initial embeddings to create context-aware representations. Each block uses self-attention mechanisms to let tokens interact across the sequence and feed-forward networks for position-specific processing.
 
-4. **Token probabilities:** Last, the last layer's embedding is transformed into a probability of each token in each of the input positions. Since there were 3 input positions and 4,107 possible tokens, the output for our sequence will be a matrix of size 3 × 4,107. The rows will sum to 1. The masked token was `1567` and was in the last position. If our model has done a good job, the matrix entry (3, 1567) will be close to 1, and the rest of the entries in that row will be close to 0. During training, the trainer evaluates this output using the [cross-entropy](https://en.wikipedia.org/wiki/Cross-entropy) loss, and adjusts the parameters of the model by [backpropagation](https://en.wikipedia.org/wiki/Backpropagation).
+4. **Token probabilities:** Last, the last layer's embedding is transformed into a probability of each token in each of the input positions. Since there were 3 input positions and 4,107 possible tokens, the output for our sequence will be a matrix of size 3 × 4,107. The rows will sum to 1. The masked token was `1567` and was in the last position. If our model has done a good job, the matrix entry (3, 1567) will be close to 1, and the rest of the entries in that row will be close to 0. During training, the trainer evaluates the model's output using the [cross-entropy](https://en.wikipedia.org/wiki/Cross-entropy) loss, and adjusts the parameters of the model by [backpropagation](https://en.wikipedia.org/wiki/Backpropagation).
 
-This is technically how the model learns to guess the hidden sequence from it's genomic context. But, what is it _really_ learning? My intuition is that it's picking up general patterns across genomes. For instance, it might learn to recognize a pattern that we would adscribe to an alpha helix. By putting together some of such patterns, it might group together sequences that we would call protein coding. Then, it would leverage this knowledge in the MLM task to predict a sequence that preserves the alpha helix with the observed codon usage. Similearly, it might learn that another mask is around the right genomic distance from an ORF, and deduce it should predict what we recognize as a promoter. In all this proess the NT has no access to phenotypic information or explicit knowledge about promoters, genes or alpha helices. It is flying blind regarding how this DNA sequence plays out in the real world. Although it is getting a glimpse of evolutionary constraints by being exposed to different genomes, it won't be able to learn sophisticated genomic regulation patterns.
+By repeating this process over and over, on DNA sequences obtained from very different species, the model learns to guess the hidden sequence from it's genomic context. But, what is it _really_ learning? My intuition is that it's picking up general patterns across genomes. For instance, it might learn to recognize a pattern that we would adscribe to an alpha helix. By putting together some of such patterns, it might learn that sequences that we would call protein coding are related. Then, it would leverage this knowledge in the MLM task to predict a sequence that preserves the alpha helix with the observed codon usage. Similarly, it might learn that another mask is around the right genomic distance from an ORF, and deduce it should predict what we recognize as a promoter. In all this proess the NT has no access to phenotypic information or explicit knowledge about promoters, genes or alpha helices. It is flying blind regarding how this DNA sequence plays out in the real world. Although it is getting a glimpse of evolutionary constraints by being exposed to different genomes, it won't be able to learn sophisticated genomic regulation patterns.
 
 # Loading a pre-trained model
 
 Two elements of the Hugging Face ecosystem vastly facilitate sharing and leveraging pre-trained models.
 
-One is the [Model Hub](https://huggingface.co/docs/hub/en/index), a repository for the community to share and discover pre-trained models. In this post I use the smallest NT, [a 50 million parameter model](https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species), which InstaDeep made available from [their hub organization](https://huggingface.co/InstaDeepAI).
+One is the [Model Hub](https://huggingface.co/docs/hub/en/index), a repository for the community to share and discover pre-trained models. In this post I use the smallest NT, [a 50 million parameter model](https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species), available from [InstaDeep's hub organization](https://huggingface.co/InstaDeepAI).
 
 The other one is the many [`transformers` AutoClasses](https://huggingface.co/docs/transformers/model_doc/auto). They abstract away the specific model architecture, and the changes that would be needed to make it fit our desired use-case. For instance, fetching the NT adapted for masked language modeling is as easy as running:
 
@@ -72,9 +74,9 @@ print(model)
 
 As expected, the output is a vector of length 4,107, one for each possible token.
 
-By using the `from_pretrained` method, we are loading both the architecture and the weights of the model. By default, the model is set in evaluation mode; if we were to further fine-tune it, we would need to set it to training mode using `model.train()`. In contrast, we could use `from_config` to load the model architecture only. This would be appropriate to train the model from scratch.
+By using the `from_pretrained` method, we are loading both the architecture and the weights of the model. By default, the model is in evaluation mode; if we were to further fine-tune it, we would need to set it to training mode using `model.train()`. In contrast, we could use `from_config` to load the model architecture only. This would be appropriate to train the model from scratch.
 
-If we wanted to leverage the pre-trained model for binary classification, we would run instead:
+If instead we wanted to leverage the pre-trained model for binary classification, we would run:
 
 ```python
 model = AutoModelForSequenceClassification.from_pretrained(
@@ -343,11 +345,11 @@ The attention mask is a binary mask that, for a given input sequence, identifies
 
 # Embedding DNA sequences
 
-I will be using the NT to embed protein-coding DNA sequences from six species: three animals (human, mouse and fruit fly); one plant (arabidopsis); one bacteria (_E. coli_); and one yeast (_S. cerevisae_). I aim to obtain embeddings such that the sequences from each species are on aggregate closer to each other than to the sequences from other species.
+I will be using the NT to embed protein-coding DNA sequences from six species: three animals (human, mouse and fruit fly); one plant (arabidopsis); one bacteria (_E. coli_); and one yeast (_S. cerevisiae_). I aim to obtain embeddings such that the sequences from each species are on aggregate closer to each other than to the sequences from other species. Note that this is not something the model was trained to do. But I hope that the model picked up that a piece of bacterial DNA is very different from a chunk of human DNA.
 
-To this end, I downloaded the DNA sequences of all protein coding genes for the selected species. For each species I randomly subsampled 2,000 sequences of 60 nucleotides each. I chose the length of the sequence because of convenience: they are a common sequence length for FASTA files, and short enough for my home computer to handle. Half of them were the train set, used for model building; the other half constituted the test set, used exclusively for performance evaluation. I will only show results on the latter.
+To this end, I [downloaded the DNA sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/prepare_data.sh) of all protein coding genes for the selected species. For each species I randomly subsampled 2,000 sequences of 60 nucleotides each. I chose the length of the sequence because of convenience: they are a common sequence length for FASTA files, and short enough for my modest home computer to handle. Half of them were the train set, used for model building; the other half constituted the test set, used exclusively for performance evaluation. All the results shown below are computed on the latter.
 
-I embedded the sequences (code available [here](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.py)) and used a UMAP to visualize the embeddings:
+I [embedded the sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.py) and used a UMAP to visualize the embeddings:
 
 <div class="l-page">
     <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
@@ -357,17 +359,17 @@ I embedded the sequences (code available [here](https://github.com/hclimente/hcl
     Scatter plot of the two UMAP dimensions from the embeddings computed by applying the <em>pre-trained</em> NT to the 6,000 DNA sequences test dataset, containing 1,000 sequences from each species.
 </div>
 
-Some disclaimers need to be made. First, I took a minuscule sample of all protein coding sequences, which is somewhat biased towards the beginning of the protein. Second, I am using the smallest NT, and its likely that larger models can represent these sequences more richly.
+Some disclaimers need to be made. First, I took a minuscule sample of all protein coding sequences, which my sampling process slightly biases towards the beginning of the protein. Second, I am using the smallest NT, and its likely that larger models can represent these sequences more richly.
 
-Even with these limitations, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes. This is probably not too reassuring, so maybe I can do better: I trained a muticlass logistic regression tasked with predicting the species using only the embeddings. This classifier achieved an accuracy of $$0.47$$, convincingly above the accuracy of a random classifier ($$\frac 1 6 = 0.16$$). Furthermore, some of the errors are clearly between the two closest species from an evolutionary standpoint: human and mouse.
+Even with these limitations, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes. Since this is probably not too reassuring, maybe I can do better: I trained a multiclass logistic regression tasked with predicting the species from the sequence embeddings. This classifier achieved an accuracy of $$0.47$$, convincingly above the accuracy of a random classifier ($$\frac 1 6 = 0.16$$). Furthermore, some of the errors are clearly between the two closest species from an evolutionary standpoint: human and mouse.
 
 {% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" class="img-fluid rounded z-depth-1" %}
 
 # Fine-tuning the model
 
-The NT was trained via self-supervised learning, and it never got any explicit knowledge about which species it was looking at. Hence, it's not too surprising that it can't separate different species right off the bat. Fine-tuning it to this task should provide more relevant representations. `transformers` also provides an easy way of doing that using `transformers.Trainer`. (For the record, I am unconvinced this is a better solution than [Lightning](https://lightning.ai) and others; however, it can be convenient.)
+The NT was trained via MLM, and it never got any explicit information about which species it was looking at. Hence, it's not too surprising that it can't separate different species right off the bat. Fine-tuning it to this task should provide more relevant representations. `transformers` also provides an easy way of doing that using `transformers.Trainer`. (For the record, I am unconvinced this is a better solution than [Lightning](https://lightning.ai) and others; however, it can be convenient if you are already in teh Hugging Face ecosystem.)
 
-We will start by importing the model using a different AutoClass which will automatically add a classification head:
+We will start by importing the model using a the right AutoClass for the task:
 
 ```python
 classif_nt = AutoModelForSequenceClassification.from_pretrained(
