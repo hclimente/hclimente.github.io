@@ -123,7 +123,7 @@ class DNAEmbeddingPipeline(DNAPipeline):
         model_outputs: Dict[str, Any],
     ) -> dict[str, np.ndarray]:
         """
-        Compute the mean sequence embedding from the model outputs.
+        Compute the mean sequence embedding from the last hidden layer (size 512).
 
         Args:
             model_outputs (Dict[str, Any]): The model outputs.
@@ -168,8 +168,7 @@ class DNAClassificationPipeline(DNAPipeline):
             attention_mask=attention_mask,
             output_hidden_states=True,
         )
-        if "attention_mask" in out:
-            raise ValueError("Output contains attention_mask, " "which is unexpected.")
+
         out["attention_mask"] = attention_mask
 
         return out

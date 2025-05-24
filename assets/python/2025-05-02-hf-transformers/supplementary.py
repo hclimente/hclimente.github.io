@@ -17,6 +17,17 @@
 
 # %% [markdown]
 # # Playing with the tokenizer
+#
+# There are 4,107 tokens in total:
+#
+# - 4,096 for each possible 6-mer
+# - 5 for each possible input nucleotide (A, T, C, G and N). They are used as fallback when the sequence is not divisible by 6.
+# - 1 for padding (PAD)
+# - 1 for the mask (MASK)
+# - 1 for the entire sequence (CLS)
+# - 3 additional tokens, which I will mostly ignore
+#
+# All summed up, 4,107 tokens, each represented by an integer.
 
 # %%
 from transformers import AutoTokenizer
@@ -68,6 +79,9 @@ tokenizer(["AAAAAAAAAAAAAAAAAAAAAAAA", "AAAAAA", "A"], padding="longest")["input
 
 # %%
 tokenizer.get_vocab()
+
+# %%
+len(tokenizer.get_vocab())
 
 # %% [markdown]
 # The tokenizer contains tokens that were not considered in the NT article. Some of them are needed to make the model robust to artifacts, like the unknown token (e.g., if our sequence contained other [IUPAC nucleotides](https://en.wikipedia.org/wiki/Nucleic_acid_notation)). The vocabulary also contains tokens to specify the beginning and the end of the sequence, let's see if the tokenizer is able to use them.
