@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: DNA language model fine-tuning and inference
-date: 2025-05-31 11:59:00-0000
+date: 2025-05-28 11:59:00-0000
 description: Using Hugging Face transformers
 tags: python machine_learning huggingface
 giscus_comments: true
@@ -27,9 +27,7 @@ This is the workflow that Hugging Face 🤗 and its [`transformers`](https://hug
 
 Let's dive into the `transformers` library. Although big tech is going crazy over LLMs, DNA language models are where the money is.<d-footnote>Citation required</d-footnote> In that spirit, in this post I use `transformers` to showcase an application of the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT), a DNA language model. And I use the NT to showcase `transformers`.
 
-I will be providing snippets of code along with the text. If you are still curious about the nitty-gritty, all the code is available [on Github](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).
-
-<!-- https://colab.research.google.com/github/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb -->
+I will be providing snippets of code along with the text. If you are still curious about the nitty-gritty, all the code is available [on Github](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/).
 
 # A worked-out training example
 
@@ -366,7 +364,7 @@ I will be using the NT to embed protein-coding DNA sequences from six species: t
 
 To this end, I [downloaded the DNA sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/prepare_data.sh) of all protein coding genes for the selected species. For each species I randomly subsampled 2,000 sequences of 60 nucleotides each. I chose the length of the sequence because of convenience: they are a common sequence length for FASTA files, and short enough for my modest home computer to handle. Half of them were the train set, used for model building; the other half constituted the test set, used exclusively for performance evaluation. All the results shown below are computed on the latter.
 
-I [embedded the sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.py) and used a UMAP to visualize the embeddings:
+I [embedded the sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb) and used a UMAP to visualize the embeddings:
 
 <div class="l-page">
     <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
