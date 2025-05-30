@@ -1,13 +1,12 @@
 ---
 layout: distill
 title: DNA language model fine-tuning and inference
-date: 2025-05-31 11:59:00-0000
+date: 2025-05-29 11:59:00-0000
 description: Using Hugging Face transformers
 tags: python machine_learning huggingface
 giscus_comments: true
 related_posts: false
 toc:
-  - name: A worked-out training example
   - name: A worked-out training example
   - name: Loading a pre-trained model
   - name: Building an inference pipeline
@@ -27,15 +26,13 @@ This is the workflow that Hugging Face 🤗 and its [`transformers`](https://hug
 
 Let's dive into the `transformers` library. Although big tech is going crazy over LLMs, DNA language models are where the money is.<d-footnote>Citation required</d-footnote> In that spirit, in this post I use `transformers` to showcase an application of the [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT), a DNA language model. And I use the NT to showcase `transformers`.
 
-I will be providing snippets of code along with the text. If you are still curious about the nitty-gritty, all the code is available [on Github](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb).
-
-<!-- https://colab.research.google.com/github/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb -->
+I will be providing snippets of code along with the text. If you are still curious about the nitty-gritty, all the code is available [on Github](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/).
 
 # A worked-out training example
 
 The [Nucleotide Transformer](https://www.nature.com/articles/s41592-024-02523-z) (NT) is an encoder-only transformer, essentially a [BERT model](<https://en.wikipedia.org/wiki/BERT_(language_model)>) trained on the genomes of 850 species via masked language modelling (MLM).
 
-{% include figure.liquid path="assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid rounded z-depth-1" %}
+{% include figure.liquid path="assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid" %}
 
 <div class="caption">
     Training of the NT using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z">NT article</a>.
@@ -366,10 +363,10 @@ I will be using the NT to embed protein-coding DNA sequences from six species: t
 
 To this end, I [downloaded the DNA sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/prepare_data.sh) of all protein coding genes for the selected species. For each species I randomly subsampled 2,000 sequences of 60 nucleotides each. I chose the length of the sequence because of convenience: they are a common sequence length for FASTA files, and short enough for my modest home computer to handle. Half of them were the train set, used for model building; the other half constituted the test set, used exclusively for performance evaluation. All the results shown below are computed on the latter.
 
-I [embedded the sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.py) and used a UMAP to visualize the embeddings:
+I [embedded the sequences](https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb) and used a UMAP to visualize the embeddings:
 
 <div class="l-page">
-    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
+    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%"></iframe>
 </div>
 
 <div class="caption">
@@ -380,7 +377,7 @@ Some disclaimers need to be made. First, I took a minuscule sample of all protei
 
 Even with these limitations, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes or toggle some species on and off. Since this is probably not too reassuring, maybe I can do better: I trained a multiclass logistic regression tasked with predicting the species from the sequence embeddings. This classifier achieved an accuracy of $$0.47$$, convincingly above the accuracy of a random classifier ($$\frac 1 6 = 0.16$$). Furthermore, some of the errors are clearly between the two closest species from an evolutionary standpoint: human and mouse.
 
-{% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" class="img-fluid rounded z-depth-1" %}
+{% include figure.liquid loading="eager" path="assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" class="img-fluid" %}
 
 # Fine-tuning the model
 
@@ -433,7 +430,7 @@ After the model is trained, as specified in the trainer arguments, the model wit
 We can create a new inference pipeline focus around classification. The pipeline will output both the probability of each class, as well as the embeddings, obtained from the last layer. Since this model is tasked explicitly with telling apart sequences coming from different species, the embedding should provides a much better separation:
 
 <div class="l-page">
-    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings_ft-model.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%" style="border: 1px dashed grey;"></iframe>
+    <iframe src="{{ '/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings_ft-model.html' | relative_url }}" frameborder='0' scrolling='no' height="500px" width="100%"></iframe>
 </div>
 
 <div class="caption">

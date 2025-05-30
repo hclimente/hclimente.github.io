@@ -78,7 +78,13 @@ tokenizer(["AAAAAAAAAAAAAAAAAAAAAAAA", "AAAAAA", "A"], padding="longest")["input
 # We can access all the tokens:
 
 # %%
-tokenizer.get_vocab()
+i = 0
+for k, v in tokenizer.get_vocab().items():
+    print(f"{k}:\t{v}")
+    i += 1
+
+    if i == 15:
+        break
 
 # %%
 len(tokenizer.get_vocab())
