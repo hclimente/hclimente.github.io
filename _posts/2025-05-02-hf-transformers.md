@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: DNA language model fine-tuning and inference
-date: 2025-05-28 11:59:00-0000
+date: 2025-05-29 11:59:00-0000
 description: Using Hugging Face transformers
 tags: python machine_learning huggingface
 giscus_comments: true
