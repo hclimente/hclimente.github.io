@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-an-intro-to-uv",
+        },{id: "post-dna-language-model-fine-tuning-and-inference",
+      
+        title: "DNA language model fine-tuning and inference",
+      
+      description: "Using Hugging Face transformers",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/hf-transformers/";
+        
+      },
+    },{id: "post-an-intro-to-uv",
       
         title: "An intro to uv",
       
