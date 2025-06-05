@@ -81,15 +81,13 @@ plt.show()
 # %%
 np.random.seed(42)
 
-v_u = 1
-v_xy = 0.5
-n = 200
+N = 200
 
 df = pd.DataFrame(
     {
-        "X": np.random.normal(0, v_xy, n),
-        "U": np.random.normal(0, v_u, n),
-        "Y": np.random.normal(0, v_xy, n),
+        "U": np.random.normal(0, 1, N),
+        "X": np.random.normal(0, 0.5, N),
+        "Y": np.random.normal(0, 0.5, N),
     }
 )
 df["X"] = df["U"] + df["X"]
@@ -149,3 +147,24 @@ plt.tight_layout()
 save_fig(plt.gcf(), "partial_correlations")
 
 # %%
+np.random.seed(42)
+
+N = 200
+
+df = pd.DataFrame(
+    {
+        "U": np.random.normal(0, 1, N),
+        "X": np.random.normal(0, 0.5, N),
+        "Y": np.random.normal(0, 0.5, N),
+    }
+)
+df["X"] = df["U"] + df["X"]
+df["Y"] = df["U"] + df["Y"]
+
+centered_df = df - df.mean()
+covariance = np.dot(centered_df.T, centered_df) / (N - 1)
+precision = np.linalg.inv(covariance)
+normalization_factors = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
+partial_correlations = precision / normalization_factors
+
+print(np.round(partial_correlations, 2))
