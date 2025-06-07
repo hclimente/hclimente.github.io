@@ -1,13 +1,11 @@
 ---
 layout: post
 title: Mendelian randomization
-date: 2025-06-05 11:59:00-0000
+date: 2023-04-03 11:59:00-0000
 description: Causality from observations, thanks to genetics
 tags: bioinformatics genetics
 giscus_comments: true
 related_posts: false
-toc:
-  sidebar: left
 mermaid:
   enabled: true
 ---
@@ -65,65 +63,47 @@ MR relies on three assumptions (_relevance_, _independence_ and _exclusion restr
 
 ## Relevance
 
-The SNP is _strongly_ associated wo the exposure. When this assumption is violated, we say that the SNP is a weak instrument. It can be measured using (Cragg-Donald) F-statistic:
+The instrument is _strongly_ associated wo the exposure. When this assumption is violated, we say that the instrument is a weak instrument. It can be measured using (Cragg-Donald) F-statistic:
 
 $$
 \left( \frac {n-m-1} {m} \right) \left( \frac {R^2} {1-R^2}\right)
 $$
 
-where $$n$$ is the number of samples, $$m$$ is the number of SNPs, and $$R^2$$ is the SNP heritability. Conventionally, a SNP is considered _relevant_ when $$F > 10$$.
+where $$n$$ is the number of samples, $$m$$ is the number of instruments, and $$R^2$$ is the instrument heritability. Conventionally, a instrument is considered _relevant_ when $$F > 10$$.
 
 ## Independence
 
-The SNP is not associated to the outcome through a confounder, measured or not. Common violations include [assortative mating](https://mr-dictionary.mrcieu.ac.uk/term/assortative-mating/), [population structure](https://mr-dictionary.mrcieu.ac.uk/term/pop-strat/) and [dynastic effects](https://mr-dictionary.mrcieu.ac.uk/term/dynastic/). This can only be assessed for the potential confounders that have been measured or can be assessed, by measuring the respective associations between those and the SNP and outcome.
+The instrument is not associated to the outcome through a confounder, measured or not. Common violations include [assortative mating](https://mr-dictionary.mrcieu.ac.uk/term/assortative-mating/), [population structure](https://mr-dictionary.mrcieu.ac.uk/term/pop-strat/) and [dynastic effects](https://mr-dictionary.mrcieu.ac.uk/term/dynastic/). This can only be assessed for the potential confounders that have been measured or can be assessed, by measuring the respective associations between those and the instrument and outcome.
 
 ## Exclusion restriction
 
-The SNP is _exclusively_ associated to the outcome through the exposure. [(Horizontal) pleiotropy](https://mr-dictionary.mrcieu.ac.uk/term/horizontal-pleiotropy/) and linkage with other causal genes are common violations. When using multiple instruments, it can be assumed that they will all lead to the same estimate of the causal effect. Strong departures from this situation suggest that some instruments are affecting the outcome in different ways.
+The instrument is _exclusively_ associated to the outcome through the exposure. [(Horizontal) pleiotropy](https://mr-dictionary.mrcieu.ac.uk/term/horizontal-pleiotropy/) and linkage with other causal genes are common violations. When using multiple instruments, it can be assumed that they will all lead to the same estimate of the causal effect. Strong departures from this situation suggest that some instruments are affecting the outcome in different ways.
 
-# Flavors of Mendelian randomization algorithms
+# Flavors of MR
 
 [We just saw](#enter-mendelian-randomization) the simplest version of MR; but there are many algorithms to carry it out, depending on what data we have access to. I classify them here according to multiple criteria.
 
-## Origin of the measurements
+## Dataset
 
-In _one-sample MR_, the SNP, exposure and outcome are measured on the same subjects. This is the case of the [two-stage least squares](#enter-mendelian-randomization) algorithm. In _two-sample MR_, the SNP-exposure relationship is measured on a set of samples, and the exposure-outcome on another one. One example is the Wald ratio estimate, which is the following statistic:
+We can carry on MR on a different **number of datasets**. In _one-sample MR_, the instrument, exposure and outcome are measured on the same subjects. This is the case of the [two-stage least squares](#enter-mendelian-randomization) algorithm. In _two-sample MR_, the instrument-exposure relationship is measured on a set of samples, and the exposure-outcome on another one. One example is the Wald ratio estimate, which is the following statistic:
 
 $$
 W = \frac {\beta_{ZY}} {\beta_{ZX}}
 $$
 
+Typically, this is is linked to the **granularity** of the data. One-sample MR is the ideal setting, since all the statistics are derived from the same dataset . This modality is easier when we have access to individual-level data. However, few datasets are rich enough to allow us to quantify effect sizes from the exposure and the outcome. And we have available a plethora of summary statistics in public repositories. For instance, we could measure the effect size of the instrument on gene expression on [GTEx](https://www.gtexportal.org), and on the outcome on a [publicly available GWAS](https://www.ebi.ac.uk/gwas/); this is called _two-sample MR_. As an attention note, all summary statistics need to come from ancestry-matched samples to preserve the [independence](#independence) assumptions.
+
 ## Instrument
 
-- SNP
-- Polygenic score
+The **choice of instrument** is a critical consideration. Instruments can range from a single SNP to multiple SNPs. A single SNP offers simplicity but is likely to have weak association with the exposure. While multiple SNPs can be a stronger instrument, they introduce challenges related to linkage disequilibrium and the need for conditional independence. In such case, prior feature selection or dimensionality reduction techniques may be necessary to address these issues and ensure numerical stability. In the extreme case we could use a polygenic score (PGS), a weighted sum of multiple SNPs derived from a GWAS of the exposure, to capture a larger proportion of the variance in the exposure. However careful consideration must be given to potential biases in the GWAS weights and the lingering effects of linkage disequilibrium.
 
-## Granularity
+The **location of the SNPs** can be relevant when examining molecular traits like gene expression. In _cis-MR_ we use SNPs located in the coding region of the target gene, or very nearby. These SNPs are very likely to affect the expression of the gene directly, boosting our confidence that the exclusion restriction criteria is met. Alternatively, in _trans-MR_ SNPs can be located very far from the exposure gene, and hence [horizontal pleiotropy](#exclusion-restriction) can become an issue.
 
-- Individual-level
-- Summary-level: as an attention note, all summary statistics must come from ancestry-matched samples.
+## Exposure
 
-## Number of SNPs
+While I have focused on the case in which we deal with a single exposure (_univariable MR_), there are cases in with we use **multiple exposures** (_Multivariable MR_ or MVMR).
 
-- Single SNP
-- Multiple SNPs: this can address the weak association that individual SNPs might have with the trait. Notably, the dependencies between the SNPs (linkage disequilibrium) can produce trouble. The SNPs should be conditionally independent predictors (e.g., not in perfect LD). Even when not in perfect LD, too many correlated SNPs can lead to numerically unstable estimates. This is solvable by a prior feature selection and/or dimensionality reduction steps.
-
-## Number of exposures
-
-So far, I have been discussing the case in which we deal with a single exposure, so-called _univariable MR_. However, in some cases we are unsure TODO _Multivariable MR_ (MVMR)
-
-want to include multiple exposures at on
-
-- Univariable: one exposure
-- Multivariable: several exposures
-
-## Location of the SNPs
-
-The location of the SNPs can be relevant when examining molecular traits like gene expression. In _cis-MR_ we use SNPs located in the coding region of the target gene, or very nearby. These SNPs are very likely to affect the expression of the gene directly, boosting our confidence that the exclusion restriction criteria is met. Alternatively, in _trans-MR_ SNPs can be located very far from the exposure gene, and hence [horizontal pleiotropy](#exclusion-restriction) can become an issue.
-
-## Type of exposures
-
-The exposure that we study can differ in multiple ways: it can be simple (like gene expression), or complex (like the body mass index). It can be a protein's activity, or a biomarker that's affected by such activity via _vertical pleiotropy_.
+There are multiple **types of exposures**. Some can be relatively simple phenotypes close to the genetics, like gene expression. Others can be complex, like the body mass index. There are also a lot of intermediate cases, like a protein's activity, or a biomarker that's affected by such activity via _vertical pleiotropy_.
 
 # Example applications
 
@@ -131,7 +111,7 @@ The exposure that we study can differ in multiple ways: it can be simple (like g
 | ---------------------------- | ------------------------------------------- | ---------------------------------------- | ----------------------------------------- |
 | Learn causes of a trait      | Simple or complex                           | One or multiple exposure-associated SNPs | Univariate MR                             |
 | Characterize causal pathways | Multiple exposures, possibly with mediators | Independent SNPs for all exposures       | MVMR to model joint/mediated effects      |
-| Find drug targets            | Protein activity or biomarker               | cis-pQTLs (preferred) or trans-pQTLs     | Cis-MR                                    |
+| Find drug targets            | Protein activity or biomarker               | cis-pQTLs (preferred) or trans-pQTLs     | Cis-MR (preferred) or trans-MR            |
 | Identify relevant tissues    | Tissue-specific gene expression             | eQTLs stratified by tissue               | Tissue-Specific MVMR to partition effects |
 
 # References
