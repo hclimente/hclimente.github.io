@@ -10,15 +10,15 @@ mermaid:
   enabled: true
 ---
 
-Randomized controlled trials (RCTs) are the gold standard to establish if an intervention **causes** an outcome. The key procedure involves performing the intervention on a random subset of the subjects, and comparing the outcomes between the ones that received the intervention and those who didn't. With a large enough sample size, the treatment and control groups should be similar in all regards except for the treatment variable. And hence any difference between the groups must be attributable to the intervention, regardless of any other confounding variables that are not under experimental control.
+Randomized controlled trials (RCTs) are the gold standard to establish if an intervention **causes** an outcome. The magic lies in randomly assigning subjects to either the intervention or control group. A sufficiently large sample ensuresany other confounding variables are evenly distributed. Thus, observed differences must be due to the intervention, and not to any other variables not under experimental control.
 
-A key question in biology is if and how an exposure, like the protein expression of a gene, causes a complex phenotype. However, using RCTs to study this issue would quite challenging technically. Oh, and ethically abhominable. Hence, we need to make do with _observational_ studies. Crucially, observational studies cannot directly prove causality: they can produce biased estimates and be affected by unknown confounders and reverse causality.
+A key question in biology is whether and how an exposure, like the protein expression of a gene, causes a complex phenotype. However, using RCTs to study this issue would be quite challenging technically—and ethically abominable. Hence, we need to make do with _observational_ studies. Crucially, observational studies cannot directly prove causality, since they are plagued by biases, unknown confounders and reverse causality.
 
 # Enter Mendelian Randomization
 
-Interestingly, [genetic variants](https://en.wikipedia.org/wiki/Single-nucleotide_polymorphism) are equivalent to a randomized treatment when comparing siblings. Which allele each sibling gets is randomized at conception and fixed throughout life, making them unaffected by confounders. While there are exceptions ([linkage disequilibrium](https://en.wikipedia.org/wiki/Linkage_disequilibrium) and [population structure](<https://en.wikipedia.org/wiki/Population_structure_(genetics)>) to the former, and [canalization](<https://en.wikipedia.org/w/index.php?title=Canalization_(genetics)>) to the latter), when this assumption holds, we can indeed estimate causality. However many observational studies are carried out in the general population, where the distribution of variants is not completely randomized. For instance, due to assortative mating, people with similar heritable phenotypes will tend to... mate. However, when [certain assumptions are met](#key-assumptions-and-how-to-verify-them), the SNP distribution in the population mimics randomization. Mendelian Randomization (MR) exploits this fact to estimate the causal effect of an exposure on an outcome using genetic variants, often SNPs.
+Interestingly, [genetic variants](https://en.wikipedia.org/wiki/Single-nucleotide_polymorphism) are akin to a randomized treatment when comparing siblings. Which allele each sibling gets is randomized at conception and fixed throughout life, making them unaffected by confounders. While there are exceptions ([linkage disequilibrium](https://en.wikipedia.org/wiki/Linkage_disequilibrium) and [population structure](<https://en.wikipedia.org/wiki/Population_structure_(genetics)>) to the former, and [canalization](<https://en.wikipedia.org/w/index.php?title=Canalization_(genetics)>) to the latter), when this assumption holds, we can indeed estimate causality. However, many observational studies are carried out in the general population, where the distribution of variants is not completely randomized. For instance, due to assortative mating, people with similar heritable phenotypes will tend to... mate. However even in the general population and as long as [certain assumptions are met](#key-assumptions-and-how-to-verify-them) the distribution of SNPs mimics a random assignment. Mendelian Randomization (MR) exploits this fact to estimate the causal effect of an exposure on an outcome using genetic variants, often SNPs.
 
-Remember: our goal is to precisely estimate the effect of an exposure on a trait. However, the presence of confounders that are either unobserved or difficult to measure makes this impossible. An instrument, such as the SNP, is a variable that modifies the exposure and is not affected by the confounders. Or, more graphically:
+Remember: our goal is to precisely estimate the effect of an exposure on a trait. However, the presence of confounders that are either unobserved or difficult to measure makes this impossible. An instrument, such as a SNP in MR, is our way out of this: it is a variable that modifies the exposure and is not affected by the confounders. Or, more graphically:
 
 ```mermaid
 ---
@@ -63,17 +63,17 @@ MR relies on three assumptions (_relevance_, _independence_ and _exclusion restr
 
 ## Relevance
 
-The instrument is _strongly_ associated wo the exposure. When this assumption is violated, we say that the instrument is a weak instrument. It can be measured using (Cragg-Donald) F-statistic:
+The instrument is _strongly_ associated with the exposure. When this assumption is violated, we say that the instrument is a weak instrument. The strength of this association can be measured using (Cragg-Donald) F-statistic:
 
 $$
 \left( \frac {n-m-1} {m} \right) \left( \frac {R^2} {1-R^2}\right)
 $$
 
-where $$n$$ is the number of samples, $$m$$ is the number of instruments, and $$R^2$$ is the instrument heritability. Conventionally, a instrument is considered _relevant_ when $$F > 10$$.
+where $$n$$ is the number of samples, $$m$$ is the number of instruments, and $$R^2$$ is the instrument heritability. Conventionally, an instrument is considered _relevant_ when $$F > 10$$.
 
 ## Independence
 
-The instrument is not associated to the outcome through a confounder, measured or not. Common violations include [assortative mating](https://mr-dictionary.mrcieu.ac.uk/term/assortative-mating/), [population structure](https://mr-dictionary.mrcieu.ac.uk/term/pop-strat/) and [dynastic effects](https://mr-dictionary.mrcieu.ac.uk/term/dynastic/). This can only be assessed for the potential confounders that have been measured or can be assessed, by measuring the respective associations between those and the instrument and outcome.
+The instrument is not associated to the outcome through a confounder, measured or not. Common violations include [assortative mating](https://mr-dictionary.mrcieu.ac.uk/term/assortative-mating/), [population structure](https://mr-dictionary.mrcieu.ac.uk/term/pop-strat/) and [dynastic effects](https://mr-dictionary.mrcieu.ac.uk/term/dynastic/). This is critical and it can only be assessed for the potential confounders that have been measured or can be estimated, by measuring the respective associations between those and the instrument and outcome.
 
 ## Exclusion restriction
 
@@ -85,23 +85,23 @@ The instrument is _exclusively_ associated to the outcome through the exposure. 
 
 ## Dataset
 
-We can carry on MR on a different **number of datasets**. In _one-sample MR_, the instrument, exposure and outcome are measured on the same subjects. This is the case of the [two-stage least squares](#enter-mendelian-randomization) algorithm. In _two-sample MR_, the instrument-exposure relationship is measured on a set of samples, and the exposure-outcome on another one. One example is the Wald ratio estimate, which is the following statistic:
+We can conduct MR with varying **numbers of datasets**. In _one-sample MR_, the instrument, exposure and outcome are measured on the same subjects. This is the case of the [two-stage least squares](#enter-mendelian-randomization) algorithm. In _two-sample MR_, the instrument-exposure relationship is measured on a set of samples, and the exposure-outcome on another one. One example is the Wald ratio estimate, which is the following statistic:
 
 $$
 W = \frac {\beta_{ZY}} {\beta_{ZX}}
 $$
 
-Typically, this is is linked to the **granularity** of the data. One-sample MR is the ideal setting, since all the statistics are derived from the same dataset . This modality is easier when we have access to individual-level data. However, few datasets are rich enough to allow us to quantify effect sizes from the exposure and the outcome. And we have available a plethora of summary statistics in public repositories. For instance, we could measure the effect size of the instrument on gene expression on [GTEx](https://www.gtexportal.org), and on the outcome on a [publicly available GWAS](https://www.ebi.ac.uk/gwas/); this is called _two-sample MR_. As an attention note, all summary statistics need to come from ancestry-matched samples to preserve the [independence](#independence) assumptions.
+Typically, this is is linked to the **granularity** of the data. One-sample MR is the ideal setting, since all the statistics are derived from the same dataset . This modality is easier when we have access to individual-level data. However, few datasets are rich enough to allow us to quantify effect sizes from the exposure and the outcome. A plethora of summary statistics are available in public repositories. For instance, we could measure the effect size of the instrument on gene expression on [GTEx](https://www.gtexportal.org), and on the outcome on a [publicly available GWAS](https://www.ebi.ac.uk/gwas/); this is called _two-sample MR_. As an attention note, all summary statistics need to come from ancestry-matched samples to preserve the [independence](#independence) assumptions.
 
 ## Instrument
 
-The **choice of instrument** is a critical consideration. Instruments can range from a single SNP to multiple SNPs. A single SNP offers simplicity but is likely to have weak association with the exposure. While multiple SNPs can be a stronger instrument, they introduce challenges related to linkage disequilibrium and the need for conditional independence. In such case, prior feature selection or dimensionality reduction techniques may be necessary to address these issues and ensure numerical stability. In the extreme case we could use a polygenic score (PGS), a weighted sum of multiple SNPs derived from a GWAS of the exposure, to capture a larger proportion of the variance in the exposure. However careful consideration must be given to potential biases in the GWAS weights and the lingering effects of linkage disequilibrium.
+The **choice of instrument** is a critical consideration. Instruments can range from a single SNP to multiple SNPs. A single SNP offers simplicity but is likely to have weak association with the exposure. While multiple SNPs can be a stronger instrument, they introduce challenges related to linkage disequilibrium and the need for conditional independence. In such case, prior feature selection or dimensionality reduction techniques may be necessary to address these issues and ensure numerical stability. In the extreme case we could use a polygenic score (PGS), a weighted sum of multiple SNPs derived from a GWAS of the exposure, to capture a larger proportion of the variance in the exposure. Beware, though, of the potential biases lurking in the GWAS weights and the lingering effects of linkage disequilibrium.
 
-The **location of the SNPs** can be relevant when examining molecular traits like gene expression. In _cis-MR_ we use SNPs located in the coding region of the target gene, or very nearby. These SNPs are very likely to affect the expression of the gene directly, boosting our confidence that the exclusion restriction criteria is met. Alternatively, in _trans-MR_ SNPs can be located very far from the exposure gene, and hence [horizontal pleiotropy](#exclusion-restriction) can become an issue.
+The **location of the SNPs** can be relevant when examining molecular traits like gene expression. In _cis-MR_ we use SNPs located in the coding region of the target gene, or very nearby. This proximity dramatically boosts our confidence that the exclusion restriction assumption holds, as these SNPs are highly likely to affect gene expression directly. Alternatively, in _trans-MR_ SNPs can be located very far from the exposure gene, and hence [horizontal pleiotropy](#exclusion-restriction) can become an issue.
 
 ## Exposure
 
-While I have focused on the case in which we deal with a single exposure (_univariable MR_), there are cases in with we use **multiple exposures** (_Multivariable MR_ or MVMR).
+While I have focused on the case in which we deal with a single exposure (_univariable MR_), there are cases in which we use **multiple exposures** (_Multivariable MR_ or MVMR).
 
 There are multiple **types of exposures**. Some can be relatively simple phenotypes close to the genetics, like gene expression. Others can be complex, like the body mass index. There are also a lot of intermediate cases, like a protein's activity, or a biomarker that's affected by such activity via _vertical pleiotropy_.
 
