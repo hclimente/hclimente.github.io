@@ -21,7 +21,7 @@ import pandas as pd
 from scipy import linalg
 from scipy.stats import pearsonr
 import seaborn as sns
-from sklearn.covariance import GraphicalLassoCV
+from sklearn.covariance import GraphicalLassoCV, LedoitWolf
 from sklearn.linear_model import LinearRegression
 import sys
 import time
@@ -321,20 +321,18 @@ def pcorr_linalg(X: np.ndarray, psd: bool = True) -> np.ndarray:  # (n, p) -> (p
     normalization_factors = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
     partial_correlations = precision / normalization_factors
 
-    return partial_correlations
+    return partial_correlations, covariance, precision
 
-
-pcorr_linalg(df.values)
 
 # %%
 X = np.random.randn(1000, 100)
 
 start = time.time()
-p_linalg_psd = pcorr_linalg(X)
+p_linalg_psd, _, _ = pcorr_linalg(X)
 print("Linalg-psd method took:", time.time() - start)
 
 start = time.time()
-p_linalg_lu = pcorr_linalg(X, psd=False)
+p_linalg_lu, _, _ = pcorr_linalg(X, psd=False)
 print("Linalg-lu method took:", time.time() - start)
 
 assert np.allclose(p_linalg_psd, p_linalg_lu)
@@ -342,6 +340,9 @@ assert np.allclose(p_linalg_psd, p_linalg_lu)
 start = time.time()
 p_residuals = pcorr_residuals(X)
 print("Residuals method took:", time.time() - start)
+
+# %% [markdown]
+# # High-dimensional example
 
 # %%
 # Define partial correlations
@@ -369,38 +370,82 @@ cov = np.linalg.inv(precision)
 
 # Sample data
 mean = np.zeros(p)
-n_samples = 1000
+n_samples = 20
 X = np.random.multivariate_normal(mean, cov, size=n_samples)
 
 
 # %%
-def plot_matrix(matrix, title):
-
-    fig, ax = plt.subplots(figsize=(6, 6))
-
+def plot_matrix(matrix, ax, **kwargs):
     sns.heatmap(
-        matrix, cmap="RdBu_r", square=True, center=0, cbar_kws={"shrink": 0.5}, ax=ax
+        matrix,
+        cmap="RdBu_r",
+        square=True,
+        center=0,
+        cbar_kws={"shrink": 0.5},
+        ax=ax,
+        **kwargs,
     )
-    ax.set_title(title)
     ax.set_xticks([])
     ax.set_yticks([])
 
-    plt.show()
 
+fig, ax = plt.subplots(3, 4, figsize=(15, 9))
 
-plot_matrix(cov, "Covariance Matrix")
-plot_matrix(partial_corr, "True partial correlation matrix")
+row_labels = ["Covariance", "Precision", "Structure"]
+col_labels = ["Ground truth", "MLE", "Ledoit-Wolf", "GraphicalLasso"]
 
-# %%
-estimated_pcorr = pcorr_linalg(X, psd=False)
-plot_matrix(estimated_pcorr, "Estimated partial correlation matrix")
+plot_matrix(cov, ax[0, 0])
+plot_matrix(precision, ax[1, 0])
+plot_matrix(precision != 0, ax[2, 0], vmin=0, vmax=1)
 
-# %%
+mle_pcorr, mle_cov, mle_precision = pcorr_linalg(X, psd=False)
+mle_structure = np.abs(mle_pcorr) > 0.1
+plot_matrix(mle_cov, ax[0, 1])
+plot_matrix(mle_precision, ax[1, 1])
+plot_matrix(mle_structure, ax[2, 1], vmin=0, vmax=1)
+
+model = LedoitWolf().fit(X)
+lw_precision = model.precision_
+lw_denom = np.sqrt(np.outer(np.diag(lw_precision), np.diag(lw_precision)))
+lw_structure = np.abs(lw_precision / lw_denom) > 0.1
+plot_matrix(model.covariance_, ax[0, 2])
+plot_matrix(model.precision_, ax[1, 2])
+plot_matrix(lw_structure, ax[2, 2], vmin=0, vmax=1)
+# indicate that a filter was applied
+ax[2, 2].text(22, 2, "*", fontsize=40, ha="center", va="center")
+
 model = GraphicalLassoCV().fit(X)
+plot_matrix(model.covariance_, ax[0, 3])
+plot_matrix(model.precision_, ax[1, 3])
+plot_matrix(model.precision_ != 0, ax[2, 3], vmin=0, vmax=1)
 
-plot_matrix(model.precision_, "Estimated covariance matrix")
+# Add big labels to the left (rows)
+for i, label in enumerate(row_labels):
+    ax[i, 0].set_ylabel(
+        label, rotation=90, ha="center", va="center", fontsize=19, labelpad=20
+    )
+
+# Add big labels to the top (columns)
+for j, label in enumerate(col_labels):
+    ax[0, j].set_title(label, ha="center", fontsize=18, pad=12)
+
+plt.tight_layout()
+save_fig(plt.gcf(), "high_dimensional_experiments")
 
 # %%
-plot_matrix(cov, "Estimated covariance matrix")
+precision = model.precision_  # shape (p, p)
+denom = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
+partial_corr = -precision / denom
+
+# %%
+np.median(mle_precision)
+
+# %%
+mle_precision.min()
+# print in scientific notation
+print(f"{mle_precision.min():.2e}")
+
+# %%
+mle_precision.max()
 
 # %%

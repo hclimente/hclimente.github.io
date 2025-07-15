@@ -1,16 +1,16 @@
 ---
 layout: post
-title: The precision matrix
+title: Covariance and precision
 date: 2025-05-29 11:59:00
-description: A Swiss Army Knife for data science
-tags: linear_algebra graphs
+description: Learning the hidden structure of data
+tags: linear_algebra graphs statistics
 giscus_comments: true
 related_posts: false
 mermaid:
   enabled: true
 ---
 
-Imagine we have a set of 3 variables ($$U$$, $$X$$, and $$Y$$), with with one of them being upstream of the other two ($$X \leftarrow U \rightarrow Y$$):
+Imagine we have a set of 3 variables ($$U$$, $$X$$, and $$Y$$), with one of them being upstream of the other two ($$X \leftarrow U \rightarrow Y$$):
 
 $$
 U \sim N(0, 1)
@@ -28,15 +28,15 @@ $$
 \varepsilon_X, \varepsilon_Y \sim N(0, 0.25)
 $$
 
-We want to discover this structure from observational data. Since both $$X$$ and $$Y$$ are caused by $$U$$, a correlation is not very enlightening:
+We want to discover this structure from observational data. Since both $$X$$ and $$Y$$ are caused by $$U$$, a correlation is not very enlightening and will just return the fully connected graph:
 
 {% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/correlations.webp" class="img-fluid" %}
 
 <div class="caption">
-    Scatter plots of each pair of variables on 200 random trios. On top of each graph, I show the <strong>correlation</strong> between the variables, and the associated P-value.
+    Scatter plots of each pair of variables on 200 random trios, each with the correlation between the variables and the associated P-value indicated above.
 </div>
 
-A sensible way of going about it is to study the relationship between each pair of variables while adjusting for the remaining variable. If we assume all relationships are linear, these are called **partial correlations**. Here is a possible implementation:
+A sensible way of going about it is to study the correlation between each pair of variables after adjusting for the remaining variable. If we assume all relationships are linear, these are called **partial correlations**. Partial correlations are designed to reveal direct relationships by removing the influence of confounding variables. Here is a naive implementation:
 
 ```python
 def pcorr_residuals(X: np.ndarray) -> np.ndarray:
@@ -91,40 +91,42 @@ def pcorr_residuals(X: np.ndarray) -> np.ndarray:
     return pcorr
 ```
 
-Partial correlations correctly identify that $$U$$ is correlated to both $$X$$ and $$Y$$, and in turn that those are not correlated once we account for the effect of $$U$$:
+Partial correlations correctly identify that $$U$$ is correlated with both $$X$$ and $$Y$$, and in turn that those are not correlated once we account for the effect of $$U$$:
 
 {% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/partial_correlations.webp" class="img-fluid" %}
 
 <div class="caption">
-    Scatter plots of the residuals of each pair of variables on 200 random trios. On top of each graph, I show the <strong>partial correlation</strong> between the variables, and the associated P-value.
+    Scatter plots of the residuals of each pair of variables on 200 random trios, each with the <em>partial correlation</em> between the variables and its associated P-value indicated above.
 </div>
 
-Note that while $$\hat{\rho}_{X, U} \approx \rho_{X, U} = 0.8944$$, $$\hat{\rho}_{X, U \mid Y} \neq \rho_{X, U}$$. This is because $$Y$$ contains an additional noise term that makes the adjustment imperfect. Note as well that we have identified the **structure** of the data ($$X - U - Y$$), but not its **causal** structure ($$X \rightarrow U \rightarrow Y$$, $$X \leftarrow U \leftarrow Y$$ or $$X \rightarrow U \rightarrow Y$$).
+Note that while $$\hat{\rho}_{X, U} \approx \rho_{X, U} = 0.8944$$, $$\hat{\rho}_{X, U \mid Y} \neq \rho_{X, U}$$. This is because $$Y$$ contains an additional noise term that makes the adjustment imperfect. Also note that we have identified the **structure** of the data ($$X - U - Y$$), but not its **causal** structure ($$X \rightarrow U \rightarrow Y$$, $$X \leftarrow U \leftarrow Y$$ or $$X \rightarrow U \rightarrow Y$$).
 
-A downside of this approach is its computational complexity. For a $$n \times p$$ input matrix:
+A downside of this approach is its computational complexity. For an $$n \times p$$ input matrix:
 
 - Memory complexity: $$\mathcal{O}(np^2)$$, dominated by storing $${p \choose 2} = \mathcal{O}(p^2)$$ residuals, each of length $$n$$.
 - Time complexity: $$\mathcal{O}(np^4)$$, dominated by computing $${p \choose 2} = \mathcal{O}(p^2)$$ least squares problems, each of complexity $$\mathcal{O}(np^2)$$.
 
-Can we do better? Enter the **precision matrix**, a nice mathematical object to do this at scale.
+This is quite computational intensive, which will become a problem in real-world problems. Can we do better? Enter the **precision matrix**, a nice mathematical object to do this at scale.
 
 # The precision matrix
 
-Let's start with some basic definitions. The **variance** of a random variable $$X$$ is defined as
+{% details Need to dust off our old friends, the variance, covariance and correlation? %}
+
+The **variance** of a random variable $$X$$ is defined as
 
 $$
 \sigma_X^2 = \mathbf{E}(X - \mathbf{E}(X))^2
 $$
 
-The variance takes values in $$(0, \infty)$$, and measures how disperse the outcomes of the RV are from its mean. Notably, the **(scalar) precision** is defined as $$\frac 1 \sigma_X^2$$, so high variance equals low precision and vice versa.
+The variance takes values in $$[0, \infty)$$, and measures how disperse the outcomes of the RV are from its mean. Notably, the **(scalar) precision** is defined as $$\frac 1 \sigma_X^2$$, so high variance equals low precision and vice versa.
 
 The **covariance** between two random variables, $$X_1$$ and $$X_2$$, is defined as:
 
 $$
-\text{Cov}(X_1, X_2) = \mathbf{E}((X_1 - \mathbf{E}(X_1))(X_2 - \mathbf{E}(X_2)))
+\text{Cov}(X_1, X_2) = \mathbf{E}((X_1 - \mathbf{E}(X_1))(X_2 - \mathbf{E}(X_2))).
 $$
 
-Note that if $$X_1 = X_2$$, $$\sigma_{X_1}^2 = \sigma_{X_2}^2 = \text{Cov}(X_1, X_2)$$.
+Observe that if $$X_1 = X_2$$, $$\sigma_{X_1}^2 = \sigma_{X_2}^2 = \text{Cov}(X_1, X_2)$$.
 
 The covariance takes values in $$(-\sigma_{X_1} \sigma_{X_2}, \sigma_{X_1} \sigma_{X_2})$$, and measures the degree to which two random variables are linearly related. The **correlation** $$\rho$$ normalizes the covariance, rescaling it to the $$[-1, 1]$$ range:
 
@@ -132,7 +134,9 @@ $$
 \rho_{X_1, X_2} = \frac {\text{Cov}(X_1, X_2)} {\sigma_{X_1} \sigma_{X_2}}
 $$
 
-The **covariance matrix** of a set of random variables ties these quantities together. If $$\mathbf{X}$$ is a column vector such that
+{% enddetails %}
+
+The **covariance matrix** of a set of random variables ties the variance and the covariance together. If $$\mathbf{X}$$ is a column vector such that
 
 $$
 \mathbf{X} = \begin{pmatrix}
@@ -143,7 +147,7 @@ $$
 \end{pmatrix}
 $$
 
-then the covariance matrix $$\mathbf{\Sigma}$$ is
+then its associated covariance matrix $$\mathbf{\Sigma}$$ is
 
 $$
 \mathbf{\Sigma} = \begin{pmatrix}
@@ -167,24 +171,24 @@ P = \begin{pmatrix}
 \end{pmatrix}
 $$
 
-Finally, the **precision matrix** $$\mathbf{\Sigma}^{-1}$$ is the inverse of the covariance matrix, i.e., $$\mathbf{\Sigma} \mathbf{\Sigma}^{-1} = \mathbf{I}$$. Note that $$\mathbf{\Sigma}$$ is not guaranteed to be invertible, and hence $$\mathbf{\Sigma}^{-1}$$ might not exist. Let's ignore this case for now, and jump to where things start getting interesting. $$\mathbf{\Sigma}^{-1}$$ can be decomposed as follows:
+Finally, the **precision matrix** $$\mathbf{\Sigma}^{-1}$$ is the inverse of the covariance matrix, i.e., $$\mathbf{\Sigma} \mathbf{\Sigma}^{-1} = \mathbf{I}$$. $$\mathbf{\Sigma}$$ is not guaranteed to be invertible, and hence $$\mathbf{\Sigma}^{-1}$$ may not exist. Let's ignore this case for now, and jump to where things start getting interesting. $$\mathbf{\Sigma}^{-1}$$ can be decomposed as follows:
 
 $$
 \mathbf{\Sigma}^{-1} =
-U
+D
 \begin{pmatrix}
     1                                           & -\rho_{X_1, X_2 \mid X_3, \dots, X_n}          & \cdots & -\rho_{X_1, X_n \mid X_2, \cdots, X_{n-1}}      \\
     -\rho_{X_2, X_1 \mid X_3, \cdots, X_n}      & 1                                              & \cdots & -\rho_{X_2, X_n \mid X_1, X_3, \cdots, X_{n-1}} \\
     \vdots                                      & \vdots                                         & \ddots & \vdots                                          \\
     -\rho_{X_n, X_1 \mid X_2, \cdots, X_{n-1}}  & -\rho_{X_n, X_2 \mid X_1, X_3 \cdots, X_{n-1}} & \cdots & 1
 \end{pmatrix}
-U
+D
 $$
 
-where $$U$$ is a normalization matrix:
+where $$D$$ is a normalization matrix:
 
 $$
-U =
+D =
 \begin{pmatrix}
     \frac 1 {\sigma_{X_1 \mid X_2, \cdots, X_n}} &                                                   &        & 0 \\
                                                  & \frac 1 {\sigma_{X_2 \mid X_1, X_3, \cdots, X_n}} &        &   \\
@@ -193,11 +197,11 @@ U =
 \end{pmatrix}
 $$
 
-The entries $$-\rho_{X_., X_. \mid \dots}$$ in the middle matrix are **partial correlations**. Partial correlations quantify the correlation between two variables after removing the linear effects of the remaining variables. Partial correlations live in $$[-1, 1]$$.
+The entries $$-\rho_{X_., X_. \mid \dots}$$ in the middle matrix are our precious **partial correlations**.
 
 # Estimating the precision matrix
 
-Let's revisit our motivating example now. I computed the correlations in the toy example above by fitting a linear model for each pair of variables and computing the correlation between the residuals. However, we can also use our knowledge of the precision matrix to compute the same result more efficiently:
+Let's revisit our motivating example equipped with our newfound knowledge: instead of fitting $$\mathcal{O}(p^2)$$ linear models, let's reach the same result using linear algebra. First, we will estimate the covariance matrix using the maximum likelihood approach. Then, we will invert it to obtain the precision matrix.
 
 ```python
 def pcorr_linalg(X: np.ndarray) -> np.ndarray: # (n, p) -> (p, p)
@@ -217,9 +221,10 @@ def pcorr_linalg(X: np.ndarray) -> np.ndarray: # (n, p) -> (p, p)
 
     n, p = X.shape
 
-    # could be replaced bt covariance = np.cov(X, rowvar=False)
+    # could be replaced by covariance = np.cov(X, rowvar=False)
     centered_X = X - X.mean(axis=0)
     covariance = np.dot(centered_X.T, centered_X) / (n - 1)
+
     precision = np.linalg.inv(covariance)
 
     normalization_factors = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
@@ -228,19 +233,39 @@ def pcorr_linalg(X: np.ndarray) -> np.ndarray: # (n, p) -> (p, p)
     return partial_correlations
 ```
 
-This implementation is not only more compact, but has a much better complexity:
+This implementation is not only more compact, but has a more favorable computational complexity:
 
 - Memory complexity: $$\mathcal{O}(p^2)$$, dominated by the intermediate matrices.
 - Time complexity: $$\mathcal{O}(np^2 + p^3)$$, dominated by the computation of the covariance matrix and the matrix inversion.
 
 Furthermore, this implementation is [vectorized]({% post_url 2024-02-04-python-vectors %}) which further improves the speed. As a quick benchmark, on a random $$1000 \times 100$$ matrix, the original `pcorr_residuals` took 40.85 seconds; the updated `pcorr_linalg` took only 0.0007 seconds.
 
-Two disclaimers are needed here. One is that this code will not work when $$\Sigma$$ is [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In those cases, [the **pseudoinverse** matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) could take its place, although we would be moving away from the theory and hence we should be careful interpreting the results. The other is that the matrix inversion will be inaccurate when $$\Sigma$$ is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number). In those cases, [regularization](https://scikit-learn.org/stable/modules/covariance.html) can help.
+As with many elegant results in linear algebra, things start breaking down when our correlation matrix is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number) or straight up [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In [high-dimensional problems](https://en.wikipedia.org/wiki/High-dimensional_statistics), $$\Sigma$$ is non-invertible (and hard to estimate in the first place). In such cases, we could use [the **pseudoinverse** matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) instead of the inverse. But that's just a patch: we will get results, but we are outside of the theory and interpreting the results is not as straightforward. However, when the matrix is ill-conditioned, there is a potential path to salvation: [regularization](https://scikit-learn.org/stable/modules/covariance.html).
 
 # Regularized estimation
 
-Let's scale up our toy example to 20 variables.
+Adding a regularization step to the covariance matrix estimation will result in a better conditioned matrix. A common approach is _shrinking_ our empirical covariance towards another matrix, the _target_:
 
-<!-- TODO regularization: https://scikit-learn.org/stable/modules/covariance.html -->
+$$
+\hat{\mathbf{\Sigma}} = (1 - \alpha) \hat{\mathbf{\Sigma}}_\text{MLE} + \alpha T
+$$
 
-# Application: the Titanic dataset
+where $$\alpha \in [0, 1]$$ is a parameter and $$T$$ is the target matrix, a highly structured matrix that encodes our assumption about what a _true_ covariance matrix should look like. A possible and aggressive target matrix is a diagonal matrix, which encodes the assumption of zero covariance between variables. By upweighting the diagonal elements and downweighting the off-diagonal elements, this matrix will have a better condition than $$\Sigma_\text{MLE}$$.
+
+The problem becomes then tuning $$\alpha$$. A common way to compute the $$\alpha$$ is the [Ledoit-Wolf shrinkage method](https://web.archive.org/web/20141205061842/http://www.econ.uzh.ch/faculty/ledoit/publications/honey.pdf), which finds the $$\alpha$$ that minimizes the mean squared error between the real and the estimated matrix. Its [scikit-learn implementation](https://github.com/scikit-learn/scikit-learn/blob/68483539614102ba8e083277ed7123e6a9fece53/sklearn/covariance/_shrunk_covariance.py#L25) assumes that the target matrix is $$T = \mu I$$, where $$\mu$$ is the average variance.
+
+Alternatively, we can use graphical lasso to estimate a sparse precision matrix. Conceptually, this is a bit easier to swallow: in many situations, most variables being conditionally uncorrelated is a valid assumption. The [graphical lasso](https://en.wikipedia.org/wiki/Graphical_lasso) does just that; it is a penalized estimator of the precision matrix.
+
+$$
+\hat{\mathbf{\Sigma}}^{-1} = \operatorname{argmin}_{\mathbf{\Sigma}^{-1} \succ 0} \left(\operatorname{tr}(\mathbf{\Sigma} \mathbf{\Sigma}^{-1}) - \log \det \mathbf{\Sigma}^{-1} - \lambda \|\mathbf{\Sigma}^{-1}\|_1 \right)
+$$
+
+Enough theory, let's look at a practical high-dimensional example (20 samples, 20 features).
+
+{% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/high_dimensional_experiments.webp" class="img-fluid" %}
+
+<div class="caption">
+    Ground truth and estimated covariance matrix, precision matrix and structure of a high-dimensional example. The data generation process involved 20 samples, with 20 features each, sampled from a 0-mean multivariate Normal distribution. The estimated structure using the Ledoit-Wolf used a soft threshold (abs(correlation) > 0.1); otherwise, the fully connected graph would be shown.
+</div>
+
+As we can see, **maximum likelihood estimation** absolutely fails. Due to the extremely ill-conditioned covariance matrix, the precision matrix is completely off scale, with values ranging from -1.8e+15 to 1.0e+15. **Ledoit-Wolf** succeeds at computing a sensible-looking precision matrix. But recovering a structure, e.g., by thresholding it, is quite a doomed task. Last, **graphical lasso** is able to find a relatively sparse structure. While it is still far from the ground truth, it prunes away most of the spurious correlations and keeps most of the true links. More than anything, this little exercise shows how hard this endeavour is, and serves as a good caution to high-dimensional statistics. Beware!
