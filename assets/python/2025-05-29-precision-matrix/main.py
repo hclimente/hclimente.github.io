@@ -392,7 +392,7 @@ def plot_matrix(matrix, ax, **kwargs):
 fig, ax = plt.subplots(3, 4, figsize=(15, 9))
 
 row_labels = ["Covariance", "Precision", "Structure"]
-col_labels = ["Ground truth", "MLE", "Ledoit-Wolf", "GraphicalLasso"]
+col_labels = ["Ground Truth", "Maximum Likelihood", "Ledoit-Wolf", "Graphical Lasso"]
 
 plot_matrix(cov, ax[0, 0])
 plot_matrix(precision, ax[1, 0])
@@ -431,21 +431,5 @@ for j, label in enumerate(col_labels):
 
 plt.tight_layout()
 save_fig(plt.gcf(), "high_dimensional_experiments")
-
-# %%
-precision = model.precision_  # shape (p, p)
-denom = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
-partial_corr = -precision / denom
-
-# %%
-np.median(mle_precision)
-
-# %%
-mle_precision.min()
-# print in scientific notation
-print(f"{mle_precision.min():.2e}")
-
-# %%
-mle_precision.max()
 
 # %%

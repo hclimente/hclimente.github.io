@@ -1,13 +1,11 @@
 ---
 layout: post
 title: Covariance and precision
-date: 2025-05-29 11:59:00
+date: 2025-07-18 11:59:00
 description: Learning the hidden structure of data
 tags: linear_algebra graphs statistics
 giscus_comments: true
 related_posts: false
-mermaid:
-  enabled: true
 ---
 
 Imagine we have a set of 3 variables ($$U$$, $$X$$, and $$Y$$), with one of them being upstream of the other two ($$X \leftarrow U \rightarrow Y$$):
@@ -110,7 +108,7 @@ This is quite computational intensive, which will become a problem in real-world
 
 # The precision matrix
 
-{% details Need to dust off our old friends, the variance, covariance and correlation? %}
+{% details Need to dust off the basics? Variance, covariance and correlation %}
 
 The **variance** of a random variable $$X$$ is defined as
 
@@ -260,7 +258,7 @@ $$
 \hat{\mathbf{\Sigma}}^{-1} = \operatorname{argmin}_{\mathbf{\Sigma}^{-1} \succ 0} \left(\operatorname{tr}(\mathbf{\Sigma} \mathbf{\Sigma}^{-1}) - \log \det \mathbf{\Sigma}^{-1} - \lambda \|\mathbf{\Sigma}^{-1}\|_1 \right)
 $$
 
-Enough theory, let's look at a practical high-dimensional example (20 samples, 20 features).
+Let's bring this point home by looking at a high-dimensional example (20 samples, 20 features).
 
 {% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/high_dimensional_experiments.webp" class="img-fluid" %}
 
@@ -268,4 +266,4 @@ Enough theory, let's look at a practical high-dimensional example (20 samples, 2
     Ground truth and estimated covariance matrix, precision matrix and structure of a high-dimensional example. The data generation process involved 20 samples, with 20 features each, sampled from a 0-mean multivariate Normal distribution. The estimated structure using the Ledoit-Wolf used a soft threshold (abs(correlation) > 0.1); otherwise, the fully connected graph would be shown.
 </div>
 
-As we can see, **maximum likelihood estimation** absolutely fails. Due to the extremely ill-conditioned covariance matrix, the precision matrix is completely off scale, with values ranging from -1.8e+15 to 1.0e+15. **Ledoit-Wolf** succeeds at computing a sensible-looking precision matrix. But recovering a structure, e.g., by thresholding it, is quite a doomed task. Last, **graphical lasso** is able to find a relatively sparse structure. While it is still far from the ground truth, it prunes away most of the spurious correlations and keeps most of the true links. More than anything, this little exercise shows how hard this endeavour is, and serves as a good caution to high-dimensional statistics. Beware!
+As we can see, **maximum likelihood estimation** absolutely fails. Due to the extremely ill-conditioned covariance matrix, the precision matrix is completely off scale, with values ranging from -1.8e+15 to 1.0e+15. **Ledoit-Wolf** succeeds at computing a sensible-looking precision matrix. But recovering a structure, e.g., by thresholding it, is quite a hard task. Last, **graphical lasso** is able to find a relatively sparse structure. While it is still far from the ground truth, it prunes away most of the spurious correlations and keeps most of the true links. More than anything, this little exercise shows how hard this endeavour is, and serves as a good caution to high-dimensional statistics. Beware!
