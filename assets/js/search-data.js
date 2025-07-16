@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-dna-language-model-fine-tuning-and-inference",
+        },{id: "post-covariance-and-precision",
+      
+        title: "Covariance and precision",
+      
+      description: "Learning the hidden structure of data",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/precision-matrix/";
+        
+      },
+    },{id: "post-dna-language-model-fine-tuning-and-inference",
       
         title: "DNA language model fine-tuning and inference",
       
