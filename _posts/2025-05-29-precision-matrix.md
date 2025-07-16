@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Covariance and precision
-date: 2025-07-18 11:59:00
+date: 2025-07-16 11:59:00
 description: Learning the hidden structure of data
 tags: linear_algebra graphs statistics
 giscus_comments: true
@@ -31,7 +31,7 @@ We want to discover this structure from observational data. Since both $$X$$ and
 {% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/correlations.webp" class="img-fluid" %}
 
 <div class="caption">
-    Scatter plots of each pair of variables on 200 random trios, each with the correlation between the variables and the associated P-value indicated above.
+    Scatter plots of each pair of variables on 200 observations, each with the correlation between the variables and the associated P-value indicated above.
 </div>
 
 A sensible way of going about it is to study the correlation between each pair of variables after adjusting for the remaining variable. If we assume all relationships are linear, these are called **partial correlations**. Partial correlations are designed to reveal direct relationships by removing the influence of confounding variables. Here is a naive implementation:
@@ -54,14 +54,12 @@ def pcorr_residuals(X: np.ndarray) -> np.ndarray:
 
     n, p = X.shape
 
-    # dictionary to store the centered residuals
-    # keys are tuples of (target, excluded) and values are the residuals
     residuals = np.empty((p, p), dtype=object)
 
     for i in range(p):
         for j in range(i + 1, p):
-            idx_covars = [k for k in range(p) if k != i and k != j]
-            X_covars = X[:, idx_covars]
+            covariates_indices = [k for k in range(p) if k != i and k != j]
+            X_covars = X[:, covariates_indices]
 
             for target, excluded in [(i, j), (j, i)]:
 
@@ -94,7 +92,7 @@ Partial correlations correctly identify that $$U$$ is correlated with both $$X$$
 {% include figure.liquid loading="eager" path="assets/python/2025-05-29-precision-matrix/img/partial_correlations.webp" class="img-fluid" %}
 
 <div class="caption">
-    Scatter plots of the residuals of each pair of variables on 200 random trios, each with the <em>partial correlation</em> between the variables and its associated P-value indicated above.
+    Scatter plots of the residuals of each pair of variables on 200 observations, each with the <em>partial correlation</em> between the variables and its associated P-value indicated above.
 </div>
 
 Note that while $$\hat{\rho}_{X, U} \approx \rho_{X, U} = 0.8944$$, $$\hat{\rho}_{X, U \mid Y} \neq \rho_{X, U}$$. This is because $$Y$$ contains an additional noise term that makes the adjustment imperfect. Also note that we have identified the **structure** of the data ($$X - U - Y$$), but not its **causal** structure ($$X \rightarrow U \rightarrow Y$$, $$X \leftarrow U \leftarrow Y$$ or $$X \rightarrow U \rightarrow Y$$).
@@ -219,14 +217,15 @@ def pcorr_linalg(X: np.ndarray) -> np.ndarray: # (n, p) -> (p, p)
 
     n, p = X.shape
 
-    # could be replaced by covariance = np.cov(X, rowvar=False)
+    # showing how the sausage is made
+    # but could be replaced by covariance = np.cov(X, rowvar=False)
     centered_X = X - X.mean(axis=0)
     covariance = np.dot(centered_X.T, centered_X) / (n - 1)
 
     precision = np.linalg.inv(covariance)
 
     normalization_factors = np.sqrt(np.outer(np.diag(precision), np.diag(precision)))
-    partial_correlations = precision / normalization_factors
+    partial_correlations = - precision / normalization_factors
 
     return partial_correlations
 ```
@@ -234,11 +233,11 @@ def pcorr_linalg(X: np.ndarray) -> np.ndarray: # (n, p) -> (p, p)
 This implementation is not only more compact, but has a more favorable computational complexity:
 
 - Memory complexity: $$\mathcal{O}(p^2)$$, dominated by the intermediate matrices.
-- Time complexity: $$\mathcal{O}(np^2 + p^3)$$, dominated by the computation of the covariance matrix and the matrix inversion.
+- Time complexity: $$\mathcal{O}(np^2 + p^3)$$, dominated by the computation of the covariance matrix and by the matrix inversion.
 
-Furthermore, this implementation is [vectorized]({% post_url 2024-02-04-python-vectors %}) which further improves the speed. As a quick benchmark, on a random $$1000 \times 100$$ matrix, the original `pcorr_residuals` took 40.85 seconds; the updated `pcorr_linalg` took only 0.0007 seconds.
+Furthermore, this implementation is [vectorized]({% post_url 2024-02-04-python-vectors %}) which further boosts performance. As a quick benchmark, on a random $$1000 \times 100$$ matrix, the original `pcorr_residuals` took 40.85 seconds; the updated `pcorr_linalg` took only 0.0007 seconds.
 
-As with many elegant results in linear algebra, things start breaking down when our correlation matrix is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number) or straight up [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In [high-dimensional problems](https://en.wikipedia.org/wiki/High-dimensional_statistics), $$\Sigma$$ is non-invertible (and hard to estimate in the first place). In such cases, we could use [the **pseudoinverse** matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) instead of the inverse. But that's just a patch: we will get results, but we are outside of the theory and interpreting the results is not as straightforward. However, when the matrix is ill-conditioned, there is a potential path to salvation: [regularization](https://scikit-learn.org/stable/modules/covariance.html).
+As with many elegant results in linear algebra, things start breaking down when our correlation matrix is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number) or outright [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In [high-dimensional problems](https://en.wikipedia.org/wiki/High-dimensional_statistics), $$\Sigma$$ is non-invertible (and hard to estimate in the first place). In such cases, we could use [the **pseudoinverse** matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) instead of the inverse. But that's just a patch: we will get results, but we are outside of the theory and interpreting the results is not as straightforward. However, when the matrix is ill-conditioned, there is a potential path to salvation: [regularization](https://scikit-learn.org/stable/modules/covariance.html).
 
 # Regularized estimation
 
@@ -255,8 +254,10 @@ The problem becomes then tuning $$\alpha$$. A common way to compute the $$\alpha
 Alternatively, we can use graphical lasso to estimate a sparse precision matrix. Conceptually, this is a bit easier to swallow: in many situations, most variables being conditionally uncorrelated is a valid assumption. The [graphical lasso](https://en.wikipedia.org/wiki/Graphical_lasso) does just that; it is a penalized estimator of the precision matrix.
 
 $$
-\hat{\mathbf{\Sigma}}^{-1} = \operatorname{argmin}_{\mathbf{\Sigma}^{-1} \succ 0} \left(\operatorname{tr}(\mathbf{\Sigma} \mathbf{\Sigma}^{-1}) - \log \det \mathbf{\Sigma}^{-1} - \lambda \|\mathbf{\Sigma}^{-1}\|_1 \right)
+\hat{\mathbf{\Sigma}}^{-1} = \operatorname{argmin}_{\mathbf{\Sigma}^{-1} \succ 0} \left(\operatorname{tr}(\mathbf{\Sigma} \mathbf{\Sigma}^{-1}) - \log \det \mathbf{\Sigma}^{-1} - \lambda \|\mathbf{\Sigma}^{-1}\|_1 \right).
 $$
+
+The $$- \lambda \|\mathbf{\Sigma}^{-1}\|_1$$ term will favor sparse matrices, with a strength proportional to the magnitude of $$\lambda$$. While tuning $$\lambda$$ is in itself a challenge, a common approach is using [cross-validation](https://scikit-learn.org/stable/modules/generated/sklearn.covariance.GraphicalLassoCV.html).
 
 Let's bring this point home by looking at a high-dimensional example (20 samples, 20 features).
 
@@ -266,4 +267,14 @@ Let's bring this point home by looking at a high-dimensional example (20 samples
     Ground truth and estimated covariance matrix, precision matrix and structure of a high-dimensional example. The data generation process involved 20 samples, with 20 features each, sampled from a 0-mean multivariate Normal distribution. The estimated structure using the Ledoit-Wolf used a soft threshold (abs(correlation) > 0.1); otherwise, the fully connected graph would be shown.
 </div>
 
-As we can see, **maximum likelihood estimation** absolutely fails. Due to the extremely ill-conditioned covariance matrix, the precision matrix is completely off scale, with values ranging from -1.8e+15 to 1.0e+15. **Ledoit-Wolf** succeeds at computing a sensible-looking precision matrix. But recovering a structure, e.g., by thresholding it, is quite a hard task. Last, **graphical lasso** is able to find a relatively sparse structure. While it is still far from the ground truth, it prunes away most of the spurious correlations and keeps most of the true links. More than anything, this little exercise shows how hard this endeavour is, and serves as a good caution to high-dimensional statistics. Beware!
+As we can see, **maximum likelihood estimation** absolutely fails. Due to the extremely ill-conditioned covariance matrix, the precision matrix is completely off scale, with values ranging from -1.8e+15 to 1.0e+15. **Ledoit-Wolf** succeeds at computing a sensible-looking precision matrix. But recovering a structure, e.g., by thresholding it, is quite a hard task. Last, **graphical lasso** is able to find a relatively sparse structure. While it is still far from the ground truth, it prunes away most of the spurious correlations and keeps most of the true links. [As expected](https://scikit-learn.org/stable/modules/covariance.html#sparse-inverse-covariance), most of the true links are larger in absolute value, and further pruning it would return something close to the true structure.
+
+More than anything, this little exercise shows how hard this endeavour is, and serves as a good caution to high-dimensional statistics. Beware!
+
+## Conclusions
+
+Under certain assumptions, the precision matrix helps us discover the internal structure of the data. When should we use what to estimate it?
+
+1. **Empirical inverse (MLE):** fast and exact, but blows up if $$p$$ approaches $$n$$ or $$\hat Σ$$ is singular. Use it when $$n \gg p$$ and $$\hat Σ$$ is well‑conditioned.
+1. **Shrinkage (Ledoit-Wolf):** automatically picks $$\alpha$$ to stabilize $$\hat Σ$$, yielding a dense but well‑behaved precision. Use it when $$\frac p n$$ is moderate.
+1. **Graphical Lasso (cross‑validated $$\lambda$$):** trades off likelihood vs. sparsity to prune weak edges and reveal a parsimonious conditional‑independence network. Use it in high‑dimensional settings.
