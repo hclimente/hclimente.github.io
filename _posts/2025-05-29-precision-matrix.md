@@ -193,7 +193,7 @@ D =
 \end{pmatrix}
 $$
 
-The entries $$-\rho_{X_., X_. \mid \dots}$$ in the middle matrix are our precious **partial correlations**.
+The entries $$\rho_{X_., X_. \mid \dots}$$ in the middle matrix are our precious **partial correlations**.
 
 # Estimating the precision matrix
 
@@ -237,7 +237,7 @@ This implementation is not only more compact, but has a more favorable computati
 
 Furthermore, this implementation is [vectorized]({% post_url 2024-02-04-python-vectors %}) which further boosts performance. As a quick benchmark, on a random $$1000 \times 100$$ matrix, the original `pcorr_residuals` took 40.85 seconds; the updated `pcorr_linalg` took only 0.0007 seconds.
 
-As with many elegant results in linear algebra, things start breaking down when our correlation matrix is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number) or outright [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In [high-dimensional problems](https://en.wikipedia.org/wiki/High-dimensional_statistics), $$\Sigma$$ is non-invertible (and hard to estimate in the first place). In such cases, we could use [the **pseudoinverse** matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) instead of the inverse. But that's just a patch: we will get results, but we are outside of the theory and interpreting the results is not as straightforward. However, when the matrix is ill-conditioned, there is a potential path to salvation: [regularization](https://scikit-learn.org/stable/modules/covariance.html).
+As with many elegant results in linear algebra, things start breaking down when our covariance matrix is [ill-conditioned](https://en.wikipedia.org/wiki/Condition_number) or outright [non-invertible](https://en.wikipedia.org/wiki/Singular_matrix). In [high-dimensional problems](https://en.wikipedia.org/wiki/High-dimensional_statistics), $$\Sigma$$ is non-invertible (and hard to estimate in the first place). In such cases, we could use [the pseudoinverse matrix](https://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_inverse) instead of the inverse. But that's just a patch: we will get results, but we are outside of the theory and interpreting the results is not as straightforward. However, when the matrix is ill-conditioned, there is a potential path to salvation: [regularization](https://scikit-learn.org/stable/modules/covariance.html).
 
 # Regularized estimation
 
