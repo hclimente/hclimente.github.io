@@ -18,7 +18,7 @@ $$
 
 (As stated above, using the binary logarithm, entropy is measured in [bits](https://en.wikipedia.org/wiki/Bit); when using the natural logarithm instead, the unit of measure is nats. For the remainder of this post, I will only use the binary logarithm, and omit the subscript.)
 
-# Interpreting entropy
+# What does entropy _really_ mean?
 
 Entropy is the expected value of a quantity ($$\log \frac{1}{p_i}$$) that reflects how surprising an outcome is: if an outcome is rare ($$p_i$$ is small), observing it should be quite surprising ($$\log \frac{1}{p_i}$$ is large); if it is very common, the surprise should be low.
 
@@ -70,9 +70,7 @@ However, it is possible to go lower if we are willing to instead send our weathe
 | RSSSSSSSSS     | 4.00e-10    | 33                          |
 | SSSSSSSSSS     | 1.00e-10    | 33                          |
 
-The average length of this code is 1.46. Slightly better! And it's easy to see how, as we keep batching more days together, our weather reports become shorter and shorter.
-
-And this brings us to the key point: entropy represents the lower bound for the average message length required to encode the outcome of a random process. Even with the optimal encoding and incredibly large batches, we can't do better than entropy. In the case of our distribution:
+The average length of this code is 14.6 bits, or 1.46 bits per day. Slightly better! And it's easy to see how, as we keep batching more and more days together, each single day requires less and less bits. And this brings us to the key point: entropy represents the lower bound for the average message length required to encode each outcome of a random process. Even with the optimal encoding and incredibly large batches, we can't do better than entropy. In the case of our distribution:
 
 $$
 H(P) = 0.5 \log \frac 1 {0.5} + 0.4 \log \frac 1 {0.4} + 0.1 \log \frac 1 {0.1} = 1.36
@@ -82,15 +80,41 @@ The Huffman encoding was doing pretty well after all!
 
 # Cross-entropy
 
-We just saw how allowing our colleague to know the true distribution of the data gave us an edge in encoding the sequence of outcomes efficiently. However, here in the real world we rarely have access to _true_ probability distributions, if such a thing even exists. At most, we have access to our best guess of what the true probability distribution is. For instance, if we have a coin, we can assume that it's a fair coin ($$P(\text{heads}) = 0.5$$); or maybe toss it a couple of times and assume the bias we can estimate via maximum likelihood ($$P(\text{heads}) = \frac {\text{number of heads}} {\text{number of tosses}}$$).
+We just saw how knowing the underlying probability distribution gave us an edge in encoding the outcomes efficiently. However, here in the real world we rarely have access to _true_ probability distributions, if such a thing even exists. At most, we have access to our best guess of what the true probability distribution is. For instance, we rely on very complex models to accurately predict the weather. But let's leave these aside, and let's use my mental model of how weather works as learnt in Barcelona, Spain:
 
-The **cross-entropy** is a quantity that can be used in such occasions. If $$p$$ is the true distribution and $$q$$ is our model of the world:
+| Weather | Probability |
+| ------- | ----------- |
+| Cloudy  | 0.2         |
+| Rainy   | 0.1         |
+| Sunny   | 0.7         |
+
+As you can imagine, after moving to London, my mental model of weather was not that useful. While I was developing my own model, I often experienced _surprise_, as outcomes that should be rare were quite common, and viceversa. Entropy quantified our average surprise when observing a distribution's outcomes while knowing the true distribution. Similarly, the **cross-entropy** measures our surprise when observing a distribution's outcomes while only having a _model_ of the true distribution. If $$p$$ is the true distribution and $$q$$ is our model of the world:
 
 $$
-H(p, q) = - \sum_x p(x) \log \frac{1}{q(x)}.
+H(p, q) = \sum_x p(x) \log \frac{1}{q(x)}.
 $$
 
-Just like entropy, it reflects surprise — but this time, it's the surprise experienced when we believe the world follows model $$p$$, while in reality it's distributed according to $$q$$.
+Just like entropy, $$\log \frac{1}{q(x)}$$ measures the degree of surprise (higher is more surprising), which is weighted by the frequency with which we observe the outcome. It is also measured in bits. And it can also be interpreted as the average number of bits required to encode the outcome from $$p$$ while using a code generated using $$q$$, leveraging probability in the same ways we saw above.
+
+> Note that order matters! $$H(p, q) \neq H(q, p)$$.
+
+This is the cross-entropy of my weather model right after landing in London:
+
+$$
+H(\text{weather}_\text{London}, \hat{\text{weather}}_\text{Barcelona}) = 0.5 \log 1 0.2 + 0.4 \log 1 0.1 + 0.1 \log 1 0.7 = 2.54.
+$$
+
+However, after a few years in London my model became quite accurate, to the extent that $$\hat{\text{weather}}_\text{London} = \text{weather}_\text{London}$$:
+
+$$
+H(\text{weather}_\text{London}, \hat{\text{weather}}_\text{London}) = 0.5 \log 1 0.5 + 0.4 \log 1 0.4 + 0.1 \log 1 0.1 = 1.36.
+$$
+
+This is an important result: $$H(p, q) \geq H(p, p) = H(p)$$.
+
+# Why this all matters?
+
+We have talked a great deal about random distributions, processes, encodings and so on. However one of the most important applications of cross-entropy is machine learning. Many machine learning algorithms aim at learning a probability distribution. For instance, discriminative models aim to learn the probability of an outcome given some input data ($$P(Y \mid X)$$), e.g., what's the likelihood of a disease given that some blood test came positive?. Generative models aim to learn the probability distribution of the data itself ($$P(X, Y)$$), e.g., a language models like GPT can generate novels, answer questions, software or legal documents. During model _training_ these models aim to learn a distribution that minimizes the cross-entropy between their model of the data, and the data itself.
 
 # Further readings
 
