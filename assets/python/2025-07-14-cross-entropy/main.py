@@ -15,56 +15,41 @@
 # ---
 
 # %%
-from dahuffman import HuffmanCodec
 import heapq
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import seaborn as sns
 from typing import Dict, Optional
 
-day_prob = {
+p_london_weather = {
     "C": 0.5,
     "R": 0.4,
     "S": 0.1,
 }
-symbol_prob = day_prob.copy()
-
 N = 10
 
-for _ in range(1, N):
-    new_symbol_prob = {}
-    for seq, p_seq in symbol_prob.items():
-        for day, p_day in day_prob.items():
-            new_seq = seq + day
-            new_symbol_prob[new_seq] = p_day * p_seq
-    symbol_prob = new_symbol_prob
 
-codec = HuffmanCodec.from_frequencies(symbol_prob)
+def generate_kmer_probabilities(
+    symbol_prob: Dict[str, float], k: int
+) -> Dict[str, float]:
 
-avg_length = 0
-for symbol, (bits, _) in codec._table.items():
-    avg_length += bits * symbol_prob.get(symbol, 0) / N
-print(f"Average code length: {avg_length:.2f}")
+    kmer_prob = symbol_prob.copy()
+
+    for _ in range(1, k):
+        new_kmer_prob = {}
+        for kmer, p_kmer in kmer_prob.items():
+            for symbol, p_symbol in symbol_prob.items():
+                new_kmer = kmer + symbol
+                new_kmer_prob[new_kmer] = p_symbol * p_kmer
+        kmer_prob = new_kmer_prob
+
+    kmer_prob = dict(sorted(kmer_prob.items(), key=lambda item: item[1], reverse=True))
+    return kmer_prob
 
 
-# %%
-print("| 10-day weather | Probability | Length of the binary string |")
-print("|----------------|-------------|-----------------------------|")
-
-code = codec._table.items()
-# sort by probability
-code = sorted(code, key=lambda x: symbol_prob.get(x[0], 0), reverse=True)
-
-for symbol, (bits, _) in code:
-    p = symbol_prob.get(symbol, 0)
-    if p == 0:
-        continue
-    print(f"| {symbol}     | {p:.2e}    | {bits}                          |")
+p_london_kmer = generate_kmer_probabilities(p_london_weather, N)
 
 
 # %%
 def generate_huffman_codes(probabilities: Dict[str, float]) -> Dict[str, str]:
-    """Generates optimal prefix codes (Huffman codes) for a given probability distribution."""
+    """Generates Huffman codes for a given probability distribution."""
     # Create a priority queue (min-heap) of nodes. Each node is a tuple:
     # (probability, symbol_or_tree)
     heap = [[weight, [symbol, ""]] for symbol, weight in probabilities.items()]
@@ -85,110 +70,63 @@ def generate_huffman_codes(probabilities: Dict[str, float]) -> Dict[str, str]:
     return dict(sorted(heapq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p[0])))
 
 
-def plot_entropy_bars(
-    p_dist: Dict[str, float],
-    q_dist: Optional[Dict[str, float]] = None,
-    ax: Optional[plt.Axes] = None,
-):
-    """
-    Visualizes Entropy or Cross-Entropy using variable-width bars.
+enc_london = generate_huffman_codes(p_london_kmer)
 
-    - For Entropy: Call with just p_dist. Widths and code lengths are from p_dist.
-    - For Cross-Entropy H(p, q): Call with p_dist and q_dist.
-      Widths are from p_dist (true probability), but code lengths are from q_dist (model).
-    """
-    if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 6))
 
-    # Determine if we're calculating Entropy or Cross-Entropy
-    is_cross_entropy = q_dist is not None
-    code_source_dist = q_dist if is_cross_entropy else p_dist
+def get_average_length(kmer_prob: Dict[str, float], encoding: Dict[str, str]) -> float:
+    """Calculate the average code length for a given k-mer probability distribution and encoding."""
+    k = len(next(iter(kmer_prob)))
+    avg_length = 0
+    for kmer, prob in kmer_prob.items():
+        kmer_enc = encoding.get(kmer, "")
+        avg_length += len(kmer_enc) * prob / k
+    return avg_length
 
-    # Generate optimal codes based on the source distribution
-    huffman_codes = generate_huffman_codes(code_source_dist)
 
-    # Prepare data for plotting
-    labels = list(p_dist.keys())
-    probs = [p_dist[label] for label in labels]
-    code_lengths = [len(huffman_codes[label]) for label in labels]
-
-    # Calculate the final value (Entropy or Cross-Entropy)
-    total_avg_length = sum(p * length for p, length in zip(probs, code_lengths))
-
-    # Set up plot title and colors
-    if is_cross_entropy:
-        title = f"Cross-Entropy H(p, q) = {total_avg_length:.2f} bits"
-        palette = sns.color_palette("Reds_d", n_colors=len(labels))
-    else:
-        title = f"Entropy H(p) = {total_avg_length:.2f} bits"
-        palette = sns.color_palette("Blues_d", n_colors=len(labels))
-
-    # Sort items for drawing, typically by probability for a clean look
-    sorted_items = sorted(
-        zip(labels, probs, code_lengths, palette), key=lambda x: x[1], reverse=True
-    )
-
-    current_x = 0
-    for label, prob, length, color in sorted_items:
-        # Create a rectangle patch: xy, width, height
-        rect = patches.Rectangle(
-            (current_x, 0),
-            width=prob,
-            height=length,
-            facecolor=color,
-            edgecolor="white",
-            linewidth=1.5,
-            label=f"{label} (p={prob:.2f}, len={length})",
-        )
-        ax.add_patch(rect)
-
-        # Add text label inside the rectangle
-        text_color = "white"
-        ax.text(
-            current_x + prob / 2,
-            length / 2,
-            f"{label}\n{length} bits",
-            ha="center",
-            va="center",
-            color=text_color,
-            fontsize=12,
-            fontweight="bold",
-        )
-        current_x += prob
-
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, max(code_lengths) * 1.15)
-    ax.set_xlabel("Cumulative Probability", fontsize=12)
-    ax.set_ylabel("Code Length (bits)", fontsize=12)
-    ax.set_title(title, fontsize=16, fontweight="bold", pad=20)
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-
-    # %%
-    # Set a pretty theme
-    sns.set_theme(style="ticks")
-
-    # Define the true (London) and model (Barcelona) probability distributions
-    p_london_weather = {"Cloudy": 0.5, "Rainy": 0.4, "Sunny": 0.1}
-    q_barcelona_weather = {"Sunny": 0.7, "Cloudy": 0.2, "Rainy": 0.1}
-
-    # Create a figure with two subplots side-by-side
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-
-    # Plot 1: Entropy of London Weather H(p)
-    # The codes are optimized for the London distribution itself.
-    plot_entropy_bars(p_dist=p_london_weather, ax=ax1)
-
-    # Plot 2: Cross-Entropy H(p, q)
-    # We experience London weather (widths from p) but use codes
-    # optimized for Barcelona weather (heights from q).
-    plot_entropy_bars(p_dist=p_london_weather, q_dist=q_barcelona_weather, ax=ax2)
-
-    fig.suptitle(
-        "Visualizing Entropy vs. Cross-Entropy", fontsize=20, fontweight="bold"
-    )
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.show()
+print(
+    f"Average code length Spain weather in Spain: {get_average_length(p_london_kmer, enc_london):.4f}"
+)
 
 
 # %%
+def tabulate_encoding(
+    encoding: Dict[str, str], code_prob: Optional[Dict[str, float]] = None
+) -> str:
+
+    print(
+        "| 10-day weather | Probability | Codeword                         | Codeword length |"
+    )
+    print(
+        "| -------------- | ----------- | -------------------------------- | --------------- |"
+    )
+
+    for symbol, code in encoding.items():
+        p = code_prob.get(symbol, 0)
+        if p == 0:
+            continue
+        print(
+            f"| {symbol}     | {p:.2e}    | {code}{' ' * (32 - len(code))} | {len(code)} {' ' * (14 - len(str(len(code))))} |"
+        )
+
+
+tabulate_encoding(enc_london, p_london_kmer)
+
+# %%
+p_barcelona_weather = {
+    "C": 0.2,
+    "R": 0.1,
+    "S": 0.7,
+}
+
+p_barcelona_kmer = generate_kmer_probabilities(p_barcelona_weather, N)
+enc_barcelona = generate_huffman_codes(p_barcelona_kmer)
+
+print(
+    f"Average code length Spain weather in Spain: {get_average_length(p_barcelona_kmer, enc_barcelona):.4f}"
+)
+print(
+    f"Average code length Spain weather in UK: {get_average_length(p_london_kmer, enc_barcelona):.4f}"
+)
+
+# %%
+tabulate_encoding(enc_barcelona, p_barcelona_kmer)
