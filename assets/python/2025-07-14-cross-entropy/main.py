@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -16,9 +17,20 @@
 
 # %%
 import heapq
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import sys
 from typing import Dict, Optional
 
-p_london_weather = {
+sys.path.append("../")
+
+from utils import (
+    save_fig,
+)
+
+p_ldn_weather = {
     "C": 0.5,
     "R": 0.4,
     "S": 0.1,
@@ -44,7 +56,7 @@ def generate_kmer_probabilities(
     return kmer_prob
 
 
-p_london_kmer = generate_kmer_probabilities(p_london_weather, N)
+p_ldn_kmer = generate_kmer_probabilities(p_ldn_weather, N)
 
 
 # %%
@@ -70,7 +82,7 @@ def generate_huffman_codes(probabilities: Dict[str, float]) -> Dict[str, str]:
     return dict(sorted(heapq.heappop(heap)[1:], key=lambda p: (len(p[-1]), p[0])))
 
 
-enc_london = generate_huffman_codes(p_london_kmer)
+enc_ldn = generate_huffman_codes(p_ldn_kmer)
 
 
 def get_average_length(kmer_prob: Dict[str, float], encoding: Dict[str, str]) -> float:
@@ -84,7 +96,7 @@ def get_average_length(kmer_prob: Dict[str, float], encoding: Dict[str, str]) ->
 
 
 print(
-    f"Average code length Spain weather in Spain: {get_average_length(p_london_kmer, enc_london):.4f}"
+    f"Average code length Spain weather in Spain: {get_average_length(p_ldn_kmer, enc_ldn):.4f}"
 )
 
 
@@ -109,24 +121,128 @@ def tabulate_encoding(
         )
 
 
-tabulate_encoding(enc_london, p_london_kmer)
+tabulate_encoding(enc_ldn, p_ldn_kmer)
 
 # %%
-p_barcelona_weather = {
+p_bcn_weather = {
     "C": 0.2,
     "R": 0.1,
     "S": 0.7,
 }
 
-p_barcelona_kmer = generate_kmer_probabilities(p_barcelona_weather, N)
-enc_barcelona = generate_huffman_codes(p_barcelona_kmer)
+p_bcn_kmer = generate_kmer_probabilities(p_bcn_weather, N)
+enc_bcn = generate_huffman_codes(p_bcn_kmer)
 
 print(
-    f"Average code length Spain weather in Spain: {get_average_length(p_barcelona_kmer, enc_barcelona):.4f}"
+    f"Average code length Spain weather in Spain: {get_average_length(p_bcn_kmer, enc_bcn):.4f}"
 )
 print(
-    f"Average code length Spain weather in UK: {get_average_length(p_london_kmer, enc_barcelona):.4f}"
+    f"Average code length Spain weather in UK: {get_average_length(p_ldn_kmer, enc_bcn):.4f}"
 )
 
 # %%
-tabulate_encoding(enc_barcelona, p_barcelona_kmer)
+tabulate_encoding(enc_bcn, p_bcn_kmer)
+
+# %% [markdown]
+# # Plots
+#
+# ## Entropy
+
+# %%
+avg_lengths = []
+
+for k in range(1, 15):
+    p_kmer = generate_kmer_probabilities(p_ldn_weather, k)
+    enc_ldn = generate_huffman_codes(p_kmer)
+    avg_length = get_average_length(p_kmer, enc_ldn)
+    avg_lengths.append([k, avg_length])
+
+df_avg_lengths = pd.DataFrame(avg_lengths, columns=["k", "avg_length"])
+
+sns.set_theme(
+    style="white",
+    context="notebook",
+    font_scale=1,
+    palette=None,
+)
+
+fig, ax = plt.subplots(figsize=(7, 4.5))
+
+sns.lineplot(
+    data=df_avg_lengths,
+    x="k",
+    y="avg_length",
+    marker="o",
+    ax=ax,
+    linewidth=2,
+    color="steelblue",
+)
+
+entropy = sum(p * np.log2(1 / p) for p in p_ldn_weather.values())
+ax.axhline(
+    y=entropy,
+    color="firebrick",
+    linestyle="--",
+    linewidth=2,
+    label=f"Entropy ≈ {entropy:.2f}",
+)
+
+ax.set_xlabel("Batch size (k)", fontsize=13)
+ax.set_ylabel("Average Bits per Day", fontsize=13)
+ax.legend(frameon=False)
+
+plt.tight_layout()
+save_fig(plt.gcf(), "entropy-batch_size_vs_avg_bits_per_day")
+
+# %% [markdown]
+# ## Cross-entropy
+
+# %%
+avg_lengths = []
+
+for k in range(1, 15):
+    p_bcn_kmer = generate_kmer_probabilities(p_bcn_weather, k)
+    p_ldn_kmer = generate_kmer_probabilities(p_ldn_weather, k)
+
+    enc_bcn = generate_huffman_codes(p_bcn_kmer)
+    avg_length = get_average_length(p_ldn_kmer, enc_bcn)
+    avg_lengths.append([k, avg_length])
+
+df_avg_lengths = pd.DataFrame(avg_lengths, columns=["k", "avg_length"])
+
+sns.set_theme(
+    style="white",
+    context="notebook",
+    font_scale=1,
+    palette=None,
+)
+
+fig, ax = plt.subplots(figsize=(7, 4.5))
+
+sns.lineplot(
+    data=df_avg_lengths,
+    x="k",
+    y="avg_length",
+    marker="o",
+    ax=ax,
+    linewidth=2,
+    color="steelblue",
+)
+
+crossentropy = sum(
+    p_ldn_weather[k] * np.log2(1 / p_bcn_weather[k]) for k in p_ldn_weather.keys()
+)
+ax.axhline(
+    y=crossentropy,
+    color="firebrick",
+    linestyle="--",
+    linewidth=2,
+    label=f"Cross-entropy ≈ {crossentropy:.2f}",
+)
+
+ax.set_xlabel("Batch size (k)", fontsize=13)
+ax.set_ylabel("Average Bits per Day", fontsize=13)
+ax.legend(frameon=False)
+
+plt.tight_layout()
+save_fig(plt.gcf(), "crossentropy-batch_size_vs_avg_bits_per_day")

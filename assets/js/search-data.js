@@ -39,7 +39,7 @@ ninja.data = [{
           },
         },{id: "post-cross-entropy-intuition-and-applications",
       
-        title: "Cross-entropy. Intuition and applications",
+        title: "Cross-entropy. Intuition and applications.",
       
       description: "The secret sauce of machine learning",
       section: "Posts",
