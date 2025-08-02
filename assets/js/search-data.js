@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-covariance-and-precision",
+        },{id: "post-cross-entropy-intuition-and-applications",
+      
+        title: "Cross-entropy. Intuition and applications",
+      
+      description: "The secret sauce of machine learning",
+      section: "Posts",
+      handler: () => {
+        
+          window.location.href = "/blog/cross-entropy/";
+        
+      },
+    },{id: "post-covariance-and-precision",
       
         title: "Covariance and precision",
       
