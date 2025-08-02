@@ -12,7 +12,7 @@ pretty_table: true
 related_posts: false
 ---
 
-In popscience, **entropy** is considered a measure of _disorder_: a system has high entropy when it is disordered (e.g., my college bedroom), and low entropy when it is ordered (e.g., a chocolate box). This meaning probably has its roots in thermodynamics, where my college bedroom was evidence of the universe getting ever closer to its [heat death](https://en.wikipedia.org/wiki/Heat_death_of_the_universe).
+In pop science, **entropy** is considered a measure of _disorder_: a system has high entropy when it is disordered (e.g., my college bedroom), and low entropy when it is ordered (e.g., a chocolate box). This meaning probably has its roots in thermodynamics, where my college bedroom was evidence of the universe getting ever closer to its [heat death](https://en.wikipedia.org/wiki/Heat_death_of_the_universe).
 
 But for us, entropy is not (only) about messy bedrooms, but about messy _data_. That's why I will focus on _Shannon's_ entropy $$H(P)$$, which is a property of a probability distribution $$P$$. For a discrete random variable:
 
@@ -20,7 +20,7 @@ $$
 H(P) = \sum_x P(x) \log_2 \frac{1}{P(x)}.
 $$
 
-As stated, using the binary logarithm, entropy is measured in [bits](https://en.wikipedia.org/wiki/Bit); when using the natural logarithm instead, the unit of measure is nats. For the remainder of this post, I will only use the binary logarithm, and omit the subscript.
+As stated, using the binary logarithm, entropy is measured in [bits](https://en.wikipedia.org/wiki/Bit); when using the natural logarithm instead, the unit of measure is nats. From here on, $$\log$$ means $$\log_2$$.
 
 # What does entropy _really_ mean?
 
@@ -89,7 +89,7 @@ Huffman coding guarantees the shortest average length for any prefix code based 
 
 This is much better: we have gone from 44 bits to $$0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5$$ bits on average. Of course, for this to be possible, we need to have access to the true weather distribution. Otherwise, our bit allocation won't be optimal or we might converge to a suboptimal code.
 
-Are we satisfied yet? Well... not quite. Our message length will be the same on rainy days and on sunny days. However, rainy days are 4 times more common! However, Huffman is already optimal. The core problem is that our messages have an _integer_ length, and we would need _fractional_ lengths to do better. But we can do better if we make some compromises. Imagine we only want to batch-send the weather report every 10 days. Then, there are $$3^{10}$$ possible sequences of 10 days. The most likely one is a streak of ten cloudy days, which occurs with probability $$0.5^{10}$$. Consequently, the Huffman coding assigns a much shorter codeword to this string than to the most unlikely string, a streak of ten sunny days:
+Are we satisfied yet? Not quite. Our message length will be the same on rainy days and on sunny days. However, rainy days are 4 times more common! However, Huffman is already optimal. The core problem is that our messages have an _integer_ length, and we would need _fractional_ lengths to do better. But we can do better if we make some compromises. Imagine we only want to batch-send the weather report every 10 days. Then, there are $$3^{10}$$ possible sequences of 10 days. The most likely one is a streak of ten cloudy days, which occurs with probability $$0.5^{10}$$. Consequently, the Huffman coding assigns a much shorter codeword to this string than to the most unlikely string, a streak of ten sunny days:
 
 | 10-day weather | Probability | Codeword (length)                | Codeword length |
 | -------------- | ----------- | -------------------------------- | --------------- |
@@ -106,7 +106,7 @@ The average length of this code is 13.64 bits, or 1.364 bits per day. Batching o
 And this brings us to the key point: entropy represents the lower bound for the average message length required to _optimally_ encode each outcome of a random process. Even with the best encoding we can come up with and incredibly large batches, we can't compress the message below the entropy limit. In the case of our distribution:
 
 $$
-H(P) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} = 1.361
+H(P) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} = 1.361 \text{bits}
 $$
 
 <!-- 0.5 * log2(1/0.5) + 0.4 * log2(1/0.4) + 0.1 * log2(1/0.1) -->
@@ -154,7 +154,7 @@ Just like entropy, $$\log \frac{1}{Q(x)}$$ measures the degree of surprise we ex
 This is the cross-entropy of my weather model $$\hat{P}_\text{Barcelona}$$ right after landing in London:
 
 $$
-H(P_\text{London}, \hat{P}_\text{Barcelona}) = 0.5 \times \log \frac 1 {0.2} + 0.4 \times \log \frac 1 {0.1} + 0.1 \times \log \frac 1 {0.7} \approx 2.54.
+H(P_\text{London}, \hat{P}_\text{Barcelona}) = 0.5 \times \log \frac 1 {0.2} + 0.4 \times \log \frac 1 {0.1} + 0.1 \times \log \frac 1 {0.7} \approx 2.54 \text{bits}.
 $$
 
 <!-- 0.5 * log2(1/0.2) + 0.4 * log2(1/0.1) + 0.1 * log2(1/0.7) -->
@@ -174,12 +174,14 @@ Notice how we're saving a ton of bits on cloudy and rainy days; we got lucky. If
 After a few years in London my model became quite accurate, to the extent that $$\hat{P}_\text{London} \approx P_\text{London}$$:
 
 $$
-H(P_\text{London}, \hat{P}_\text{London}) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} \approx 1.36.
+H(P_\text{London}, \hat{P}_\text{London}) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} \approx 1.36 \text{bits}.
 $$
 
 <!-- 0.5 * log2(1/0.5) + 0.4 * log2(1/0.4) + 0.1 * log2(1/0.1) -->
 
-This is an important result: $$H(P, Q) \geq H(P, P) = H(P)$$. So important that it has its own name: [Gibbs' inequality](https://en.wikipedia.org/wiki/Gibbs%27_inequality).
+This is an important result (the [Gibbs' inequality](https://en.wikipedia.org/wiki/Gibbs%27_inequality)):
+
+$$H(P, Q) \geq H(P, P) = H(P)$$
 
 {% details Kullback-Leibler (KL) divergence %}
 
