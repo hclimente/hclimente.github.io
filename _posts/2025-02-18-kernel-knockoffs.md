@@ -22,7 +22,7 @@ $$
 Y \perp X_{-S} \mid X_S
 $$
 
-The procedure computes and leverages a new matrix $$\tilde{X}$$, with the same dimensions as $$X$$, containing "knockoff" copies of the original features. Each original variable $$\mathbf{X_i}$$ has its own knockoff $$\mathbf{\tilde{X}_i}$$. These knockoffs are engineered to mimic the correlation structure of the original features: for any $$i \neq j$$, $$\rho(\mathbf{X_i}, \mathbf{X_j}) = \rho(\mathbf{X_i}, \mathbf{\tilde{X}_j}) = \rho(\mathbf{\tilde{X}_i}, \mathbf{\tilde{X}_j})$$. Also, knockoffs are created without using $$\mathbf{Y}$$. Hence, conditional on $$X$$, $$Y$$ is independent of $$\tilde{X}$$ conditioned on $$X$$.
+The procedure computes and leverages a new matrix $$\tilde{X}$$, with the same dimensions as $$X$$, containing "knockoff" copies of the original features. Each original variable $$\mathbf{X_i}$$ has its own knockoff $$\mathbf{\tilde{X}_i}$$. These knockoffs are engineered to mimic the correlation structure of the original features: for any $$i \neq j$$, $$\rho(\mathbf{X_i}, \mathbf{X_j}) = \rho(\mathbf{X_i}, \mathbf{\tilde{X}_j}) = \rho(\mathbf{\tilde{X}_i}, \mathbf{\tilde{X}_j})$$. Also, knockoffs are created without using $$\mathbf{Y}$$. Hence, conditional on $$X$$, $$Y$$ is independent of $$\tilde{X}$$.
 
 There are two paradigms to model knockoffs: Model-X and Fixed-X.
 
@@ -30,7 +30,7 @@ The **Model-X** paradigm assumes that the explanatory variables are random varia
 
 The **Fixed-X** paradigm makes no assumptions on the distribution of the explanatory variables. Instead, they can be treated as fixed quantities. This makes it more applicable in practice. However, it imposes three important restrictions:
 
-- $$F_{Y|X}$$ must be linear and homoscedastic
+- $$F_{Y \mid X}$$ must be linear and homoscedastic
 - The problem must be low dimensional (number of samples $$>$$ number of features)
 - The statistics $$D(X_i, Y)$$ and $$D(\tilde{X}_i, Y)$$ must satisfy additional requirements (see references)
 
@@ -44,7 +44,7 @@ Create synthetic copies of the features that retain the original correlation str
 
 ## 2. Compute association measures
 
-For each feature, calculate the association measure $$D(\mathbf{Y}, \mathbf{X_k})$$ and its counterpart $$D(\mathbf{Y}, \tilde{\mathbf{X}_k})$$ on the knockoff.
+For each feature, calculate the association measure $$D(\mathbf{Y}, \mathbf{X_k})$$ and its counterpart $$D(\mathbf{Y}, \tilde{\mathbf{X}}_k)$$ on the knockoff.
 
 Kernel-based measures are powerful tools for detecting complex, non-linear dependencies:
 

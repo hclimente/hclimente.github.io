@@ -1,0 +1,23 @@
+[project]
+name = "2025-05-02-hf-transformers"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate>=0.26.0",
+    "datasets>=3.5.1",
+    "nbformat>=5.10.4",
+    "plotly>=6.1.0",
+    "torch>=2.7.0",
+    "torchinfo>=1.8.0",
+    "transformers>=4.51.3",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "matplotlib>=3.10.1",
+    "seaborn>=0.13.2",
+    "umap-learn>=0.5.7",
+]
