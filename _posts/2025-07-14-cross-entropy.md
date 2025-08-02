@@ -1,6 +1,6 @@
 ---
 layout: distill
-title: Cross-entropy. Intuition and applications
+title: Cross-entropy. Intuition and applications.
 date: 2025-08-01 11:59:00 +0000
 description: The secret sauce of machine learning
 tags:
@@ -103,6 +103,8 @@ Are we satisfied yet? Not quite. Despite Huffman being optimal, our message leng
 
 The average length of this code is 13.64 bits, or 1.364 bits per day. Batching outcomes together allows us to spend only _fractions_ of a bit. And it's easy to see how, if we kept batching more and more days together, each single day would require less and less bits.
 
+{% include figure.liquid loading="eager" path="assets/python/2025-07-14-cross-entropy/img/entropy-batch_size_vs_avg_bits_per_day.webp" class="img-fluid rounded z-depth-1" %}
+
 And this brings us to the key point: entropy represents the lower bound for the average message length required to _optimally_ encode each outcome of a random process. Even with the best encoding we can come up with and incredibly large batches, we can't compress the message below the entropy limit. In the case of our distribution:
 
 $$
@@ -127,7 +129,7 @@ $$- \log P(x)$$ gives us the optimal length of an outcome's codeword.
 
 We just saw how knowing the underlying probability distribution gave us an edge in encoding the outcomes efficiently. However, here in the real world we rarely have access to _true_ probability distributions, if such a thing even exists. At most, we have access to our best guess of what the true probability distribution is. And these guesses are rarely completely correct.
 
-For instance, we rely on very complex models to accurately predict the weather. But let's leave those aside, and use the simple model and Huffman code I developed for Barcelona's weather:
+For instance, we rely on very complex models to accurately predict the weather. But let's leave those aside, and use the simple model ($$Q_\text{Barcelona}$$) and associated Huffman code I developed for Barcelona's weather:
 
 | Weather | Probability | Codeword | Codeword length |
 | ------- | ----------- | -------- | --------------- |
@@ -151,15 +153,15 @@ Just like entropy, $$\log \frac{1}{Q(x)}$$ measures the degree of surprise we ex
 
 ## Why theory and practice can differ
 
-The cross-entropy of my model $$\hat{P}_\text{Barcelona}$$ right after landing in London is:
+The cross-entropy of my model $$Q_\text{Barcelona}$$ on the London weather is:
 
 $$
-H(P_\text{London}, \hat{P}_\text{Barcelona}) = 0.5 \times \log \frac 1 {0.2} + 0.4 \times \log \frac 1 {0.1} + 0.1 \times \log \frac 1 {0.7} \approx 2.54 \text{ bits}.
+H(P_\text{London}, Q_\text{Barcelona}) = 0.5 \times \log \frac 1 {0.2} + 0.4 \times \log \frac 1 {0.1} + 0.1 \times \log \frac 1 {0.7} \approx 2.54 \text{ bits}.
 $$
 
 <!-- 0.5 * log2(1/0.2) + 0.4 * log2(1/0.1) + 0.1 * log2(1/0.7) -->
 
-This is higher than our actual average length of 1.9 bits. This is because the cross-entropy leverages (optimal) fractional lengths, but our Huffman codes use non-fractional lengths, underestimating some outcomes and overestimating others:
+This is higher than the average message length of 1.9 bits. Contrary to entropy, which is a hard-limit, our model _can_ do better than cross-entropy. This is because the cross-entropy leverages (optimal) fractional lengths, but our Huffman codes use non-fractional lengths, underestimating some outcomes and overestimating others:
 
 | Weather | P   | Codeword length | Q-optimal codeword length | Extra/Saved bits             |
 | ------- | --- | --------------- | ------------------------- | ---------------------------- |
@@ -169,12 +171,14 @@ This is higher than our actual average length of 1.9 bits. This is because the c
 
 Notice how we're saving a ton of bits on cloudy and rainy days; we got lucky. If we batch our weather reports, we get closer to encoding individual outcomes with fractional bits. Using the 10-day Barcelona code to report London weather, the average length of my message was $$2.53 \text{ bits}$$, which is much closer to $$H(P, Q) \approx 2.54 \text{ bits}$$. The cross-entropy _is_ a lower bound if and only if we achieve the optimal coding for $$Q$$.
 
+{% include figure.liquid loading="eager" path="assets/python/2025-07-14-cross-entropy/img/crossentropy-batch_size_vs_avg_bits_per_day.webp" class="img-fluid rounded z-depth-1" %}
+
 # Why does this all matter?
 
-After a few years in London my model became quite accurate, to the extent that $$\hat{P}_\text{London} \approx P_\text{London}$$:
+After a few years in London my model became quite accurate, to the extent that $$Q_\text{London} \approx P_\text{London}$$:
 
 $$
-H(P_\text{London}, \hat{P}_\text{London}) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} \approx 1.36 \text{ bits}.
+H(P_\text{London}, Q_\text{London}) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} \approx 1.36 \text{ bits}.
 $$
 
 <!-- 0.5 * log2(1/0.5) + 0.4 * log2(1/0.4) + 0.1 * log2(1/0.1) -->
