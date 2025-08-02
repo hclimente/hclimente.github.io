@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Cross-entropy
-date: 2025-07-14 11:59:00 +0000
+date: 2025-08-01 11:59:00 +0000
 description: The secret sauce of machine learning
 tags:
   - information_theory
@@ -24,7 +24,7 @@ As stated, using the binary logarithm, entropy is measured in [bits](https://en.
 
 # What does entropy _really_ mean?
 
-In a nutshell, entropy is the average surprise we'll experience when observing a realization of $$P$$: if an outcome is rare ($$P(X)$$ is small), observing it should be quite surprising ($$\log \frac{1}{P(X)}$$ is large); if it is very common, the surprise should be low.
+In a nutshell, entropy is the average surprise we'll experience when observing a realization of $$P$$: if an outcome is rare ($$P(x)$$ is small), observing it should be quite surprising ($$\log \frac{1}{P(x)}$$ is large); if it is very common, the surprise should be low.
 
 A more tangible interpretation of entropy links it to the _encoding_ of a message. Imagine we want to encode the outcome of a probability distribution. We observe an outcome and want to unambiguously communicate it to a colleague. For instance, let's say the weather in my city follows the following probability distribution:
 
@@ -34,7 +34,7 @@ A more tangible interpretation of entropy links it to the _encoding_ of a messag
 | Rainy   | 0.4         |
 | Sunny   | 0.1         |
 
-(Yes, I live in the London.)
+(Yes, I live in London.)
 
 > For easier computations, let's assume that probabilities remain independent and constant over time. Which, again, isn't too far from my reality. More formally, the outcomes are independent and identically distributed.
 
@@ -87,11 +87,9 @@ Huffman coding guarantees the shortest average length for any prefix code based 
 
 {% enddetails %}
 
-This is much better: we have gone from 44 bits to $$0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5$$ bits on average. Of course, for this to be possible, both our colleague and us need to _know_ what the true weather distribution is. Otherwise, our bit allocation won't be optimal or we might converge to a suboptimal code.
+This is much better: we have gone from 44 bits to $$0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5$$ bits on average. Of course, for this to be possible, we need to have access to the true weather distribution. Otherwise, our bit allocation won't be optimal or we might converge to a suboptimal code.
 
-Are we satisfied yet? Well... not quite. Our message length will be the same on rainy days and on sunny days. However, rainy days are 4 times more common! Wouldn't it make sense to associate common outcomes to shorter strings and rarer outcomes to longer strings?
-
-It is possible to go lower if we are willing to instead send our weather reports in batches. Imagine we only want to batch-send the weather report every 10 days. There are $$3^{10}$$ possible sequences of 10 days, and hence messages to send. The most likely one is a streak of ten cloudy days, which occurs with probability $$0.5^{10}$$. Consequently, the Huffman coding assigns a much shorter codeword to this string than to the most unlikely string, a streak of ten sunny days:
+Are we satisfied yet? Well... not quite. Our message length will be the same on rainy days and on sunny days. However, rainy days are 4 times more common! However, Huffman is already optimal. The core problem is that our messages have an _integer_ length, and we would need _fractional_ lengths to do better. But we can do better if we make some compromises. Imagine we only want to batch-send the weather report every 10 days. Then, there are $$3^{10}$$ possible sequences of 10 days. The most likely one is a streak of ten cloudy days, which occurs with probability $$0.5^{10}$$. Consequently, the Huffman coding assigns a much shorter codeword to this string than to the most unlikely string, a streak of ten sunny days:
 
 | 10-day weather | Probability | Codeword (length)                | Codeword length |
 | -------------- | ----------- | -------------------------------- | --------------- |
@@ -103,7 +101,7 @@ It is possible to go lower if we are willing to instead send our weather reports
 | RSSSSSSSSS     | 4.00e-10    | 11000100010100011010000101101111 | 32              |
 | SSSSSSSSSS     | 1.00e-10    | 11000100010100011010000101101110 | 32              |
 
-The average length of this code is 13.64 bits, or 1.364 bits per day. Batching outcomes together allows us to spend only _fractions_ of a bit. And it's easy to see how, as we keep batching more and more days together, each single day requires less and less bits.
+The average length of this code is 13.64 bits, or 1.364 bits per day. Batching outcomes together allows us to spend only _fractions_ of a bit. And it's easy to see how, if we kept batching more and more days together, each single day would require less and less bits.
 
 And this brings us to the key point: entropy represents the lower bound for the average message length required to _optimally_ encode each outcome of a random process. Even with the best encoding we can come up with and incredibly large batches, we can't compress the message below the entropy limit. In the case of our distribution:
 
@@ -119,9 +117,9 @@ The Huffman encoding was doing pretty well after all!
 
 All this is fine, but a lingering question remains: what's the logarithm of the probability doing there? Why aren't we using any other transformation of the probability?
 
-Imagine the space of all possible codewords of a prefix code. If we decide to use the codeword "0", every other codeword needs to start by "1"; that choice cost us half of all possible codewords. Hence, if we are going to spend that precious codeword into one outcome, it better happen at least half the time. Note that $$- \log 0.5 = 1$$. Similarly, a codeword like "00" still allows for words prefixed by "01", "10" and "11"; it costed us only one fourth of the space. Note that $$- \log 0.25 = 2$$.
+Imagine the space of all possible codewords of a prefix code. If we decide to use the codeword "0", every other codeword needs to start by "1"; that choice cost us half of all possible codewords. Hence, if we are going to spend that precious codeword into one outcome, it better happen at least half the time. Note that $$- \log 0.5 = 1$$. Similarly, a codeword like "00" still allows for words prefixed by "01", "10" and "11"; it cost us only one fourth of the space. Note that $$- \log 0.25 = 2$$.
 
-$$- \log P(x)$$ gives us the optimal length of an outcomes codeword.
+$$- \log P(x)$$ gives us the optimal length of an outcome's codeword.
 
 {% enddetails %}
 
@@ -129,29 +127,17 @@ $$- \log P(x)$$ gives us the optimal length of an outcomes codeword.
 
 We just saw how knowing the underlying probability distribution gave us an edge in encoding the outcomes efficiently. However, here in the real world we rarely have access to _true_ probability distributions, if such a thing even exists. At most, we have access to our best guess of what the true probability distribution is.
 
-For instance, we rely on very complex models to accurately predict the weather. But let's leave these aside, and let's use my mental model of the weather as learned in Barcelona, Spain:
+For instance, we rely on very complex models to accurately predict the weather. But let's leave these aside, and let's use the code I developed to encode Barcelona's weather:
 
-| Weather | Probability |
-| ------- | ----------- |
-| Cloudy  | 0.2         |
-| Rainy   | 0.1         |
-| Sunny   | 0.7         |
+| Weather | Probability | Codeword | Codeword length |
+| ------- | ----------- | -------- | --------------- |
+| Cloudy  | 0.2         | 11       | 2               |
+| Rainy   | 0.1         | 10       | 2               |
+| Sunny   | 0.7         | 0        | 1               |
 
-When going through the encoding process, my mental model produced the following Huffman code:
+As you can imagine, after moving to London, my mental model of the weather was not that useful. In fact, I often experienced _surprise_, as outcomes that should be rare were quite common. In consequence, when using this code in London, my average message took up 1.9 bits.
 
-| 10-day weather | Probability | Codeword                         | Codeword length |
-| -------------- | ----------- | -------------------------------- | --------------- |
-| SSSSSSSSSS     | 2.82e-02    | 01110                            | 5               |
-| CSSSSSSSSS     | 8.07e-03    | 1000011                          | 7               |
-| SCSSSSSSSS     | 8.07e-03    | 1000101                          | 7               |
-| ...            | ...         | ...                              | ...             |
-| RRRRRRRCRR     | 2.00e-10    | 11010101110100100100001110001110 | 32              |
-| RRRRRRRRCR     | 2.00e-10    | 11010101110100100100001110001111 | 32              |
-| RRRRRRRRRR     | 1.00e-10    | 00010001011101001011000011000110 | 32              |
-
-Back in Spain, this encoding resulted on an average length per day of 1.16.
-
-As you can imagine, after moving to London, my mental model of weather was not that useful. In fact, I often experienced _surprise_, as outcomes that should be rare were quite common. In consequence, when using my Barcelona code to report London weather, the average length of my message was 2.53, more than one bit higher per day. Absolutely unacceptable.
+<!-- 0.5 * 2 + 0.4 * 2 + 0.1 * 1 -->
 
 Entropy quantified our average surprise when observing a distribution's outcomes while knowing the true distribution. Similarly, the **cross-entropy** measures our surprise when observing a distribution's outcomes while only having a _model_ of the true distribution. If $$P$$ is the true distribution and $$Q$$ is our model of the world:
 
@@ -163,14 +149,29 @@ Just like entropy, $$\log \frac{1}{Q(x)}$$ measures the degree of surprise we ex
 
 > Note that order matters! $$H(P, Q) \neq H(Q, P)$$.
 
+## Why theory and practice can differ
+
 This is the cross-entropy of my weather model $$\hat{P}_\text{Barcelona}$$ right after landing in London:
 
 $$
 H(P_\text{London}, \hat{P}_\text{Barcelona}) = 0.5 \times \log \frac 1 {0.2} + 0.4 \times \log \frac 1 {0.1} + 0.1 \times \log \frac 1 {0.7} \approx 2.54.
 $$
+
 <!-- 0.5 * log2(1/0.2) + 0.4 * log2(1/0.1) + 0.1 * log2(1/0.7) -->
 
-However, after a few years in London my model became quite accurate, to the extent that $$\hat{P}_\text{London} \approx P_\text{London}$$:
+And this is higher than our actual average length of 1.9 bits. This is because the cross-entropy leverages (optimal) fractional lengths, but our Huffman codes use non-fractional lengths, underestimating some outcomes and overestimating others:
+
+| Weather | P   | Codeword length | Q-optimal codeword length | Extra bits                   |
+| ------- | --- | --------------- | ------------------------- | ---------------------------- |
+| Cloudy  | 0.5 | 2               | 2.32                      | $$-0.32 \times 0.5 = -0.16$$ |
+| Rainy   | 0.4 | 2               | 3.32                      | $$-1.32 \times 0.4 = -0.53$$ |
+| Sunny   | 0.1 | 1               | 0.51                      | $$ 0.49 \times 0.1 = 0.05$$  |
+
+Notice how we're saving a ton of bits on cloudy and rainy days; we got lucky. If we batch our weather reports, we get closer to encoding individual outcomes with fractional bits. Using the 10-day Barcelona code to report London weather, the average length of my message was 2.53, which is much closer to $$H(P, Q) \approx 2.54$$. The cross-entropy _is_ a lower bound if and only if we achieve the optimal coding for $$Q$$.
+
+# Why does this all matter?
+
+After a few years in London my model became quite accurate, to the extent that $$\hat{P}_\text{London} \approx P_\text{London}$$:
 
 $$
 H(P_\text{London}, \hat{P}_\text{London}) = 0.5 \times \log \frac 1 {0.5} + 0.4 \times \log \frac 1 {0.4} + 0.1 \times \log \frac 1 {0.1} \approx 1.36.
@@ -190,17 +191,15 @@ It can be interpreted as the _cost of being wrong_: how many extra bits we need 
 
 {% enddetails %}
 
-# Why does this all matter?
+And, ultimately, this is why I went down this rabbit hole. We have talked a great deal about random distributions, processes, encodings and so on. Ultimately, this brings us to one of the most important applications of cross-entropy: machine learning. Many machine learning algorithms aim to learn a probability distribution. For instance, discriminative models aim to learn the probability of an outcome given some input data ($$P(Y \mid X)$$), e.g., what's the likelihood of a disease given that some blood test came back positive? Generative models aim to learn the probability distribution of the data itself ($$P(X, Y)$$), e.g., language models like GPT can generate novels, answer questions, or produce software and legal documents. During model _training_ these models aim to learn a distribution that minimizes the cross-entropy between their model of the data, and the data itself.
 
-We have talked a great deal about random distributions, processes, encodings and so on. However one of the most important applications of cross-entropy is machine learning. Many machine learning algorithms aim at learning a probability distribution. For instance, discriminative models aim to learn the probability of an outcome given some input data ($$P(Y \mid X)$$), e.g., what's the likelihood of a disease given that some blood test came positive?. Generative models aim to learn the probability distribution of the data itself ($$P(X, Y)$$), e.g., language models like GPT can generate novels, answer questions, or produce software and legal documents. During model _training_ these models aim to learn a distribution that minimizes the cross-entropy between their model of the data, and the data itself.
-
-Let's bring this point home by revisiting our weather model one last time. Say we have a model to predict the weather tomorrow. It considers all the usual suspects: today's weather, temperature, humidity, wind, season, etc. and emits a probability for each possible outcome: $$[q_C, q_R, q_S]$$. For a given day, it predicts $$q = [0.35, 0.6, 0.05]$$. Then, the day arrives, and the observe the true outcome: $$p = [1, 0, 0]$$. Turns out our model was quite wrong! Let's compute the cross-entropy:
+Let's bring this point home by revisiting our weather model one last time. Say we have a model to predict the weather tomorrow. It considers all the usual suspects (like today's weather, temperature, humidity and wind), makes some complex calculations, and emits a probability for each possible outcome: $$[q_C, q_R, q_S]$$. Say, for a given day, it predicts $$q = [0.35, 0.6, 0.05]$$. Then, the day arrives, and we observe the true outcome: $$p = [1, 0, 0]$$. Turns out our model was quite wrong! Let's compute the cross-entropy:
 
 $$
 H(P, Q) = 1 \times \log\frac{1}{q_C} + 0 \times \log\frac{1}{q_R} + 0 \times \log\frac{1}{q_S} = \log\frac{1}{q_C} = - \log q_C.
 $$
 
-And this is the key result: minimizing the cross-entropy of each model literally means [maximizing the probability of the data](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation).
+In machine learning this criterion is often called log-loss (or "binary/multiclass cross-entropy loss"), and minimizing it is equivalent to [maximizing the probability of the data](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation)
 
 # Further readings
 
