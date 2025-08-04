@@ -8,7 +8,6 @@ tags:
   - machine_learning
   - statistics
 giscus_comments: true
-# pretty_table: true
 related_posts: false
 ---
 
@@ -199,25 +198,38 @@ It can be interpreted as the _cost of being wrong_: how many extra bits we need 
 
 Ultimately, this is why I went down this rabbit hole. We’ve covered distributions, processes, and encoding. But machine learning is one of the most important applications of cross-entropy via the [cross-entropy loss](https://en.wikipedia.org/wiki/Loss_function). During model _training_, many machine learning algorithms minimize the cross-entropy between the learned probability distribution (like [$$P(Y \mid X)$$](https://en.wikipedia.org/wiki/Discriminative_model) or [$$P(X, Y)$$](https://en.wikipedia.org/wiki/Generative_model)) and the one observed in the data.
 
-Let's bring this point home by revisiting our weather model one last time. In this case, we want a model to predict tomorrow's weather using some sensible variables (like today's weather, temperature, humidity and wind). After some complex calculations it emits a probability vector $$q = [q_C, q_R, q_S]$$. Say, for a given day, it predicts $$q = [0.35, 0.6, 0.05]$$. Then, the day arrives, and we observe the true outcome: $$p = [1, 0, 0]$$. Turns out our model was quite wrong!
+Let's bring this point home by revisiting our weather model one last time. In this case, we want a model to predict tomorrow's weather using some sensible variables (like today's weather, temperature, humidity and wind), encapsulated into a vector $$x$$. After some complex calculations it emits a probability vector $$q(x) = [q_C, q_R, q_S]$$. Say, for a given day, it predicts $$q(x) = [0.35, 0.6, 0.05]$$. Then, the day arrives, and we observe the true outcome: $$p = [1, 0, 0]$$. Turns out our model was quite wrong!
 
-Here $$p$$ is the one-hot (empirical) distribution on the observed class, not the true generative $$P$$, and $$q$$ is just the model's prediction for this example, not the overall distribution $$Q$$. Yet, the cross-entropy loss will have the familiar form:
+> Note that $$p$$ is the one-hot (empirical) distribution on the observed class, not the true generative $$P$$, and $$q$$ is just the model's prediction for this example, not the overall distribution $$Q$$!
+
+The cross-entropy loss has a familiar form:
 
 $$
-\mathcal{L}(p,q)
-   = -\sum_{i=1}^K p_i \log q_i
-   = -\log q_y.
+\mathcal{L}(p,q(x))
+   = 1 \times \log\frac{1}{q_C} + 0 \times \log\frac{1}{q_R} + 0 \times \log\frac{1}{q_S}
+   = \log\frac{1}{q_C}
+   = - \log q_C.
 $$
 
-where $$K$$ is the number of classes, and $$y$$ is the index of the true class ($$1$$ in our example).
+Or, more generally:
 
-The model will consequently update its parameters to minimize this loss, adequately called cross-entropy loss (aka log-loss). Minimizing it is equivalent to [maximizing the probability of the data](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation). During training we minimize the average of this loss over the dataset $$\mathcal{D}$$:
+$$
+\mathcal{L}(p, q(x))
+   = -\sum_{i=1}^K p_i \log q(x)_i
+   = -\log q(x)_y.
+$$
+
+where $$K$$ is the number of classes, and $$y$$ is the index of the true class ($$1$$ in our example, corresponding to class $$C$$).
+
+The model will consequently update its parameters to minimize this loss, also known as log-loss. Minimizing it is equivalent to [maximizing the probability of the data](https://en.wikipedia.org/wiki/Maximum_likelihood_estimation). During training we minimize the average of this loss over the whole training dataset $$\mathcal{D}$$:
 
 $$
 \mathcal{L} =
-   \mathbb{E}_{(x,y) \sim \mathcal{D}} \bigl[-\log q_{y\mid x}\bigr] =
-   -\frac{1}{N}\sum_{i=1}^N \log q_{y^{(i)}\mid x^{(i)}}.
+   \mathbb{E}_{(x,y) \sim \mathcal{D}} \bigl[-\log q(x)_y \bigr] =
+   -\frac{1}{N}\sum_{i=1}^N \log q(x^{(i)})_{y^{(i)}}.
 $$
+
+And that’s the objective in its entirety: to adjust the model's parameters until it is, on average, least surprised by the correct answer. At least until it sees the test set...
 
 # Further readings
 
