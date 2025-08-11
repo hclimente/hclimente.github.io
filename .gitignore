@@ -11,3 +11,7 @@ assets/libs/
 node_modules/
 vendor
 .idea
+
+# my ignores
+.ipynb_checkpoints
+__pycache__

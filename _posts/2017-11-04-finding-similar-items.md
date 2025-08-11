@@ -1,34 +1,54 @@
 ---
-layout: post
+layout: distill
 title: Finding similar documents
-date: 2017-11-04 11:59:00-0400
+date: 2025-08-09 11:59:00 +0000
 description: A fast algorithm to quickly scan over the corpus
 tags: local-sensitivity-hashing document-similarity
 giscus_comments: true
 related_posts: false
 ---
 
-Here we address the problem of looking for similar, but not necessarily equal items. This is frequently the case of looking for related documents. For example, all the versions of the same news article: they all possibly come from the same source, each website makes slight modifications.
+A big part of data science revolves around structured data, data that can be neatly organized into tables. We love tables: they can be easily sliced, diced, summarized, and filtered using SQL or another similar language. If we want to check if an item exists in our table, we can do that quicky by checking for equality of all the rows.
+
+However, large swaths of data can't naturally fit in a table. This is the case of corpora of text, DNA sequences or songs. In such cases, finding _equal_ elements is still easy by, for instance, checking bit-wise equality. If we are feeling fancy, we might even do that efficiently using hash functions. However, in these cases, _quasi-equality_ is even more important. We want all the versions of [our favorite song](https://www.youtube.com/watch?v=dQw4w9WgXcQ); all the pieces of news reporting on the same event; all the pictures containing a cat. How do we go about that?
+
+# Formalizing the problem
+
+Our goal is finding all documents in a collection of $$N$$ items (like documents, images or songs) that are similar, though not necessarily equal, to our query document. We will represent each item in a $$D$$-dimensional space. Given a query item, our goal is to find the items that are similar to it.
+
+> In the naive case, each query takes $$O(N^2)$$, which makes in unfeasible for large collections. That's why we will study an approximate methods, that produces a good enough estimation of similarity in a reasonable time.
+
+The above problem relies on three concepts:
+
+- **Embeddings**: $$d$$-dimensional numerical representations of the items in our collection
+- **Distance function**: a measure of similarity between pairs of items
+- **Search algorithm**: an efficient way to find the similar items
+
+# Embeddings
+
+Embeddings are just vectors.
 
 # Distance measures
 
-If we wanted to find equal documents, finding an efficient solution would be relatively straightforward: hash them and see which ones fall in the same bucket. In this case, we have to define a similarity measure or, analogously, a distance metric, which takes small values when the two items are alike. Many metrics for different kinds of data have been defined.
+If we wanted to find equal documents, an efficient solution would be relatively straightforward: hash them and see which ones fall in the same bucket. But that's not the task we embarked ourselves on. We need a **distance** measure, a function whose inputs are two items and whose output is a real value. The distance will be low when the two items are alike, and high when they are not. Analogously, we could define a **similarity** measures, which behaves just in the opposite way.
 
-## Jaccard distance
+Many distance and similarity mmeasures have been defined for different kinds of data.
 
-The Jaccard similarity between two sets $$A$$ and $$B$$ is defined by looking at the relative size of their intersection:
+## Distances for sets
+
+The **Jaccard _similarity_** between two sets $$A$$ and $$B$$ is defined by looking at the relative size of their intersection:
 
 $$J(S,T)=\frac{|S\cap T|}{|S \cup T|}.$$
 
-Equivalently, the Jaccard distance is defined as $$1-J(S,T)$$.
+Equivalently, the Jaccard _distance_ is defined as $$1-J(S,T)$$.
 
-## Cosine distance
+## Distances for embeddings
 
-Cosine distance is used in spaces that have dimensions, and hence we can think of points as non-zero vectors. In this case, the distance between two vectors $$x$$ and $$y$$ would be the angle between them, which independently of how many dimensions are there, will be between 0 and 180 degrees.
+**Cosine distance** is used in spaces that have dimensions, and hence we can think of points as non-zero vectors. In this case, the distance between two vectors $$x$$ and $$y$$ would be the angle between them, which independently of how many dimensions are there, will be between 0 and 180 degrees.
 
-## Edit distance
+## Distances for text
 
-Edit distance can be used when points are strings. The distance between two strings $$x$$ and $$y$$ will be the smallest number of single-character insertions and deletions that would convert $$x$$ into $$y$$. It can be easily computed from the _longest common subsequence_.
+**Edit distance** can be used when points are strings. The distance between two strings $$x$$ and $$y$$ will be the smallest number of single-character insertions and deletions that would convert $$x$$ into $$y$$. It can be easily computed from the _longest common subsequence_.
 
 # Efficiently finding similar items
 
