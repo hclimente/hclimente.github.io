@@ -38,7 +38,7 @@ In this problem, we will start from $$N$$ items (documents, images, etc.) which 
 
 1. Shingling: convert documents into vectors/sets.
 2. Minhashing: convert sets to signatures.
-3. Local-sensitivity hashing: make an estimation of the similarity.
+3. Locality-sensitive hashing: make an estimation of the similarity.
 
 ## Shingling
 
@@ -65,7 +65,7 @@ We build a new representation of our set $$S$$ as a vector $$[h_1(S), h_2(S), ..
 
 In practice, permuting a huge matrix is very time consuming, and it is not feasible in real-world applications. Instead, $$n$$ hash functions $$h_i$$ are selected, which are applied on the row number. In some cases, two rows might end up in the same bucket. But still, in most of the cases that will not happen, so this is a good approach to random permutations.
 
-## Local-sensitivity hashing
+## Locality-sensitive hashing
 
 We calculate $$M$$, which has a complexity of $$N$$. We will pick the documents that are similar enough on the M matrix as candidates to similar documents. Then, we will compute exactly the Jaccard similarity between the candidates.
 
