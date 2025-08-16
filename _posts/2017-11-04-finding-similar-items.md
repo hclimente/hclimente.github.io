@@ -8,6 +8,8 @@ giscus_comments: true
 related_posts: false
 ---
 
+> ⚠️ See [the post on RAGs]({% post_url 2025-08-16-rags %}) for an updated take on this problem.
+
 Here we address the problem of looking for similar, but not necessarily equal items. This is frequently the case of looking for related documents. For example, all the versions of the same news article: they all possibly come from the same source, each website makes slight modifications.
 
 # Distance measures
@@ -32,7 +34,7 @@ Edit distance can be used when points are strings. The distance between two stri
 
 # Efficiently finding similar items
 
-In this problem, we will start from N items (documents, images, etc.) which we represent in a D-dimensional space. An exhaustive approach is calculating all pairwise distances, but that would be very inefficient ($$O(N^2)$$). Instead, we will study an approximate methods, that produces a good enough estimation of similarity in a reasonable time. The process is divided in:
+In this problem, we will start from $$N$$ items (documents, images, etc.) which we represent in a $$D$$-dimensional space. An exhaustive approach is calculating all pairwise distances, but that would be very inefficient ($$O(N^2)$$). Instead, we will study an approximate methods, that produces a good enough estimation of similarity in a reasonable time. The process is divided in:
 
 1. Shingling: convert documents into vectors/sets.
 2. Minhashing: convert sets to signatures.
@@ -40,7 +42,7 @@ In this problem, we will start from N items (documents, images, etc.) which we r
 
 ## Shingling
 
-The first step is representing the documents as sets. A $$k$$-shingle of a document is the set on any substring of length $$k$$ that appears in the document. Or, instead of directly using substrings as shingles, we can apply a hash function that maps strings of length $$k$$ to a number of buckets, representing the data more compactly while conserving most of the information. This is possible because many of the possible shingles might never appear i.e. we are mapping documents to a mostly-empty space. So it's possible to map every shingle the lower dimensionality space represented by the buckets.
+The first step is representing the documents as sets. A $$k$$-shingle of a document is the set of any substring of length $$k$$ that appears in the document. Or, instead of directly using substrings as shingles, we can apply a hash function that maps strings of length $$k$$ to a number of buckets, representing the data more compactly while conserving most of the information. This is possible because many of the possible shingles might never appear i.e. we are mapping documents to a mostly-empty space. So it's possible to map every shingle the lower dimensionality space represented by the buckets.
 
 The choice of $$k$$ is not trivial, and mostly depends on how long are usually the documents we are dealing with. Hence, $$k$$ must be chosen so that the probability of any given shingle appearing in any given document is low: the longer the average document, the higher the $$k$$ of choice.
 
@@ -52,7 +54,7 @@ There are two kind of special elements in the text that must be dealt with: whit
 
 In the exhaustive approach, we could already take the shingle-sets and calculate the Jaccard index between all pairs, still a problem with $$O(N^2)$$ complexity. Additionally, shingle-sets are large. For example, shingle-set hashed to 4 byte-buckets still occupies 4 times more than the original document. So we will convert the sets to small signatures that preserve the similarity information i.e. if two documents are similar, they will tend to have the same output in the hash functions.
 
-We will do so through a process called minhashing. To understand it, we can imagine all our shingle-sets represented it as a characteristic matrix $$C$$, although out data most probably won't be represented like that. Each column $$c$$ of $$C$$ is one document; each row $$r$$ represents one element of the all the possible shingles; and an element $$C_{r,c}$$ will take a value of 1 if the element for row $$r$$ is a member of the set for $$c$$ and 0 otherwise. In the minhash procedure, we will create a minhash signature matrix $$M$$ by repeating the following steps $$n$$ times:
+We will do so through a process called minhashing. To understand it, we can imagine all our shingle-sets represented it as a characteristic matrix $$C$$, although our data most probably won't be represented like that. Each column $$c$$ of $$C$$ is one document; each row $$r$$ represents one element of the all the possible shingles; and an element $$C_{r,c}$$ will take a value of 1 if the element for row $$r$$ is a member of the set for $$c$$ and 0 otherwise. In the minhash procedure, we will create a minhash signature matrix $$M$$ by repeating the following steps $$n$$ times:
 
 1. Generate a random permutation of the rows of $$C$$.
 1. For each column $$c$$/document:
@@ -65,11 +67,11 @@ In practice, permuting a huge matrix is very time consuming, and it is not feasi
 
 ## Local-sensitivity hashing
 
-We calculate M, which has a complexity of N. We will pick the documents that are similar enough on the M matrix as candidates to similar documents. Then, we will compute exactly the Jaccard similarity between the candidates.
+We calculate $$M$$, which has a complexity of $$N$$. We will pick the documents that are similar enough on the M matrix as candidates to similar documents. Then, we will compute exactly the Jaccard similarity between the candidates.
 
 We do that by binning the rows into bands, and the compare the documents inside each band. We will get how many bands are exactly the same between two documents.
 
-Depending the choice of r and t, we modulate the curve. Hence we get to the sensitivity of our curve.
+Depending on the choice of $$r$$ and $$t$$, we modulate the curve. Hence we get to the sensitivity of our curve.
 
 # References
 
