@@ -13,9 +13,7 @@ toc:
   sidebar: left
 ---
 
-# Data structures
-
-## Graphs
+# Graphs
 
 Graphs are data structures composed of a set of objects (_nodes_) and pairwise relationships between them (_edges_). Notably, edges can have properties, like a direction or a weight.
 
@@ -27,7 +25,7 @@ Graphs can be represented as:
 
 A common type of graph in computer science are grids, in which nodes are laid in a grid, and they are connected to the nodes selected top, bottom, left and right.
 
-## Binary trees
+# Binary trees
 
 A tree is a graph in which there is only one path between every pair of nodes. Some concepts related to trees are: root, the (only) node on level 1; parent, the connected node in the level above; child, a connected in the level below; and leaf, a node with no children. Importantly, a tree has only one root. A very useful type of tree are _binary_ trees, in which every node has _at most_ two children.
 
@@ -43,7 +41,7 @@ class Node:
 
 We would keep a reference to the root, and build a try by successively creating new nodes and assigning them to `.left` or `.right`.
 
-### Heaps / priority queues
+## Heaps / priority queues
 
 (Min-)Heaps are binary trees in which the value of every parent is lower or equal than any of its children. This gives them their most interesting property: the minimum element is always on top. (Similarly, in max-heaps, the maximum stands at the root.) Because of that, they are also called priority queues. A famous algorithm that can be solved with heaps is [computing the running median of a data stream](https://leetcode.com/problems/find-median-from-data-stream/).
 
@@ -111,7 +109,7 @@ Let's examine the time complexity of each operation:
 
 **Note:** Heaps are great to recover the smallest element, but not the k<sup>th</sup> smallest one. [BSTs](#binary-search-trees) might me more appropriate for that.
 
-### Binary search trees
+## Binary search trees
 
 Binary serach trees (BSTs) are binary trees in which every node meets two properties:
 
@@ -125,7 +123,7 @@ They provide a good balance between insertion and search speeds:
 
 The time complexity of both is $$O(\log n)$$ when the tree is **balanced**; otherwise it is $$O(n)$$. (Balanced trees are those whose height is small compared to the number of nodes. Visually, they look full and all branches look similarly long.) As a caveat, no operation takes constant time on a BST.
 
-## Tries
+# Tries
 
 Tries (from re*trie*val) are trees that store strings:
 
@@ -141,7 +139,7 @@ Due to its nature, tries excel at two things:
 
 These two properties make them excellent at handling spell checking and autocomplete functions.
 
-## Union-finds
+# Union-finds
 
 Union-finds, also known as Disjoint-sets, store a collection of non-overlapping sets. Internally, sets are represented as directed trees, in which every member points towards the root of the tree. The root is just another member, which we call the **representative**. Union-finds provide two methods:
 
@@ -177,13 +175,13 @@ class UnionFind:
                 self.rank[rootY] = self.rank[rootX]
 ```
 
-## Bloom filters
+# Bloom filters
 
 Bloom filters are data structures to probabilistically check if an element is a member of a set. It can be used when false positives are acceptable, but false negatives are not. For instance, if we have a massive data set, and we want to quickly discard all the elements that are not part of a specific set.
 
 The core structure underlying bloom filters is a bit array, which makes it highly compact in memory. When initialized, all the positions are set to 0. When inserting a given element, we apply multiple hash functions to it, each of which would map the element to a bucket in the array. This would be the element's "signature". Then, we would set the value of each of these buckets to 1. To probabilistically verify if an element is in the array, we would compute its signature and examine if all the buckets take a value of 1.
 
-## Linked lists
+# Linked lists
 
 A linked list is a DAG in which almost every node has exactly one inbound edge and one outbound edge. The exceptions are the _head_, a node with no inbound egde, and the _tail_, a node with no outbound edge. Like arrays, linked lists are ordered. However, they have one key diference: insertions in the middle of an array are expensive ($$O(n)$$), since they require copying all the items of the array, while they are cheap in the linked list ($$O(1)$$), since they only require changing two pointers.
 

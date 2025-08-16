@@ -12,13 +12,11 @@ toc:
   sidebar: left
 ---
 
-# Algorithms
-
-## Divide and conquer problems
+# Divide and conquer problems
 
 Divide and conquer algorithms work by breaking down a problem into _two or more_ smaller subproblems of the same type. These subproblems are tackled recursively, until the subproblem is simple enough to have a trivial solution. Then, the solutions are combined in a bottom-up fashion. For examples in [sorting](#sorting-problems), see [merge sort](#merge-sort) and [quick sort](#quick-sort).
 
-## Intervals and scheduling problems
+# Intervals and scheduling problems
 
 The input of interval problems is a list of lists, each of which contains a pair `[start_i, end_i]` representing an interval. Typical questions revolve around how much they overlap with each other, or inserting and merging a new element.
 
@@ -26,7 +24,7 @@ The input of interval problems is a list of lists, each of which contains a pair
 
 **Note:** If the intervals are not sorted, the first step is _almost always_ **sorting them**, either by start or by end. This usually brings the time complexity to $$O(n \log n)$$. In some cases we need to perform two sorts, by start and end separately, before merging them. This produces the sequence of events that are happening.
 
-## Sorting problems
+# Sorting problems
 
 Sorting consists on arranging the elements of an input array according to some criteria. There are multiple ways to sort an input, each offerintg different trade-offs:
 
@@ -46,7 +44,7 @@ I implement a couple of those below. Their complexities are as follows:
 | [Quicksort](#quick-sort)         | $$O(n \log n)$$ (average) | $$O(\log n)$$    |
 | [Topological](#topological-sort) | $$O(\|V\| + \|E\|)$$      | $$O(\|V\|)$$     |
 
-### Selection sort
+## Selection sort
 
 ```python
 def selection_sort(x):
@@ -66,7 +64,7 @@ def selection_sort(x):
 bubble_sort([3,5,1,8,-1])
 ```
 
-### Bubble sort
+## Bubble sort
 
 ```python
 def bubble_sort(x):
@@ -79,7 +77,7 @@ def bubble_sort(x):
 bubble_sort([3,5,1,8,-1])
 ```
 
-### Merge sort
+## Merge sort
 
 ```python
 def merge_sort(x):
@@ -116,7 +114,7 @@ def merge_sort(x):
 merge_sort([3,5,1,8,-1])
 ```
 
-### Quick sort
+## Quick sort
 
 ```python
 def quick_sort(x):
@@ -141,13 +139,13 @@ def quick_sort(x):
 quick_sort([3,5,1,8,-1])
 ```
 
-### Further reading
+## Further reading
 
 - [Sorting Out The Basics Behind Sorting Algorithms](https://medium.com/basecs/sorting-out-the-basics-behind-sorting-algorithms-b0a032873add)
 
-## Linked lists
+# Linked lists
 
-### Traversal
+## Traversal
 
 Traversing a linked list simply consists on passing through every element. We can do that starting from the head, following the pointer to the next node and so on.
 
@@ -203,7 +201,7 @@ fetch_values(a)
 ['A', 'B', 'C', 'D']
 ```
 
-### Search
+## Search
 
 ```python
 def find_value(node, target):
@@ -218,7 +216,7 @@ find_value(a, "A") # True
 find_value(b, "A") # False
 ```
 
-### Keeping multiple pointers
+## Keeping multiple pointers
 
 Often multiple pointers are needed in order to perform certain operations on the list, like reversing it or deleting an element in the middle.
 
@@ -242,7 +240,7 @@ fetch_values(reverse_list(a))
 ['D', 'C', 'B', 'A']
 ```
 
-### Merge lists
+## Merge lists
 
 ```python
 a = create_list()
@@ -283,7 +281,7 @@ fetch_values(merge(a, x))
 ['A', 'X', 'B', 'Y', 'C', 'D']
 ```
 
-### Fast and slow pointers
+## Fast and slow pointers
 
 Using two pointers that iterate the list at different speeds can help with multiple problems: finding the middle of a list, detecting cycles, or finding the element at a certain distance from the end. For instance, this is how you would use this technique to find the middle node:
 
@@ -300,28 +298,28 @@ a = create_list()
 print(find_middle(a))
 ```
 
-## Search problems
+# Search problems
 
 {% comment %}
 
-### Linear search
+## Linear search
 
 TODO
 
-### Binary search
+## Binary search
 
 TODO
 
-## Tree problems
+# Tree problems
 
 TODO
 
-### Tree traversal
+## Tree traversal
 
 TODO
 {% endcomment %}
 
-#### In-order traversal
+### In-order traversal
 
 A very useful algorithm to know is how to iterate a BST in order, from the smallest to the largest value in the tree. It has a very compact recursive implementation:
 
@@ -405,22 +403,22 @@ find_k_smallest(root, 2)
 
 {% comment %}
 
-### Search and delete
+## Search and delete
 
 TODO
 
-### Insert
+## Insert
 
 TODO
 {% endcomment %}
 
-## Graph problems
+# Graph problems
 
-### Traversals
+## Traversals
 
 The bread and butter of graph problems are traversal algorithms. Let's study them.
 
-#### Depth first traversal
+### Depth first traversal
 
 In a depth-first traversal (DFT), given a starting node, we recursively visit each of its neighbors before moving to the next one. In a 2D grid, it would involve picking a direction, and following it until we reach a bound. Then we would pick another direction, and do the same. Essentially, the exploration path looks like a snake.
 
@@ -489,7 +487,7 @@ For a graph with nodes $$V$$ and edges $$E$$, the time complexity is $$O(\|V\|+\
 
 **Note:** Some corner cases are the empty graph, graphs with one or two nodes, graphs with multiple components and graphs with cycles.
 
-#### Breadth first traversal
+### Breadth first traversal
 
 In a breadth-first traversal (BFT), given a starting node, we first visit its neighbors, then their neighbors, and so on.
 
@@ -537,7 +535,7 @@ f
 
 For a graph with nodes $$V$$ and edges $$E$$, the time complexity is $$O(\|V\|+\|E\|)$$ and the space complexity is $$O(\|V\|)$$.
 
-### Topological sort
+## Topological sort
 
 A topological sort (or _top sort_) is an algorithm whose input is a DAG, and whose output is an array such that every node appears after all the nodes that point at it. (Note that, in the presence of cycles, there is no valid topological sorting.) The algorithm looks like this:
 
@@ -551,30 +549,30 @@ Put together, the time complexity of top sort is $$O(\|V\| + \|E\|)$$, and the s
 
 {% comment %}
 
-### Union find
+## Union find
 
 TODO
 
-### Djikstra
+## Djikstra
 
 TODO
 
-### Min spanning tree
+## Min spanning tree
 
 TODO
 {% endcomment %}
 
-## Binary tree problems
+# Binary tree problems
 
-### Tree traversals
+## Tree traversals
 
 As for graph related problems, problems involving trees often require traversals, either [depth](#depth-first-traversal) or [breadth](#breadth-first-traversal) first. The same principles and data structures apply. For a tree with $$n$$ nodes, the time complexity is $$O(n)$$, and the time complexity is $$O(n)$$. If the tree is balanced, depth first has a space complexity of $$O(\log n)$$.
 
-### Further resources
+## Further resources
 
 - [Graph Algorithms for Technical Interviews - Full Course](https://www.youtube.com/watch?v=tWVWeAqZ0WU)
 
-## Two pointers
+# Two pointers
 
 The two pointer approach can be used in problems involving searching, comparing and modifying elements in a sequence. A naive approach would involve two loops, and hence take $$O(n^2)$$ time. Instead, in the two pointer approach we have two pointers storing indexes, and, by moving them in a coordinate way, we can reduce the complexity down to $$O(n)$$. Generally speaking, the two pointers can either move in the same direction, or in opposite directions.
 
@@ -582,15 +580,15 @@ The two pointer approach can be used in problems involving searching, comparing 
 
 **Note:** Sometimes we need to iterate an $$m \times n$$ table. While we can use two pointers for that, we can to with a single pointer $$i \in [0, m \times n)$$: `row = i // n`, `col = i % n`.
 
-#### Sliding window problems
+### Sliding window problems
 
 Sliding window problems are a type of same direction pointer problems. They are optimization problems involving **contiguous** sequences (substrings, subarrays, etc.), particularly involving cumulative properties. The general approach consists on starting with two pointers, `st` and `ed` at the beginning of the sequence. We can keep track of the cumulative property and update it as the window expands or contracts. We keep increasing `st` until we find a window that meets our constraint. Then, we try to reduce it by increasing `st`, until it doesn't meet it anymore. Then, we go back to increasing `ed`, and so on.
 
-## Permutation problems
+# Permutation problems
 
 Permutation problems can be tackled by [recursion](#recursion).
 
-## Backtracking problems
+# Backtracking problems
 
 Backtracking is a family of algorithms characterized by:
 
@@ -601,7 +599,7 @@ Since solutions are built incrementally, backtracting they can be visualized as 
 
 **Note:** Because of the need to backtrack, a recursive implementation of the DFS is often more convenient, since undoing a step simply involves invoking `return`. A stack might require a more elaborate implementation.
 
-### A recipe for backtracking problems
+## A recipe for backtracking problems
 
 As we will see in a few examples, the solution to a backtracking problem looks like this:
 
@@ -619,9 +617,9 @@ def solve(candidate):
             remove(child)
 ```
 
-### Examples
+## Examples
 
-#### The eight queens puzzle
+### The eight queens puzzle
 
 A famous application of backtracking is solving the [eight queens puzzle](https://en.wikipedia.org/wiki/Eight_queens_puzzle):
 
@@ -669,7 +667,7 @@ print(f"Total solutions: {total_solutions}")
 Total solutions: 92
 ```
 
-#### Solving a sudoku
+### Solving a sudoku
 
 ```python
 
@@ -738,7 +736,7 @@ else:
  [8, 1, 9, 4, 6, 5, 7, 3, 2]]
 ```
 
-#### Permutations of a list
+### Permutations of a list
 
 ```python
 def permute(nums):
@@ -757,7 +755,7 @@ def permute(nums):
     return res
 ```
 
-## Dynamic programming
+# Dynamic programming
 
 The hallmark of a dynamic programming problem are **overlapping subproblems**.
 
@@ -770,9 +768,9 @@ We have two strategies:
 
 Draw a strategy!!
 
-### Recursion + memoization
+## Recursion + memoization
 
-#### Recursion
+### Recursion
 
 Recursion is a technique in to solve problems which in turn depend on solving smaller subproblems. It permeates many other methods, like [backtracking](#backtracking-problems), [merge sort](#merge-sort), [quick sort](#quick-sort), [binary search](#binary-search) or [tree traversal](#tree-traversal).
 
@@ -787,12 +785,12 @@ The space complexity of recursion will be, at least, the length of the stack whi
 
 {% comment %}
 
-#### Memoization
+### Memoization
 
 TODO
 {% endcomment %}
 
-#### Recursion + memoization recipe
+### Recursion + memoization recipe
 
 In DP, combining recursion and memoization is a powerful way to trade space complexity for time complexity. Specifically, since problems are overlapping, it is likely we are solving the same subproblems over and over, which can get expensive due to recursion. Caching them can greatly improve the speed of our algorithm.
 
@@ -807,7 +805,7 @@ Here is a recipe for solving these problems (from [here](https://www.youtube.com
    1. Store the return values into the memo
    1. Return the right value from memo
 
-#### Computational complexity
+### Computational complexity
 
 The computational complexity will be impacted by two factors:
 
@@ -820,12 +818,12 @@ The computational complexity will be impacted by two factors:
 
 {% comment %}
 
-### Tabulation
+## Tabulation
 
 TODO
 {% endcomment %}
 
-#### Tabulation recipe
+### Tabulation recipe
 
 Taken from [here](https://www.youtube.com/watch?v=oBt53YbR9Kk):
 
@@ -840,7 +838,7 @@ Some caveats:
 
 1. Note that sometimes the trivial case might not have the solution we need to solve the algorithm. Watch out for such situations.
 
-### Additional resources
+## Additional resources
 
 These are some materials that helped me understand dynamic programming (the order matters!):
 
@@ -849,7 +847,7 @@ These are some materials that helped me understand dynamic programming (the orde
 1. [Dynamic Programming is not Black Magic](https://qsantos.fr/2024/01/04/dynamic-programming-is-not-black-magic/)
 1. [LeetCode: DP for Beginners](https://leetcode.com/discuss/study-guide/662866/DP-for-Beginners-Problems-or-Patterns-or-Sample-Solutions)
 
-### Solved problems
+## Solved problems
 
 ```python
 def how_sum(target: int, nums: list[int], memo: dict = {}) -> None | list[int]:
