@@ -61,26 +61,21 @@ The [Huffman coding](https://en.wikipedia.org/wiki/Huffman_coding) is a common s
 
 1. **Start with probabilities:**
 
-   ```
-   Cloudy: 0.5
-   Rainy:  0.4
-   Sunny:  0.1
-   ```
+   | Weather | Probability |
+   | ------- | ----------- |
+   | Cloudy  | 0.5         |
+   | Rainy   | 0.4         |
+   | Sunny   | 0.1         |
 
 2. **Merge lowest pairs:** Combine Sunny (0.1) and Rainy (0.4) → node with weight 0.5. Then combine with Cloudy (0.5) → final tree.
 
-3. **Assign bits:** Traverse tree, assigning 0/1 at each split.
+3. **Assign bits:** Traverse the tree, assigning 0/1 at each split.
 
-   | Symbol | Codeword |
-   | ------ | -------- |
-   | Cloudy | 0        |
-   | Rainy  | 10       |
-   | Sunny  | 11       |
-
-4. **Average length:**
-   $$
-   0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5 \text{ bits}
-   $$
+   | Weather | Codeword |
+   | ------- | -------- |
+   | Cloudy  | 0        |
+   | Rainy   | 10       |
+   | Sunny   | 11       |
 
 Huffman coding guarantees the shortest average length for any prefix code based on the true distribution.
 
@@ -162,11 +157,11 @@ $$
 
 This is higher than the average message length of 1.9 bits. Contrary to entropy, which is a hard-limit, our model _can_ do better than cross-entropy. This is because the cross-entropy leverages (optimal) fractional lengths, but our Huffman codes use non-fractional lengths, underestimating some outcomes and overestimating others:
 
-| Weather | P   | Codeword length | Q-optimal codeword length | Extra/Saved bits             |
-| ------- | --- | --------------- | ------------------------- | ---------------------------- |
-| Cloudy  | 0.5 | 2               | 2.32                      | $$-0.32 \times 0.5 = -0.16$$ |
-| Rainy   | 0.4 | 2               | 3.32                      | $$-1.32 \times 0.4 = -0.53$$ |
-| Sunny   | 0.1 | 1               | 0.51                      | $$ 0.49 \times 0.1 = 0.05$$  |
+| Weather | P   | Codeword length | Q-optimal codeword length | Extra ($$+$$)/Saved ($$-$$) bits |
+| ------- | --- | --------------- | ------------------------- | -------------------------------- |
+| Cloudy  | 0.5 | 2               | 2.32                      | $$-0.32 \times 0.5 = -0.16$$     |
+| Rainy   | 0.4 | 2               | 3.32                      | $$-1.32 \times 0.4 = -0.53$$     |
+| Sunny   | 0.1 | 1               | 0.51                      | $$ 0.49 \times 0.1 = 0.05$$      |
 
 Notice how we're saving a ton of bits on cloudy and rainy days; we got lucky. If we batch our weather reports, we get closer to encoding individual outcomes with fractional bits. Using the 10-day Barcelona code to report London weather, the average length of my message was $$2.53 \text{ bits}$$, which is much closer to $$H(P, Q) \approx 2.54 \text{ bits}$$. The cross-entropy _is_ a lower bound if and only if we achieve the optimal coding for $$Q$$.
 
