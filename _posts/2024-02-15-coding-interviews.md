@@ -1,8 +1,8 @@
 ---
 layout: post
-title: A strategy for coding interviews
+title: How to take coding interviews
 date: 2024-02-24 11:59:00-0400
-description: Success not guaranteed
+description: Provided "as is", without warranty of any kind
 tags:
   - computer_science
   - coding
@@ -12,7 +12,7 @@ toc:
   sidebar: left
 ---
 
-Although maybe on their way out, coding interviews are still common for computational roles. They aim to assess our problem-solving skills, to write code and to communicate our thought process. A common format involves a live coding session with an interviewer. The goal is to solve a problem in a limited time, usually 45-60 minutes. Here I present a template to tackle these situations.
+Coding interviews are still common for computational roles. They aim to assess our problem-solving skills, to write code and to communicate our thought process. A common format involves a live coding session with an interviewer. The goal is to solve a problem in a limited time, usually 45-60 minutes. Here I present a template to tackle these interviews.
 
 # 1. Problem statement
 
