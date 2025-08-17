@@ -19,6 +19,7 @@
 from pathlib import Path
 from typing import List, Tuple
 import yaml
+from urllib.parse import quote
 
 import numpy as np
 import plotly.graph_objects as go
@@ -205,12 +206,42 @@ cat_colors = {
     "other": "#bebebe",
 }
 
-# Build 2D traces, one per category
+# Build per-document URL based on filename (strip date prefix YYYY-MM-DD- and extension)
+base_url = "https://hclimente.eu/blog/"
+urls = []
+for m in metadata:
+    if isinstance(m, dict):
+        p = m.get("path", "")
+        stem = Path(p).stem if p else ""
+    else:
+        stem = ""
+    if not stem:
+        stem = "doc"
+    # remove fixed 11-char date prefix YYYY-MM-DD- if present
+    if (
+        len(stem) > 11
+        and stem[4] == "-"
+        and stem[7] == "-"
+        and stem[10] == "-"
+        and stem[:4].isdigit()
+        and stem[5:7].isdigit()
+        and stem[8:10].isdigit()
+    ):
+        slug = stem[11:]
+    else:
+        slug = stem
+    slug = slug.strip()
+    slug = quote(slug)
+    url = base_url + slug + "/"
+    urls.append(url)
+
+# Build 2D traces, one per category, with customdata for click URLs
 traces = []
 order = categories + ["other"]
 for lab in order:
     idx = [i for i, p in enumerate(primary) if p == lab]
     if idx:
+        trace_urls = [urls[i] for i in idx]
         traces.append(
             go.Scatter(
                 x=emb2[idx, 0],
@@ -220,6 +251,7 @@ for lab in order:
                 text=[hover_texts[i] for i in idx],
                 hoverinfo="text",
                 name=f"{lab}",
+                customdata=trace_urls,
             )
         )
     else:
@@ -231,14 +263,16 @@ for lab in order:
                 marker=dict(size=8),
                 name=f"{lab}",
                 visible=False,
+                customdata=[],
             )
         )
 
 fig = go.Figure(data=traces)
 
 fig.update_layout(
+    title="2D UMAP of embeddings",
     height=720,
-    template="simple_white",
+    template="plotly_white",
     xaxis=dict(title="UMAP 1", gridcolor="lightgrey"),
     yaxis=dict(title="UMAP 2", gridcolor="lightgrey"),
     legend=dict(
@@ -251,4 +285,22 @@ fig.update_layout(
     ),
 )
 
-fig.write_html("img/posts_umap.html", include_plotlyjs="cdn")
+# Add JS that opens the customdata URL on click
+div_id = "umap_plot"
+post_script = f"""
+var gd = document.getElementById('{div_id}');
+if(gd) {{
+  gd.on('plotly_click', function(data) {{
+    var pt = data.points[0];
+    var url = pt.customdata;
+    if(url) {{ window.open(url, '_blank'); }}
+  }});
+}}
+"""
+
+html = fig.to_html(
+    full_html=True, include_plotlyjs="cdn", div_id=div_id, post_script=post_script
+)
+out_html = Path("img/posts_umap.html")
+out_html.write_text(html, encoding="utf-8")
+print(f"Wrote interactive 2D plot with links to {out_html}")
