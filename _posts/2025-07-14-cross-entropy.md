@@ -86,11 +86,11 @@ Huffman coding guarantees the shortest average length for any prefix code based 
 
 {% enddetails %}
 
-This is much better: we have gone from 44 bits to $$0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5$$ bits on average. Of course, for this to be possible, we need to have access to the true weather distribution. Otherwise, our bit allocation won't be optimal or we might converge to a suboptimal code.
+This is much better: we have gone from 44 bits to $$0.5 \times 1 + 0.4 \times 2 + 0.1 \times 2 = 1.5$$ bits on average. Of course, for this to be possible, we need to have access to the true weather distribution. Otherwise, our bit allocation won't be optimal.
 
 Are we satisfied yet? Not quite. Despite Huffman being optimal, our message length will be the same on rainy days and on sunny days. However, rainy days are 4 times more common! The core problem is that our messages have an _integer_ length, and we would need _fractional_ lengths to do better. But we can do better if we make some compromises. Imagine we only want to batch-send the weather report every 10 days. Then, there are $$3^{10}$$ possible sequences of 10 days. The most likely one is a streak of ten cloudy days, which occurs with probability $$0.5^{10}$$. Consequently, the Huffman coding assigns a much shorter codeword to this string than to the most unlikely string, a streak of ten sunny days:
 
-| 10-day weather | Probability | Codeword (length)                | Codeword length |
+| 10-day weather | Probability | Codeword                         | Codeword length |
 | -------------- | ----------- | -------------------------------- | --------------- |
 | CCCCCCCCCC     | 9.77e-04    | 0111001010                       | 10              |
 | CCCCCCCCCR     | 7.81e-04    | 0000101101                       | 10              |
