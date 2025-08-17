@@ -58,6 +58,22 @@ def extract_frontmatter_and_body(text: str) -> Tuple[dict, str]:
     return meta, body
 
 
+def infer_post_url(path: str) -> str:
+    """Infer URLs for each document based on filename."""
+
+    base_url = "https://hclimente.eu/blog"
+
+    stem = Path(path).stem
+
+    # remove fixed 11-char date prefix YYYY-MM-DD-
+    slug = stem[11:]
+    slug = slug.strip()
+    slug = quote(slug)
+    url = f"{base_url}/{slug}/"
+
+    return url
+
+
 def collect_markdowns(root: Path) -> List[Path]:
     """Find all markdown files under `root` (recursively)."""
     patterns = ("**/*.md", "**/*.markdown")
@@ -98,6 +114,8 @@ def load_documents(paths: List[Path]) -> Tuple[List[str], List[dict]]:
                 else:
                     m["tags"] = [t for t in m["tags"].split() if t]
 
+        m["url"] = infer_post_url(p)
+
         texts.append(body)
         metadatas.append(m)
 
@@ -110,9 +128,6 @@ def compute_embeddings(texts: List[str], metadatas: List[dict]):
     The actual import is done inside the function so the module can be
     syntactically validated without heavy dependencies present.
     """
-    if not texts:
-        print("No documents found. Nothing to embed.")
-        return
 
     # Small, high-quality model that is lightweight on CPU
     model_name = "all-MiniLM-L6-v2"
@@ -206,34 +221,7 @@ cat_colors = {
     "other": "#bebebe",
 }
 
-# Build per-document URL based on filename (strip date prefix YYYY-MM-DD- and extension)
-base_url = "https://hclimente.eu/blog/"
-urls = []
-for m in metadata:
-    if isinstance(m, dict):
-        p = m.get("path", "")
-        stem = Path(p).stem if p else ""
-    else:
-        stem = ""
-    if not stem:
-        stem = "doc"
-    # remove fixed 11-char date prefix YYYY-MM-DD- if present
-    if (
-        len(stem) > 11
-        and stem[4] == "-"
-        and stem[7] == "-"
-        and stem[10] == "-"
-        and stem[:4].isdigit()
-        and stem[5:7].isdigit()
-        and stem[8:10].isdigit()
-    ):
-        slug = stem[11:]
-    else:
-        slug = stem
-    slug = slug.strip()
-    slug = quote(slug)
-    url = base_url + slug + "/"
-    urls.append(url)
+urls = [m["url"] for m in metadata]
 
 # Build 2D traces, one per category, with customdata for click URLs
 traces = []
