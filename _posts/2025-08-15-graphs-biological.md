@@ -1,12 +1,11 @@
 ---
 layout: distill
-title: Cross-entropy. Intuition and applications.
+title: Compendium of biological networks
 date: 2025-08-01 11:59:00 +0000
-description: The secret sauce of machine learning
+description: And comments.
 tags:
-  - information_theory
-  - machine_learning
-  - statistics
+  - graphs
+  - bioinformatics
 giscus_comments: true
 related_posts: false
 ---
