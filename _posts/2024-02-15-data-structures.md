@@ -175,11 +175,17 @@ class UnionFind:
                 self.rank[rootY] = self.rank[rootX]
 ```
 
-# Bloom filters
+# Probabilistic data structures
+
+## Bloom filters
 
 Bloom filters are data structures to probabilistically check if an element is a member of a set. It can be used when false positives are acceptable, but false negatives are not. For instance, if we have a massive data set, and we want to quickly discard all the elements that are not part of a specific set.
 
 The core structure underlying bloom filters is a bit array, which makes it highly compact in memory. When initialized, all the positions are set to 0. When inserting a given element, we apply multiple hash functions to it, each of which would map the element to a bucket in the array. This would be the element's "signature". Then, we would set the value of each of these buckets to 1. To probabilistically verify if an element is in the array, we would compute its signature and examine if all the buckets take a value of 1.
+
+## Skip lists
+
+_See [Skip lists]({% post_url 2025-08-16-rags %}#nearest-neighbor-search)._
 
 # Linked lists
 

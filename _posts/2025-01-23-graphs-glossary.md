@@ -140,6 +140,10 @@ An [undirected](#undirected-graph) graph in which any two vertices are connected
 
 A graph which can have multiple edges between the same pair of vertices.
 
+## Navigable
+
+A graph in which we can find a path between any two nodes via a greedy strategy that choses the neighbor closest according to a distance function.
+
 ## Regular
 
 A graph in which every vertex has the same degree.

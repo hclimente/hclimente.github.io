@@ -1,13 +1,12 @@
 ---
-layout: post
+layout: distill
 title: Properties of Graphs
 date: 2025-01-24 11:59:00-0000
 description: Multiscale ways to talk about graphs
-tags: graphs
+tags:
+    - graphs
 giscus_comments: true
 related_posts: false
-toc:
-  sidebar: left
 ---
 
 At the most fundamental level, graphs are just entities and connections between them. Yet, the network topology gives rise to emergent properties. For instance, how information flows through a social network is partly a function who posts the message and how they are connected to the rest of the network, with their immediate connections being likely more important. In this section, I review three levels at which networks operate: [local](#local-properties), [mesoscale](#mesoscale-properties) and [global](#global-properties). They refer, respectively, to properties of the nodes, properties of parts of the network and properties of the whole network.
@@ -68,4 +67,26 @@ $$C = \frac {3 \times \text{triangles}} {\text{triplets}}$$
 
 **Centrality** assigns a score or a ranking to every vertex in the graph, which represents its importance in the network according to some metric. [Degree](#degree) and [participation](#participation) are examples of such metrics, but there are others.
 
-WIP
+# Types of graphs
+
+We can clasify graphs into different types by using the [global properties](#global-properties) of their nodes.
+
+## Regular graphs
+
+**Regular** graphs are those in which every node has the same degree. They have a high average [clustering coefficient](#local-clustering-coefficient) and a large [diameter](#radius-and-diameter).
+
+## Small-world graph
+
+{% details Milgram's small-world experiment %}
+
+[Milgram](https://en.wikipedia.org/wiki/Stanley_Milgram) _et al._ conducted experiments that were key to understand the topology of social graphs.
+
+They gave letters to randomly chosen people from Nebraska and Kansas, each of which was to reach a target random person from Massachusetts. To that end, they could only give it to their friend or relative they thought was most likely to know the target. These, in turn, were meant to do the same; and so on, until eventually the letter would reach the target. The majority of letters never reached their target; but those who did, made it in 5 to 6 hops.
+
+This ultimately lead to the postulation of the [six degrees of separation](https://en.wikipedia.org/wiki/Six_degrees_of_separation) and the realization that social graphs are small world graphs.
+
+{% enddetails %}
+
+# Further reading
+
+- [Chihling's series on graphs](https://chih-ling-hsu.github.io/tags/#Graph)
