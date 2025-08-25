@@ -39,6 +39,7 @@ def save_plotly(
     yaxis_attr_dict: dict,
     legend_attr_dict: dict,
     colorway=plotly.colors.qualitative.T10,
+    **kwargs,
 ):
 
     fig.update_layout(
@@ -53,4 +54,4 @@ def save_plotly(
     )
 
     fig.show()
-    fig.write_html(f"plotly/{basename}.html", include_plotlyjs="cdn")
+    fig.write_html(f"plotly/{basename}.html", include_plotlyjs="cdn", **kwargs)

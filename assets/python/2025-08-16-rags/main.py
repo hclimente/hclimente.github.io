@@ -10,21 +10,33 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.11.2
 #   kernelspec:
-#     display_name: 2025-08-16-rags
+#     display_name: .venv
 #     language: python
 #     name: python3
 # ---
 
 # %%
 from pathlib import Path
+import sys
 from typing import List, Tuple
 import yaml
 from urllib.parse import quote
 
+import matplotlib.pyplot as plt
 import numpy as np
 import plotly.graph_objects as go
+from scipy.cluster.hierarchy import linkage, leaves_list
 from sentence_transformers import SentenceTransformer
 from umap import UMAP
+
+sys.path.append("../")
+
+from utils import (
+    PLOTLY_AXIS_ATTR_DICT,
+    PLOTLY_LEGEND_ATTR_DICT,
+    save_fig,
+    save_plotly,
+)
 
 MD_PATH = Path("../../../_posts")
 
@@ -122,7 +134,7 @@ def load_documents(paths: List[Path]) -> Tuple[List[str], List[dict]]:
     return texts, metadatas
 
 
-def compute_embeddings(texts: List[str], metadatas: List[dict]):
+def compute_embeddings(texts: List[str]):
     """Compute embeddings using a small sentence-transformers model and save.
 
     The actual import is done inside the function so the module can be
@@ -145,7 +157,7 @@ print("Scanning for markdown files in:", MD_PATH)
 files = collect_markdowns(MD_PATH)
 print(f"Found {len(files)} markdown files")
 texts, metadata = load_documents(files)
-embeddings = compute_embeddings(texts, metadata)
+embeddings = compute_embeddings(texts)
 
 # %%
 # Ensure embeddings array is a numeric 2D numpy array
@@ -257,22 +269,6 @@ for lab in order:
 
 fig = go.Figure(data=traces)
 
-fig.update_layout(
-    title="2D UMAP of embeddings",
-    height=720,
-    template="plotly_white",
-    xaxis=dict(title="UMAP 1", gridcolor="lightgrey"),
-    yaxis=dict(title="UMAP 2", gridcolor="lightgrey"),
-    legend=dict(
-        itemsizing="constant",
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1,
-    ),
-)
-
 # Add JS that opens the customdata URL on click
 div_id = "umap_plot"
 post_script = f"""
@@ -286,9 +282,57 @@ if(gd) {{
 }}
 """
 
-html = fig.to_html(
-    full_html=True, include_plotlyjs="cdn", div_id=div_id, post_script=post_script
+xaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+xaxis_attr_dict["title"] = "UMAP 1"
+yaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+yaxis_attr_dict["title"] = "UMAP 2"
+
+save_plotly(
+    fig, "posts_umap", xaxis_attr_dict, yaxis_attr_dict, PLOTLY_LEGEND_ATTR_DICT, div_id=div_id, post_script=post_script
 )
-out_html = Path("img/posts_umap.html")
-out_html.write_text(html, encoding="utf-8")
-print(f"Wrote interactive 2D plot with links to {out_html}")
+
+
+# %%
+
+# %%
+# make heatmap with hierarchical clustering
+def compute_similarity_matrix(X):
+    X_norm = X / np.linalg.norm(X, axis=1, keepdims=True)
+    return np.dot(X_norm, X_norm.T)
+
+# compute cosine similarities matrix
+sim = compute_similarity_matrix(embeddings)
+
+# hierarchically cluster the embeddings
+Z = linkage(embeddings, method="ward")
+leaf_order = leaves_list(Z)
+sim_ordered = sim[leaf_order][:, leaf_order]
+
+# make plot
+plt.figure(figsize=(10, 8))
+plt.imshow(sim_ordered, cmap="seismic", vmin=-1, vmax=1)
+plt.colorbar(label="Cosine similarity")
+
+titles = [ m.get("title") for m in metadata ]
+plt.xticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], rotation=90, fontsize=10)
+plt.yticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], fontsize=10)
+
+plt.tight_layout()
+save_fig(plt.gcf(), "posts_cosine_similarities_heatmap")
+
+# %%
+
+# %%
+import pandas as pd
+
+QUERY = """
+A blog post about interpretable machine learning.
+"""
+query_embedding = compute_embeddings([QUERY])
+
+df = pd.DataFrame({
+    "title": ["query"] + titles,
+    "similarity": compute_similarity_matrix(np.vstack([query_embedding, embeddings]))[0, :],
+})
+
+df.sort_values("similarity", ascending=False)
