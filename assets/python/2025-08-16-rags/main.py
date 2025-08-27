@@ -225,7 +225,7 @@ umap = UMAP(n_components=2, random_state=42)
 emb_umap = umap.fit_transform(embeddings)
 
 # Prepare hover text: title + chunk text (truncate for display)
-hover_texts = [f"<b>{title}</b><br>{chunk.split("\n")[1][:200]}..." for title, chunk in zip(titles, chunk_list)]
+hover_texts = [f"<b>{title}</b><br>{chunk.split('\n\n')[1][:200]}..." for title, chunk in zip(titles, chunk_list)]
 
 # Factorize titles for color assignment
 unique_titles, title_ids = np.unique(titles, return_inverse=True)
@@ -256,6 +256,9 @@ save_plotly(
     post_script=post_script
 )
 
+# %% [markdown]
+# # Cosine similarity between the chunks
+
 # %%
 # compute cosine similarities matrix
 sim = compute_similarity_matrix(embeddings)
@@ -265,31 +268,64 @@ Z = linkage(embeddings, method="ward")
 leaf_order = leaves_list(Z)
 sim_ordered = sim[leaf_order][:, leaf_order]
 
-# make plot
-plt.figure(figsize=(10, 8))
-plt.imshow(sim_ordered, cmap="seismic", vmin=-1, vmax=1)
-plt.colorbar(label="Cosine similarity")
+# map titles (strings) to categorical ids in leaf order
+titles_ordered = [titles[i] for i in leaf_order]
+# stable unique preserving order
+title_to_id = {t: i for i, t in enumerate(dict.fromkeys(titles_ordered))}
+ids_ordered = np.array([title_to_id[t] for t in titles_ordered], dtype=int)
+n_titles = len(title_to_id)
 
-# titles = [ m.get("title") for m in metadata ]
-plt.xticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], rotation=90, fontsize=2)
-plt.yticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], fontsize=2)
+# Plotly interactive heatmap with per-cell hover showing titles and similarity
+import numpy as np
+import plotly.graph_objects as go
 
-plt.tight_layout()
-save_fig(plt.gcf(), "paragraph_similarity_heatmap")
+n = sim_ordered.shape[0]
+rows = np.array(titles_ordered)          # row titles (y)
+cols = rows                               # col titles (x, same order)
+row_grid = np.tile(rows[:, None], (1, n)) # n x n
+col_grid = np.tile(cols[None, :], (n, 1)) # n x n
+customdata = np.stack([row_grid, col_grid], axis=-1)  # n x n x 2
 
-# %%
+heatmap = go.Heatmap(
+    z=sim_ordered,
+    zmin=-1, zmax=1,
+    colorscale="RdBu",
+    reversescale=True,  # positive=red, negative=blue
+    colorbar=dict(title="Cosine similarity"),
+    customdata=customdata,
+    hovertemplate="x: %{customdata[1]}<br>"
+                  "y: %{customdata[0]}<br>"
+                  "similarity: %{z:.3f}<extra></extra>",
+)
+
+fig = go.Figure(data=[heatmap])
+
+xaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
+yaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
+xaxis_attr.update(dict(title="", showticklabels=False, ticks=""))
+yaxis_attr.update(dict(title="", showticklabels=False, ticks="", autorange="reversed"))
+
+save_plotly(
+    fig,
+    "paragraph_similarity_heatmap",
+    xaxis_attr,
+    yaxis_attr,
+    PLOTLY_LEGEND_ATTR_DICT,
+    div_id="sim_heatmap",
+)
 
 # %%
 import pandas as pd
 
 QUERY = """
-A blog post about interpretable machine learning.
-"""
-query_embedding = compute_embeddings([QUERY])
+Interpretable machine learning
+""".strip()
+query_embedding = compute_embeddings([QUERY], model)
 
 df = pd.DataFrame({
     "title": ["query"] + titles,
+    "text": [QUERY] + [f"{chunk.split('\n\n')[1][:200]}..." for chunk in chunk_list],
     "similarity": compute_similarity_matrix(np.vstack([query_embedding, embeddings]))[0, :],
 })
 
-df.sort_values("similarity", ascending=False)
+df.sort_values("similarity", ascending=False).head(10)

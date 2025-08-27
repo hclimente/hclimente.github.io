@@ -144,7 +144,7 @@ def make_overlaps(chunks, max_overlap = 0.1):
         next_chunk = "" if i == (len(chunks) - 1) else chunks[i+1]
         next_chunk = next_chunk[:overlap]
 
-        new_chunk = f"{prev_chunk}\n{curr_chunk}\n{next_chunk}"
+        new_chunk = f"{prev_chunk}\n\n{curr_chunk}\n\n{next_chunk}"
         new_chunk = new_chunk.strip()
 
         overlapping_chunks.append(new_chunk)
