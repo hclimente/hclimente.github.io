@@ -283,7 +283,7 @@ ninja.data = [{
       
         title: "Mendelian randomization",
       
-      description: "Causality.",
+      description: "Causality from observations, thanks to genetics",
       section: "Posts",
       handler: () => {
         
