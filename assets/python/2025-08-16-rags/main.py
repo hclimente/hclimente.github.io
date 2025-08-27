@@ -10,7 +10,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.11.2
 #   kernelspec:
-#     display_name: .venv
+#     display_name: 2025-08-16-rags
 #     language: python
 #     name: python3
 # ---
@@ -18,9 +18,6 @@
 # %%
 from pathlib import Path
 import sys
-from typing import List, Tuple
-import yaml
-from urllib.parse import quote
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,6 +25,17 @@ import plotly.graph_objects as go
 from scipy.cluster.hierarchy import linkage, leaves_list
 from sentence_transformers import SentenceTransformer
 from umap import UMAP
+
+from embedding_utils import (
+    collect_markdowns,
+    compute_embeddings,
+    compute_similarity_matrix,
+    extract_frontmatter_and_body,
+    infer_post_url,
+    load_documents,
+    make_overlaps,
+    split_text,
+)
 
 sys.path.append("../")
 
@@ -39,125 +47,23 @@ from utils import (
 )
 
 MD_PATH = Path("../../../_posts")
+MAX_CHUNK_SIZE = 600
+MIN_CHUNK_SIZE = 100
+MODEL_NAME = "all-MiniLM-L6-v2" # Small, high-quality model that is lightweight on CPU
 
+print(f"Loading model '{MODEL_NAME}' (this will download the model if needed)...")
+model = SentenceTransformer(MODEL_NAME)
 
-def extract_frontmatter_and_body(text: str) -> Tuple[dict, str]:
-    """Return (metadata dict, body text).
+# %% [markdown]
+# # Whole document embedding
 
-    Frontmatter is expected to be the first section between two lines that
-    contain only '---'. If no frontmatter is present, returns ({}, original).
-    """
-    # Quick check
-    if not text.lstrip().startswith("---"):
-        return {}, text
-
-    # Split at the first two occurrences of '---'
-    parts = text.split("---", 2)
-    if len(parts) < 3:
-        return {}, text
-
-    # parts[1] is the YAML-ish header, parts[2] is the rest
-    header = parts[1].strip()
-    body = parts[2].strip()
-
-    # Parse header using a local, optional import to keep startup light
-    meta = yaml.safe_load(header) or {}
-
-    # Normalize tags if present (possible space-separated string)
-    if "tags" in meta and isinstance(meta["tags"], str):
-        meta["tags"] = [t for t in meta["tags"].split() if t]
-
-    return meta, body
-
-
-def infer_post_url(path: str) -> str:
-    """Infer URLs for each document based on filename."""
-
-    base_url = "https://hclimente.eu/blog"
-
-    stem = Path(path).stem
-
-    # remove fixed 11-char date prefix YYYY-MM-DD-
-    slug = stem[11:]
-    slug = slug.strip()
-    slug = quote(slug)
-    url = f"{base_url}/{slug}/"
-
-    return url
-
-
-def collect_markdowns(root: Path) -> List[Path]:
-    """Find all markdown files under `root` (recursively)."""
-    patterns = ("**/*.md", "**/*.markdown")
-    files = []
-    for p in patterns:
-        files.extend(list(root.glob(p)))
-    # Deduplicate and sort for stable ordering
-    files = sorted(set(files))
-    return files
-
-
-def load_documents(paths: List[Path]) -> Tuple[List[str], List[dict]]:
-    """Load files, extract frontmatter and return (texts, metadata_list).
-
-    Each metadata dict will include at least: 'path' and any parsed header keys.
-    The returned texts are the document bodies (without the frontmatter).
-    """
-    texts = []
-    metadatas = []
-    for p in paths:
-        try:
-            raw = p.read_text(encoding="utf-8")
-        except Exception:
-            # Skip unreadable files
-            continue
-        meta, body = extract_frontmatter_and_body(raw)
-        # ensure JSON serializable basic metadata
-        m = {k: v for k, v in (meta or {}).items()}
-        m.setdefault("path", str(p))
-        # Convert possible non-serializable values
-        if "date" in m:
-            m["date"] = str(m["date"])
-        if "tags" in m and not isinstance(m["tags"], list):
-            # try splitting on whitespace or commas
-            if isinstance(m["tags"], str):
-                if "," in m["tags"]:
-                    m["tags"] = [t.strip() for t in m["tags"].split(",") if t.strip()]
-                else:
-                    m["tags"] = [t for t in m["tags"].split() if t]
-
-        m["url"] = infer_post_url(p)
-
-        texts.append(body)
-        metadatas.append(m)
-
-    return texts, metadatas
-
-
-def compute_embeddings(texts: List[str]):
-    """Compute embeddings using a small sentence-transformers model and save.
-
-    The actual import is done inside the function so the module can be
-    syntactically validated without heavy dependencies present.
-    """
-
-    # Small, high-quality model that is lightweight on CPU
-    model_name = "all-MiniLM-L6-v2"
-    print(f"Loading model '{model_name}' (this will download the model if needed)...")
-    model = SentenceTransformer(model_name)
-
-    print(f"Computing embeddings for {len(texts)} documents...")
-    embeddings = model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
-    print(f"Embeddings computed (shape={embeddings.shape})")
-
-    return embeddings
-
-
+# %%
 print("Scanning for markdown files in:", MD_PATH)
 files = collect_markdowns(MD_PATH)
 print(f"Found {len(files)} markdown files")
 texts, metadata = load_documents(files)
-embeddings = compute_embeddings(texts)
+
+embeddings = compute_embeddings(texts, model)
 
 # %%
 # Ensure embeddings array is a numeric 2D numpy array
@@ -282,24 +188,75 @@ if(gd) {{
 }}
 """
 
-xaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+xaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT.copy()
 xaxis_attr_dict["title"] = "UMAP 1"
-yaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT
+yaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT.copy()
 yaxis_attr_dict["title"] = "UMAP 2"
 
 save_plotly(
     fig, "posts_umap", xaxis_attr_dict, yaxis_attr_dict, PLOTLY_LEGEND_ATTR_DICT, div_id=div_id, post_script=post_script
 )
 
+# %% [markdown]
+# # Chunked embedding
 
 # %%
+embeddings = []
+titles = []
+chunk_list = []
+for txt, meta in zip(texts, metadata):
+    chunks = split_text(txt, split_chars = ["\n\n", "\n"], max_size=MAX_CHUNK_SIZE)
+    chunks = make_overlaps(chunks)
+    # Remove short chunks
+    chunks = [x for x in chunks if len(x) > MIN_CHUNK_SIZE]
+    chunk_list.extend(chunks)
+
+    title = [meta["title"]] * len(chunks)
+    titles.extend(title)
+
+embeddings = compute_embeddings(chunk_list, model)
+embeddings = np.array(embeddings)
+print(f"Chunked embeddings shape: {embeddings.shape}")
 
 # %%
-# make heatmap with hierarchical clustering
-def compute_similarity_matrix(X):
-    X_norm = X / np.linalg.norm(X, axis=1, keepdims=True)
-    return np.dot(X_norm, X_norm.T)
+import plotly.graph_objects as go
 
+umap = UMAP(n_components=2, random_state=42)
+emb_umap = umap.fit_transform(embeddings)
+
+# Prepare hover text: title + chunk text (truncate for display)
+hover_texts = [f"<b>{title}</b><br>{chunk.split("\n")[1][:200]}..." for title, chunk in zip(titles, chunk_list)]
+
+# Factorize titles for color assignment
+unique_titles, title_ids = np.unique(titles, return_inverse=True)
+colors = [f"hsl({(i*360)//len(unique_titles)},70%,50%)" for i in title_ids]
+
+fig = go.Figure(
+    data=[go.Scatter(
+        x=emb_umap[:, 0],
+        y=emb_umap[:, 1],
+        mode="markers",
+        marker=dict(
+            color=colors,
+            size=8,
+            opacity=0.7,
+        ),
+        text=hover_texts,
+        hoverinfo="text",
+    )]
+)
+
+save_plotly(
+    fig,
+    "paragraphs_umap",
+    xaxis_attr_dict,
+    yaxis_attr_dict,
+    PLOTLY_LEGEND_ATTR_DICT,
+    div_id=div_id,
+    post_script=post_script
+)
+
+# %%
 # compute cosine similarities matrix
 sim = compute_similarity_matrix(embeddings)
 
@@ -313,12 +270,12 @@ plt.figure(figsize=(10, 8))
 plt.imshow(sim_ordered, cmap="seismic", vmin=-1, vmax=1)
 plt.colorbar(label="Cosine similarity")
 
-titles = [ m.get("title") for m in metadata ]
-plt.xticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], rotation=90, fontsize=10)
-plt.yticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], fontsize=10)
+# titles = [ m.get("title") for m in metadata ]
+plt.xticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], rotation=90, fontsize=2)
+plt.yticks(ticks=np.arange(len(titles)), labels=[titles[i] for i in leaf_order], fontsize=2)
 
 plt.tight_layout()
-save_fig(plt.gcf(), "posts_cosine_similarities_heatmap")
+save_fig(plt.gcf(), "paragraph_similarity_heatmap")
 
 # %%
 
