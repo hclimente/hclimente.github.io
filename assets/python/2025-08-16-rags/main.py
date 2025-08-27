@@ -21,6 +21,7 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
 from scipy.cluster.hierarchy import linkage, leaves_list
 from sentence_transformers import SentenceTransformer
@@ -219,8 +220,6 @@ embeddings = np.array(embeddings)
 print(f"Chunked embeddings shape: {embeddings.shape}")
 
 # %%
-import plotly.graph_objects as go
-
 umap = UMAP(n_components=2, random_state=42)
 emb_umap = umap.fit_transform(embeddings)
 
@@ -270,32 +269,21 @@ sim_ordered = sim[leaf_order][:, leaf_order]
 
 # map titles (strings) to categorical ids in leaf order
 titles_ordered = [titles[i] for i in leaf_order]
-# stable unique preserving order
-title_to_id = {t: i for i, t in enumerate(dict.fromkeys(titles_ordered))}
-ids_ordered = np.array([title_to_id[t] for t in titles_ordered], dtype=int)
-n_titles = len(title_to_id)
 
-# Plotly interactive heatmap with per-cell hover showing titles and similarity
-import numpy as np
-import plotly.graph_objects as go
+# round to 3 decimals to shrink JSON payload
+sim_ordered = np.round(sim_ordered, 3)
 
 n = sim_ordered.shape[0]
-rows = np.array(titles_ordered)          # row titles (y)
-cols = rows                               # col titles (x, same order)
-row_grid = np.tile(rows[:, None], (1, n)) # n x n
-col_grid = np.tile(cols[None, :], (n, 1)) # n x n
-customdata = np.stack([row_grid, col_grid], axis=-1)  # n x n x 2
 
 heatmap = go.Heatmap(
     z=sim_ordered,
+    x=titles_ordered,  # column labels (used in hover)
+    y=titles_ordered,  # row labels (used in hover)
     zmin=-1, zmax=1,
     colorscale="RdBu",
     reversescale=True,  # positive=red, negative=blue
     colorbar=dict(title="Cosine similarity"),
-    customdata=customdata,
-    hovertemplate="x: %{customdata[1]}<br>"
-                  "y: %{customdata[0]}<br>"
-                  "similarity: %{z:.3f}<extra></extra>",
+    hovertemplate="x: %{x}<br>y: %{y}<br>similarity: %{z:.3f}<extra></extra>",
 )
 
 fig = go.Figure(data=[heatmap])
@@ -314,9 +302,10 @@ save_plotly(
     div_id="sim_heatmap",
 )
 
-# %%
-import pandas as pd
+# %% [markdown]
+# # Query
 
+# %%
 QUERY = """
 Interpretable machine learning
 """.strip()
