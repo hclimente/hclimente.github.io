@@ -4,8 +4,8 @@ title: Mendelian randomization
 date: 2023-04-03 11:59:00-0000
 description: Causality from observations, thanks to genetics
 tags:
-    - bioinformatics
-    - genetics
+  - bioinformatics
+  - genetics
 giscus_comments: true
 related_posts: false
 mermaid:
