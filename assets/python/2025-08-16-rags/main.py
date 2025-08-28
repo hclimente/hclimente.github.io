@@ -51,6 +51,7 @@ MD_PATH = Path("../../../_posts")
 MAX_CHUNK_SIZE = 600
 MIN_CHUNK_SIZE = 100
 MODEL_NAME = "all-MiniLM-L6-v2" # Small, high-quality model that is lightweight on CPU
+SPLIT_CHARS = ["\n\n", "\n", [".", "!", "?"], [";", ","]]
 
 print(f"Loading model '{MODEL_NAME}' (this will download the model if needed)...")
 model = SentenceTransformer(MODEL_NAME)
@@ -206,7 +207,7 @@ embeddings = []
 titles = []
 chunk_list = []
 for txt, meta in zip(texts, metadata):
-    chunks = split_text(txt, split_chars = ["\n\n", "\n"], max_size=MAX_CHUNK_SIZE)
+    chunks = split_text(txt, split_chars=SPLIT_CHARS, max_size=MAX_CHUNK_SIZE)
     chunks = make_overlaps(chunks)
     # Remove short chunks
     chunks = [x for x in chunks if len(x) > MIN_CHUNK_SIZE]
@@ -218,6 +219,9 @@ for txt, meta in zip(texts, metadata):
 embeddings = compute_embeddings(chunk_list, model)
 embeddings = np.array(embeddings)
 print(f"Chunked embeddings shape: {embeddings.shape}")
+
+# %%
+chunks[9].split('\n\n')[1]
 
 # %%
 umap = UMAP(n_components=2, random_state=42, n_jobs=1)

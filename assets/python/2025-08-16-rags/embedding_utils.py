@@ -1,4 +1,5 @@
 from pathlib import Path
+import re
 from typing import List, Tuple
 from urllib.parse import quote
 import yaml
@@ -121,9 +122,10 @@ def split_text(text, split_chars = ["\n\n", "\n", ". ", " "], max_size=500):
         return [text[:max_size]]
     
     splitter = split_chars[0]
+    splitter = splitter if isinstance(splitter, str) else "|".join(map(re.escape, splitter))
     splits = []
 
-    for chunk in text.strip().split(splitter):
+    for chunk in re.split(splitter, text.strip()):
         splits.extend(split_text(chunk, split_chars[1:], max_size=max_size))
 
     return splits
