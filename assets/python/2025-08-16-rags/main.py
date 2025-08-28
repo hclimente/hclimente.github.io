@@ -220,7 +220,7 @@ embeddings = np.array(embeddings)
 print(f"Chunked embeddings shape: {embeddings.shape}")
 
 # %%
-umap = UMAP(n_components=2, random_state=42)
+umap = UMAP(n_components=2, random_state=42, n_jobs=1)
 emb_umap = umap.fit_transform(embeddings)
 
 # Prepare hover text: title + chunk text (truncate for display)
@@ -267,8 +267,15 @@ Z = linkage(embeddings, method="ward")
 leaf_order = leaves_list(Z)
 sim_ordered = sim[leaf_order][:, leaf_order]
 
-# map titles (strings) to categorical ids in leaf order
-titles_ordered = [titles[i] for i in leaf_order]
+# Create unique chunk labels instead of just article titles
+chunk_labels = []
+title_counts = {}
+for i in leaf_order:
+    title = titles[i]
+    if title not in title_counts:
+        title_counts[title] = 0
+    title_counts[title] += 1
+    chunk_labels.append(f"{title} (chunk {title_counts[title]})")
 
 # round to 3 decimals to shrink JSON payload
 sim_ordered = np.round(sim_ordered, 3)
@@ -277,11 +284,11 @@ n = sim_ordered.shape[0]
 
 heatmap = go.Heatmap(
     z=sim_ordered,
-    x=titles_ordered,  # column labels (used in hover)
-    y=titles_ordered,  # row labels (used in hover)
+    x=chunk_labels,  # unique labels per chunk
+    y=chunk_labels,  # unique labels per chunk
     zmin=-1, zmax=1,
     colorscale="RdBu",
-    reversescale=True,  # positive=red, negative=blue
+    reversescale=True,
     colorbar=dict(title="Cosine similarity"),
     hovertemplate="x: %{x}<br>y: %{y}<br>similarity: %{z:.3f}<extra></extra>",
 )
@@ -289,8 +296,9 @@ heatmap = go.Heatmap(
 fig = go.Figure(data=[heatmap])
 
 xaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
-yaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
 xaxis_attr.update(dict(title="", showticklabels=False, ticks=""))
+
+yaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
 yaxis_attr.update(dict(title="", showticklabels=False, ticks="", autorange="reversed"))
 
 save_plotly(
@@ -317,4 +325,6 @@ df = pd.DataFrame({
     "similarity": compute_similarity_matrix(np.vstack([query_embedding, embeddings]))[0, :],
 })
 
-df.sort_values("similarity", ascending=False).head(10)
+df.sort_values("similarity", ascending=False).head(10).reset_index(drop=True)
+
+# %%
