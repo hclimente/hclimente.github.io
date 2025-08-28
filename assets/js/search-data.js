@@ -341,6 +341,12 @@ ninja.data = [{
           section: "News",},{id: "news-our-preprint-on-deep-learning-based-genetic-risk-prediction-is-out-this-work-was-driven-by-taiyu-zhu-from-the-university-of-oxford",
           title: 'Our preprint on deep learning-based genetic risk prediction is out! This work was...',
           description: "",
+          section: "News",},{id: "news-i-will-be-taking-a-new-role-as-systems-biology-lead-i-will-deliver-systems-biology-capabilities-for-early-target-discovery-and-maturation",
+          title: 'I will be taking a new role as Systems Biology Lead. I will...',
+          description: "",
+          section: "News",},{id: "news-we-just-put-out-our-preprint-on-sparse-mrmr-for-feature-selection-this-work-was-driven-by-peter-naylor",
+          title: 'We just put out our preprint on sparse mRMR for feature selection. This...',
+          description: "",
           section: "News",},{
         id: 'social-bluesky',
         title: 'Bluesky',
