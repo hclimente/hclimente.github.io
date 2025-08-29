@@ -51,7 +51,7 @@ MD_PATH = Path("../../../_posts")
 MAX_CHUNK_SIZE = 600
 MIN_CHUNK_SIZE = 100
 MODEL_NAME = "all-MiniLM-L6-v2" # Small, high-quality model that is lightweight on CPU
-SPLIT_CHARS = ["\n\n", "\n", [".", "!", "?"], [";", ","]]
+SPLIT_CHARS = ["\n\n", "\n", [". ", "! ", "? "], "; ", ", ", " "]
 
 print(f"Loading model '{MODEL_NAME}' (this will download the model if needed)...")
 model = SentenceTransformer(MODEL_NAME)
@@ -221,9 +221,6 @@ embeddings = np.array(embeddings)
 print(f"Chunked embeddings shape: {embeddings.shape}")
 
 # %%
-chunks[9].split('\n\n')[1]
-
-# %%
 umap = UMAP(n_components=2, random_state=42, n_jobs=1)
 emb_umap = umap.fit_transform(embeddings)
 
@@ -330,5 +327,146 @@ df = pd.DataFrame({
 })
 
 df.sort_values("similarity", ascending=False).head(10).reset_index(drop=True)
+
+# %% [markdown]
+# # Qdrant
+
+# %%
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+import uuid
+
+client = QdrantClient(":memory:")
+
+COLLECTION_NAME = "blog_chunks"
+
+# Create collection with vector configuration
+client.create_collection(
+    collection_name=COLLECTION_NAME,
+    vectors_config=VectorParams(
+        size=embeddings.shape[1],  # Dimension of our embeddings
+        distance=Distance.COSINE,  # Use cosine distance for similarity
+    ),
+)
+
+# Prepare points for insertion
+points = []
+for i, (embedding, title, chunk) in enumerate(zip(embeddings, titles, chunk_list)):
+    # Extract a preview of the chunk text (first paragraph after frontmatter)
+    chunk_preview = chunk.split('\n\n')[1][:300] if '\n\n' in chunk else chunk[:300]
+    
+    point = PointStruct(
+        id=i,  # Using index as ID
+        vector=embedding,
+        payload={
+            "title": title,
+            "chunk_text": chunk,
+            "chunk_preview": chunk_preview,
+            "chunk_index": i,
+        }
+    )
+    points.append(point)
+
+# Insert all points into the collection
+client.upsert(
+    collection_name=COLLECTION_NAME,
+    points=points
+)
+
+print(f"Successfully inserted {len(points)} chunks into Qdrant collection '{COLLECTION_NAME}'")
+print(f"Collection info: {client.get_collection(COLLECTION_NAME)}")
+
+
+# %%
+# Efficient similarity search using Qdrant
+def search_similar_chunks(query_text, top_k=10):
+    """Search for the most similar chunks to a query using Qdrant."""
+    # Compute query embedding
+    query_embedding = compute_embeddings([query_text], model)[0]
+    
+    # Search in Qdrant
+    search_results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_embedding,
+        limit=top_k
+    ).points
+    
+    # Format results
+    results = []
+    for result in search_results:
+        results.append({
+            "title": result.payload["title"],
+            "chunk_preview": result.payload["chunk_preview"],
+            "similarity": result.score,
+            "chunk_index": result.payload["chunk_index"]
+        })
+    
+    return results
+
+# Test the search functionality
+search_query = "Interpretable machine learning"
+print(f"Searching for: '{search_query}'\n")
+
+results = search_similar_chunks(search_query, top_k=5)
+
+for i, result in enumerate(results, 1):
+    print(f"{i}. {result['title']} (similarity: {result['similarity']:.3f})")
+    print(f"   Preview: {result['chunk_preview'][:150]}...")
+    print()
+
+# %%
+# Advanced Qdrant features: filtering and batch operations
+from qdrant_client.models import Filter, FieldCondition, MatchValue
+
+def search_by_article(article_title, query_text, top_k=5):
+    """Search within a specific article's chunks."""
+    query_embedding = compute_embeddings([query_text], model)[0]
+    
+    # Create a filter to only search within specific article
+    search_filter = Filter(
+        must=[
+            FieldCondition(
+                key="title",
+                match=MatchValue(value=article_title)
+            )
+        ]
+    )
+    
+    search_results = client.query_points(
+        collection_name=COLLECTION_NAME,
+        query=query_embedding,
+        query_filter=search_filter,
+        limit=top_k
+    ).points
+    
+    return [
+        {
+            "title": result.payload["title"],
+            "chunk_preview": result.payload["chunk_preview"],
+            "similarity": result.score,
+        }
+        for result in search_results
+    ]
+
+# Example: Search for "algorithm" within a specific article
+available_titles = list(set(titles))
+print("Available article titles:")
+for i, title in enumerate(available_titles[:5], 1):  # Show first 5 titles
+    print(f"{i}. {title}")
+
+if available_titles:
+    example_title = available_titles[0]
+    print(f"\nSearching for 'algorithm' within '{example_title}':")
+    filtered_results = search_by_article(example_title, "algorithm", top_k=3)
+    
+    for i, result in enumerate(filtered_results, 1):
+        print(f"{i}. Similarity: {result['similarity']:.3f}")
+        print(f"   Preview: {result['chunk_preview'][:100]}...")
+        print()
+
+# Demonstrate batch similarity computation (equivalent to original matrix approach)
+print(f"\nVector database contains {len(points)} chunks from {len(set(titles))} articles")
+print(f"Each vector has {embeddings.shape[1]} dimensions")
+print(f"Using {Distance.COSINE} distance metric for optimal similarity search")
 
 # %%
