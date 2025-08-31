@@ -6,6 +6,7 @@ import yaml
 
 import numpy as np
 
+
 def extract_frontmatter_and_body(text: str) -> Tuple[dict, str]:
     """Return (metadata dict, body text).
 
@@ -113,16 +114,22 @@ def compute_embeddings(texts: List[str], model) -> np.ndarray:
     return embeddings
 
 
-def split_text(text, split_chars = ["\n\n", "\n", ". ", " "], max_size=500):
+def split_text(
+    text: str,
+    split_chars: List = ["\n\n", "\n", [". ", "! ", "? "], "; ", ", ", " "],
+    max_size: int = 500,
+) -> List[str]:
     """Recursively split text into chunks no larger than max_size."""
 
     if len(text) <= max_size:
         return [text]
     elif not split_chars:
         return [text[:max_size]]
-    
+
     splitter = split_chars[0]
-    splitter = splitter if isinstance(splitter, str) else "|".join(map(re.escape, splitter))
+    splitter = (
+        splitter if isinstance(splitter, str) else "|".join(map(re.escape, splitter))
+    )
     splits = []
 
     for chunk in re.split(splitter, text.strip()):
@@ -130,20 +137,20 @@ def split_text(text, split_chars = ["\n\n", "\n", ". ", " "], max_size=500):
 
     return splits
 
-def make_overlaps(chunks, max_overlap = 0.1):
+
+def make_overlaps(chunks, max_overlap=0.1):
     """Add overlapping text to each chunk from its neighbors."""
 
     overlapping_chunks = []
 
     for i in range(len(chunks)):
-
         curr_chunk = chunks[i]
         overlap = int(max_overlap * len(curr_chunk))
 
-        prev_chunk = "" if i == 0 else chunks[i-1]
+        prev_chunk = "" if i == 0 else chunks[i - 1]
         prev_chunk = prev_chunk[-overlap:]
 
-        next_chunk = "" if i == (len(chunks) - 1) else chunks[i+1]
+        next_chunk = "" if i == (len(chunks) - 1) else chunks[i + 1]
         next_chunk = next_chunk[:overlap]
 
         new_chunk = f"{prev_chunk}\n\n{curr_chunk}\n\n{next_chunk}"
@@ -154,6 +161,7 @@ def make_overlaps(chunks, max_overlap = 0.1):
     return overlapping_chunks
 
 
-def compute_similarity_matrix(X):
+def cosine_similarity(X: np.ndarray) -> np.ndarray:
+    """Compute the cosine similarity matrix between the rows in X."""
     X_norm = X / np.linalg.norm(X, axis=1, keepdims=True)
     return np.dot(X_norm, X_norm.T)

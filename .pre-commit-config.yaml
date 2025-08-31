@@ -15,15 +15,11 @@ repos:
       - id: prettier
         stages: [pre-commit]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.5
+    rev: v0.12.11
     hooks:
+      - id: ruff-format
       - id: ruff
         args: [--fix]
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 25.1.0
-    hooks:
-      - id: black
-        language_version: python3.10
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.10.0
     hooks:

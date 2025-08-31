@@ -19,10 +19,18 @@
 from pathlib import Path
 import sys
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from qdrant_client import QdrantClient
+from qdrant_client.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+)
 from scipy.cluster.hierarchy import linkage, leaves_list
 from sentence_transformers import SentenceTransformer
 from umap import UMAP
@@ -30,9 +38,7 @@ from umap import UMAP
 from embedding_utils import (
     collect_markdowns,
     compute_embeddings,
-    compute_similarity_matrix,
-    extract_frontmatter_and_body,
-    infer_post_url,
+    cosine_similarity,
     load_documents,
     make_overlaps,
     split_text,
@@ -43,14 +49,13 @@ sys.path.append("../")
 from utils import (
     PLOTLY_AXIS_ATTR_DICT,
     PLOTLY_LEGEND_ATTR_DICT,
-    save_fig,
     save_plotly,
 )
 
 MD_PATH = Path("../../../_posts")
 MAX_CHUNK_SIZE = 600
 MIN_CHUNK_SIZE = 100
-MODEL_NAME = "all-MiniLM-L6-v2" # Small, high-quality model that is lightweight on CPU
+MODEL_NAME = "all-MiniLM-L6-v2"  # Small, high-quality model that is lightweight on CPU
 SPLIT_CHARS = ["\n\n", "\n", [". ", "! ", "? "], "; ", ", ", " "]
 
 print(f"Loading model '{MODEL_NAME}' (this will download the model if needed)...")
@@ -196,7 +201,13 @@ yaxis_attr_dict = PLOTLY_AXIS_ATTR_DICT.copy()
 yaxis_attr_dict["title"] = "UMAP 2"
 
 save_plotly(
-    fig, "posts_umap", xaxis_attr_dict, yaxis_attr_dict, PLOTLY_LEGEND_ATTR_DICT, div_id=div_id, post_script=post_script
+    fig,
+    "posts_umap",
+    xaxis_attr_dict,
+    yaxis_attr_dict,
+    PLOTLY_LEGEND_ATTR_DICT,
+    div_id=div_id,
+    post_script=post_script,
 )
 
 # %% [markdown]
@@ -225,25 +236,30 @@ umap = UMAP(n_components=2, random_state=42, n_jobs=1)
 emb_umap = umap.fit_transform(embeddings)
 
 # Prepare hover text: title + chunk text (truncate for display)
-hover_texts = [f"<b>{title}</b><br>{chunk.split('\n\n')[1][:200]}..." for title, chunk in zip(titles, chunk_list)]
+hover_texts = [
+    f"<b>{title}</b><br>{chunk.split('\n\n')[1][:200]}..."
+    for title, chunk in zip(titles, chunk_list)
+]
 
 # Factorize titles for color assignment
 unique_titles, title_ids = np.unique(titles, return_inverse=True)
-colors = [f"hsl({(i*360)//len(unique_titles)},70%,50%)" for i in title_ids]
+colors = [f"hsl({(i * 360) // len(unique_titles)},70%,50%)" for i in title_ids]
 
 fig = go.Figure(
-    data=[go.Scatter(
-        x=emb_umap[:, 0],
-        y=emb_umap[:, 1],
-        mode="markers",
-        marker=dict(
-            color=colors,
-            size=8,
-            opacity=0.7,
-        ),
-        text=hover_texts,
-        hoverinfo="text",
-    )]
+    data=[
+        go.Scatter(
+            x=emb_umap[:, 0],
+            y=emb_umap[:, 1],
+            mode="markers",
+            marker=dict(
+                color=colors,
+                size=8,
+                opacity=0.7,
+            ),
+            text=hover_texts,
+            hoverinfo="text",
+        )
+    ]
 )
 
 save_plotly(
@@ -253,7 +269,7 @@ save_plotly(
     yaxis_attr_dict,
     PLOTLY_LEGEND_ATTR_DICT,
     div_id=div_id,
-    post_script=post_script
+    post_script=post_script,
 )
 
 # %% [markdown]
@@ -261,7 +277,7 @@ save_plotly(
 
 # %%
 # compute cosine similarities matrix
-sim = compute_similarity_matrix(embeddings)
+sim = cosine_similarity(embeddings)
 
 # hierarchically cluster the embeddings
 Z = linkage(embeddings, method="ward")
@@ -287,7 +303,8 @@ heatmap = go.Heatmap(
     z=sim_ordered,
     x=chunk_labels,  # unique labels per chunk
     y=chunk_labels,  # unique labels per chunk
-    zmin=-1, zmax=1,
+    zmin=-1,
+    zmax=1,
     colorscale="RdBu",
     reversescale=True,
     colorbar=dict(title="Cosine similarity"),
@@ -320,11 +337,14 @@ Interpretable machine learning
 """.strip()
 query_embedding = compute_embeddings([QUERY], model)
 
-df = pd.DataFrame({
-    "title": ["query"] + titles,
-    "text": [QUERY] + [f"{chunk.split('\n\n')[1][:200]}..." for chunk in chunk_list],
-    "similarity": compute_similarity_matrix(np.vstack([query_embedding, embeddings]))[0, :],
-})
+df = pd.DataFrame(
+    {
+        "title": ["query"] + titles,
+        "text": [QUERY]
+        + [f"{chunk.split('\n\n')[1][:200]}..." for chunk in chunk_list],
+        "similarity": cosine_similarity(np.vstack([query_embedding, embeddings]))[0, :],
+    }
+)
 
 df.sort_values("similarity", ascending=False).head(10).reset_index(drop=True)
 
@@ -332,10 +352,6 @@ df.sort_values("similarity", ascending=False).head(10).reset_index(drop=True)
 # # Qdrant
 
 # %%
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
-import uuid
-
 client = QdrantClient(":memory:")
 
 COLLECTION_NAME = "blog_chunks"
@@ -353,8 +369,8 @@ client.create_collection(
 points = []
 for i, (embedding, title, chunk) in enumerate(zip(embeddings, titles, chunk_list)):
     # Extract a preview of the chunk text (first paragraph after frontmatter)
-    chunk_preview = chunk.split('\n\n')[1][:300] if '\n\n' in chunk else chunk[:300]
-    
+    chunk_preview = chunk.split("\n\n")[1][:300] if "\n\n" in chunk else chunk[:300]
+
     point = PointStruct(
         id=i,  # Using index as ID
         vector=embedding,
@@ -363,17 +379,16 @@ for i, (embedding, title, chunk) in enumerate(zip(embeddings, titles, chunk_list
             "chunk_text": chunk,
             "chunk_preview": chunk_preview,
             "chunk_index": i,
-        }
+        },
     )
     points.append(point)
 
 # Insert all points into the collection
-client.upsert(
-    collection_name=COLLECTION_NAME,
-    points=points
-)
+client.upsert(collection_name=COLLECTION_NAME, points=points)
 
-print(f"Successfully inserted {len(points)} chunks into Qdrant collection '{COLLECTION_NAME}'")
+print(
+    f"Successfully inserted {len(points)} chunks into Qdrant collection '{COLLECTION_NAME}'"
+)
 print(f"Collection info: {client.get_collection(COLLECTION_NAME)}")
 
 
@@ -383,25 +398,26 @@ def search_similar_chunks(query_text, top_k=10):
     """Search for the most similar chunks to a query using Qdrant."""
     # Compute query embedding
     query_embedding = compute_embeddings([query_text], model)[0]
-    
+
     # Search in Qdrant
     search_results = client.query_points(
-        collection_name=COLLECTION_NAME,
-        query=query_embedding,
-        limit=top_k
+        collection_name=COLLECTION_NAME, query=query_embedding, limit=top_k
     ).points
-    
+
     # Format results
     results = []
     for result in search_results:
-        results.append({
-            "title": result.payload["title"],
-            "chunk_preview": result.payload["chunk_preview"],
-            "similarity": result.score,
-            "chunk_index": result.payload["chunk_index"]
-        })
-    
+        results.append(
+            {
+                "title": result.payload["title"],
+                "chunk_preview": result.payload["chunk_preview"],
+                "similarity": result.score,
+                "chunk_index": result.payload["chunk_index"],
+            }
+        )
+
     return results
+
 
 # Test the search functionality
 search_query = "Interpretable machine learning"
@@ -416,29 +432,24 @@ for i, result in enumerate(results, 1):
 
 # %%
 # Advanced Qdrant features: filtering and batch operations
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+
 
 def search_by_article(article_title, query_text, top_k=5):
     """Search within a specific article's chunks."""
     query_embedding = compute_embeddings([query_text], model)[0]
-    
+
     # Create a filter to only search within specific article
     search_filter = Filter(
-        must=[
-            FieldCondition(
-                key="title",
-                match=MatchValue(value=article_title)
-            )
-        ]
+        must=[FieldCondition(key="title", match=MatchValue(value=article_title))]
     )
-    
+
     search_results = client.query_points(
         collection_name=COLLECTION_NAME,
         query=query_embedding,
         query_filter=search_filter,
-        limit=top_k
+        limit=top_k,
     ).points
-    
+
     return [
         {
             "title": result.payload["title"],
@@ -447,6 +458,7 @@ def search_by_article(article_title, query_text, top_k=5):
         }
         for result in search_results
     ]
+
 
 # Example: Search for "algorithm" within a specific article
 available_titles = list(set(titles))
@@ -458,14 +470,16 @@ if available_titles:
     example_title = available_titles[0]
     print(f"\nSearching for 'algorithm' within '{example_title}':")
     filtered_results = search_by_article(example_title, "algorithm", top_k=3)
-    
+
     for i, result in enumerate(filtered_results, 1):
         print(f"{i}. Similarity: {result['similarity']:.3f}")
         print(f"   Preview: {result['chunk_preview'][:100]}...")
         print()
 
 # Demonstrate batch similarity computation (equivalent to original matrix approach)
-print(f"\nVector database contains {len(points)} chunks from {len(set(titles))} articles")
+print(
+    f"\nVector database contains {len(points)} chunks from {len(set(titles))} articles"
+)
 print(f"Each vector has {embeddings.shape[1]} dimensions")
 print(f"Using {Distance.COSINE} distance metric for optimal similarity search")
 
