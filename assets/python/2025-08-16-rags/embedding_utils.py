@@ -1,3 +1,4 @@
+import fastembed
 from pathlib import Path
 import re
 from typing import List, Tuple
@@ -100,15 +101,18 @@ def load_documents(paths: List[Path]) -> Tuple[List[str], List[dict]]:
     return texts, metadatas
 
 
-def compute_embeddings(texts: List[str], model) -> np.ndarray:
-    """Compute embeddings using a small sentence-transformers model and save.
+def compute_embeddings(
+    texts: List[str], model: fastembed.text.TextEmbedding
+) -> np.ndarray:
+    """Compute embeddings using fastembed and save.
 
     The actual import is done inside the function so the module can be
     syntactically validated without heavy dependencies present.
     """
 
     print(f"Computing embeddings for {len(texts)} texts...")
-    embeddings = model.encode(texts, convert_to_numpy=True)
+    embeddings = list(model.embed(texts))
+    embeddings = np.array(embeddings)
     print(f"Embeddings computed (shape={embeddings.shape})")
 
     return embeddings

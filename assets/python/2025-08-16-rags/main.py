@@ -32,7 +32,7 @@ from qdrant_client.models import (
     MatchValue,
 )
 from scipy.cluster.hierarchy import linkage, leaves_list
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 from umap import UMAP
 
 from embedding_utils import (
@@ -55,11 +55,11 @@ from utils import (
 MD_PATH = Path("../../../_posts")
 MAX_CHUNK_SIZE = 600
 MIN_CHUNK_SIZE = 100
-MODEL_NAME = "all-MiniLM-L6-v2"  # Small, high-quality model that is lightweight on CPU
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"  # Small, high-quality model that is lightweight on CPU
 SPLIT_CHARS = ["\n\n", "\n", [". ", "! ", "? "], "; ", ", ", " "]
 
 print(f"Loading model '{MODEL_NAME}' (this will download the model if needed)...")
-model = SentenceTransformer(MODEL_NAME)
+model = TextEmbedding(MODEL_NAME)
 
 # %% [markdown]
 # # Whole document embedding
@@ -308,16 +308,16 @@ heatmap = go.Heatmap(
     colorscale="RdBu",
     reversescale=True,
     colorbar=dict(title="Cosine similarity"),
-    hovertemplate="x: %{x}<br>y: %{y}<br>similarity: %{z:.3f}<extra></extra>",
+    hovertemplate="Post x: %{x}<br>Post y: %{y}<br>Similarity: %{z:.3f}<extra></extra>",
 )
 
 fig = go.Figure(data=[heatmap])
 
 xaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
-xaxis_attr.update(dict(title="", showticklabels=False, ticks=""))
+xaxis_attr.update(dict(title="", showticklabels=False, ticks="", showline=False))
 
 yaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
-yaxis_attr.update(dict(title="", showticklabels=False, ticks="", autorange="reversed"))
+yaxis_attr.update(dict(title="", showticklabels=False, ticks="", autorange="reversed", showline=False))
 
 save_plotly(
     fig,
@@ -430,10 +430,9 @@ for i, result in enumerate(results, 1):
     print(f"   Preview: {result['chunk_preview'][:150]}...")
     print()
 
+
 # %%
 # Advanced Qdrant features: filtering and batch operations
-
-
 def search_by_article(article_title, query_text, top_k=5):
     """Search within a specific article's chunks."""
     query_embedding = compute_embeddings([query_text], model)[0]
