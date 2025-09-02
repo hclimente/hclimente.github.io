@@ -41,7 +41,6 @@ N = 10
 def generate_kmer_probabilities(
     symbol_prob: Dict[str, float], k: int
 ) -> Dict[str, float]:
-
     kmer_prob = symbol_prob.copy()
 
     for _ in range(1, k):
@@ -104,7 +103,6 @@ print(
 def tabulate_encoding(
     encoding: Dict[str, str], code_prob: Optional[Dict[str, float]] = None
 ) -> str:
-
     print(
         "| 10-day weather | Probability | Codeword                         | Codeword length |"
     )

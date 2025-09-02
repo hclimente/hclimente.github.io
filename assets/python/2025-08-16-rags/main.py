@@ -43,6 +43,7 @@ from embedding_utils import (
     make_overlaps,
     split_text,
 )
+from rag_system import create_rag_system
 
 sys.path.append("../")
 
@@ -317,7 +318,9 @@ xaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
 xaxis_attr.update(dict(title="", showticklabels=False, ticks="", showline=False))
 
 yaxis_attr = PLOTLY_AXIS_ATTR_DICT.copy()
-yaxis_attr.update(dict(title="", showticklabels=False, ticks="", autorange="reversed", showline=False))
+yaxis_attr.update(
+    dict(title="", showticklabels=False, ticks="", autorange="reversed", showline=False)
+)
 
 save_plotly(
     fig,
@@ -486,29 +489,27 @@ print(f"Using {Distance.COSINE} distance metric for optimal similarity search")
 # # RAG System with Small LLM
 
 # %%
-from rag_system import SimpleRAG, create_rag_system
-
 # Initialize the RAG system with a small CPU-friendly model
 print("Initializing RAG system...")
 rag = create_rag_system(
     qdrant_client=client,
     collection_name=COLLECTION_NAME,
     embedding_model=model,
-    model_choice="phi-3.5-mini"  # Options: phi-3.5-mini, phi-3-mini, qwen2-1.5b, gemma2-2b
+    model_choice="phi-3.5-mini",  # Options: phi-3.5-mini, phi-3-mini, qwen2-1.5b, gemma2-2b
 )
 
 # %%
 # Test the RAG system
 test_queries = [
     "What is interpretable machine learning?",
-    "How can I visualize high-dimensional data?", 
-    "What are some coding best practices mentioned in the blog?"
+    "How can I visualize high-dimensional data?",
+    "What are some coding best practices mentioned in the blog?",
 ]
 
 for query in test_queries:
     print("=" * 80)
     result = rag.ask(query, top_k=3, max_length=300)
-    
+
     print(f"\nQuery: {result['query']}")
     print(f"\nAnswer: {result['answer']}")
     print(f"\nSources: {', '.join(result['sources'])}")

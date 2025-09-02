@@ -4,7 +4,7 @@ title: Properties of Graphs
 date: 2025-01-24 11:59:00-0000
 description: Multiscale ways to talk about graphs
 tags:
-    - graphs
+  - graphs
 giscus_comments: true
 related_posts: false
 ---

@@ -41,7 +41,6 @@ def save_plotly(
     colorway=plotly.colors.qualitative.T10,
     **kwargs,
 ):
-
     fig.update_layout(
         xaxis=xaxis_attr_dict,
         yaxis=yaxis_attr_dict,

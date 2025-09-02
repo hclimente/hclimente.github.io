@@ -68,9 +68,9 @@ def compute_accuracy(true_labels: np.ndarray, predicted_labels: np.ndarray) -> f
     :param predicted_labels: List of predicted labels
     :return: Accuracy
     """
-    assert len(true_labels) == len(
-        predicted_labels
-    ), "Length of true and predicted labels must be equal"
+    assert len(true_labels) == len(predicted_labels), (
+        "Length of true and predicted labels must be equal"
+    )
     acc = (predicted_labels == true_labels).sum() / len(true_labels)
 
     return acc
@@ -113,7 +113,6 @@ def plot_confusion_matrix(
 
 
 def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
-
     dataset = []
 
     for label_id, (filename, label_name) in enumerate(ds_list):
@@ -129,7 +128,6 @@ def create_dataset(prefix: str, ds_list: List[Tuple[str]]):
 
 
 def extract_embeddings_from_pipeline(pipeline, dataset, **pipeline_kwargs):
-
     embeddings = []
     predictions = []
 

@@ -17,18 +17,21 @@ This directory contains a Retrieval-Augmented Generation (RAG) system that lever
 ## Quick Start
 
 ### 1. Run the Main Analysis
+
 ```python
 # This will process your markdown files, create embeddings, and set up the RAG system
 python main.py
 ```
 
 ### 2. Interactive Demo
+
 ```python
 # Run a simple demo with a smaller dataset
 python rag_demo.py
 ```
 
 ### 3. Use the RAG System Programmatically
+
 ```python
 from rag_system import create_rag_system
 from qdrant_client import QdrantClient
@@ -56,23 +59,25 @@ rag.chat()
 
 ## Available Small LLM Models
 
-| Model | Size | Speed | Quality | Best For |
-|-------|------|-------|---------|----------|
-| `qwen2-1.5b` | 1.5B | ⭐⭐⭐ | ⭐⭐ | Quick responses, limited hardware |
-| `gemma2-2b` | 2B | ⭐⭐ | ⭐⭐⭐ | Balanced performance |
-| `phi-3-mini` | 3.8B | ⭐ | ⭐⭐⭐ | Better reasoning |
-| `phi-3.5-mini` | 3.8B | ⭐ | ⭐⭐⭐⭐ | Best overall (default) |
+| Model          | Size | Speed  | Quality  | Best For                          |
+| -------------- | ---- | ------ | -------- | --------------------------------- |
+| `qwen2-1.5b`   | 1.5B | ⭐⭐⭐ | ⭐⭐     | Quick responses, limited hardware |
+| `gemma2-2b`    | 2B   | ⭐⭐   | ⭐⭐⭐   | Balanced performance              |
+| `phi-3-mini`   | 3.8B | ⭐     | ⭐⭐⭐   | Better reasoning                  |
+| `phi-3.5-mini` | 3.8B | ⭐     | ⭐⭐⭐⭐ | Best overall (default)            |
 
 ## Configuration Options
 
 You can customize the RAG system by:
 
 1. **Changing the LLM model**:
+
    ```python
    rag = create_rag_system(..., model_choice="qwen2-1.5b")
    ```
 
 2. **Adjusting retrieval parameters**:
+
    ```python
    result = rag.ask("question", top_k=10, max_length=500)
    ```
@@ -100,6 +105,7 @@ You can customize the RAG system by:
 ## Dependencies
 
 Core dependencies are managed via `pyproject.toml`:
+
 - `transformers`: For LLM models
 - `torch`: PyTorch backend
 - `qdrant-client`: Vector database

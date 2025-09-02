@@ -71,7 +71,6 @@ covariances = variances
 
 for i, v in enumerate(variances):
     for j, c in enumerate(covariances):
-
         if abs(c) > v:
             axs[i, j].set_visible(False)
             continue
@@ -252,7 +251,6 @@ def pcorr_residuals(X: np.ndarray) -> np.ndarray:  # (n, p) -> (p, p)
             X_covars = X[:, idx_covars]
 
             for target, excluded in [(i, j), (j, i)]:
-
                 y = X[:, target]
 
                 beta, *_ = np.linalg.lstsq(X_covars, y, rcond=None)
@@ -267,7 +265,6 @@ def pcorr_residuals(X: np.ndarray) -> np.ndarray:  # (n, p) -> (p, p)
 
     for i in range(p):
         for j in range(i + 1, p):
-
             res_1 = residuals[(i, j)]
             res_2 = residuals[(j, i)]
             corr = np.dot(res_1, res_2) / (

@@ -87,7 +87,6 @@ class DNAPipeline(Pipeline):
 
 # %%
 class DNAEmbeddingPipeline(DNAPipeline):
-
     def _forward(
         self,
         model_inputs: pt.Tensor,
@@ -113,7 +112,7 @@ class DNAEmbeddingPipeline(DNAPipeline):
         )
 
         if "attention_mask" in out:
-            raise ValueError("Output contains attention_mask, " "which is unexpected.")
+            raise ValueError("Output contains attention_mask, which is unexpected.")
         out["attention_mask"] = attention_mask
 
         return out
@@ -145,7 +144,6 @@ class DNAEmbeddingPipeline(DNAPipeline):
 
 # %%
 class DNAClassificationPipeline(DNAPipeline):
-
     def _forward(
         self,
         model_inputs: pt.Tensor,
