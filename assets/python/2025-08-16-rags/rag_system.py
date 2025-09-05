@@ -22,7 +22,7 @@ class SimpleRAG:
         qdrant_client: QdrantClient,
         collection_name: str,
         embedding_model,
-        llm_model_name: str = "microsoft/gemma3-1b-instruct",
+        llm_model_name: str = "google/gemma-3-1b-it",
     ):
         """
         Initialize the RAG system.
@@ -37,8 +37,9 @@ class SimpleRAG:
         self.collection_name = collection_name
         self.embedding_model = embedding_model
 
-        print(f"Loading small LLM: {llm_model_name}")
-        print("This may take a few minutes on first run...")
+        print(
+            f"\t⏳ Loading small LLM: {llm_model_name}. This may take a few minutes on first run..."
+        )
 
         # Load tokenizer and model
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -58,7 +59,7 @@ class SimpleRAG:
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-        print("RAG system initialized successfully!")
+        print("✅ RAG system initialized successfully!")
 
     def retrieve_context(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """Retrieve relevant chunks from the vector database."""
@@ -132,18 +133,18 @@ Question: {query}<|end|>
 
     def ask(self, query: str, top_k: int = 5, max_length: int = 512) -> Dict[str, Any]:
         """Complete RAG pipeline: retrieve context and generate answer."""
-        print(f"Processing query: {query}")
+        print(f"\t⏳ Processing query: {query}")
 
         # Retrieve relevant contexts
-        print("Retrieving relevant contexts...")
+        print("\t⏳ Retrieving relevant contexts...")
         contexts = self.retrieve_context(query, top_k)
 
-        print(f"Found {len(contexts)} relevant chunks")
+        print(f"\t✅ Found {len(contexts)} relevant chunks")
         for i, ctx in enumerate(contexts, 1):
-            print(f"  {i}. {ctx['title']} (similarity: {ctx['similarity']:.3f})")
+            print(f"\t\t{i}. {ctx['title']} (similarity: {ctx['similarity']:.3f})")
 
         # Generate answer
-        print("Generating answer...")
+        print("\t💭 Generating answer...")
         answer = self.generate_answer(query, contexts, max_length)
 
         return {
@@ -156,28 +157,28 @@ Question: {query}<|end|>
     def chat(self):
         """Interactive chat interface."""
         print("\n" + "=" * 60)
-        print("RAG Chat Interface - Type 'quit' to exit")
+        print("\t🤖 RAG Chat Interface - Type 'quit' to exit")
         print("=" * 60)
 
         while True:
             try:
-                query = input("\nYour question: ").strip()
+                query = input("\n❓ Your question: ").strip()
                 if query.lower() in ["quit", "exit", "q"]:
-                    print("Goodbye!")
+                    print("\n👋 Goodbye!")
                     break
 
                 if not query:
                     continue
 
                 result = self.ask(query)
-                print(f"\nAnswer: {result['answer']}")
-                print(f"Sources: {', '.join(result['sources'])}")
+                print(f"\n\t💡 Answer: {result['answer']}")
+                print(f"\t📚 Sources: {', '.join(result['sources'])}")
 
             except KeyboardInterrupt:
-                print("\nGoodbye!")
+                print("\n👋 Goodbye!")
                 break
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"❌ Error: {e}")
 
 
 # Alternative lightweight models for CPU usage
@@ -203,11 +204,11 @@ def create_rag_system(
         model_choice: Choice of small LLM ('gemma3-1b', 'qwen3-1.7b')
     """
     if model_choice not in SMALL_LLM_OPTIONS:
-        print(f"Unknown model choice: {model_choice}")
-        print(f"Available options: {list(SMALL_LLM_OPTIONS.keys())}")
+        print(f"\t⚠️  Unknown model choice: {model_choice}")
+        print(f"\t📝 Available options: {list(SMALL_LLM_OPTIONS.keys())}")
         model_choice = "qwen3-1.7b"
 
     llm_model_name = SMALL_LLM_OPTIONS[model_choice]
-    print(f"Creating RAG system with {model_choice} ({llm_model_name})")
+    print(f"\n⏳ Creating RAG system with {model_choice} ({llm_model_name})")
 
     return SimpleRAG(qdrant_client, collection_name, embedding_model, llm_model_name)

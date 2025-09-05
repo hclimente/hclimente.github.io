@@ -3,17 +3,18 @@
 RAG CLI - Command Line Interface for the RAG system
 
 Usage:
-    python rag_cli.py "Your question here"
-    python rag_cli.py --interactive  # Start chat mode
-    python rag_cli.py --model qwen2-1.5b "Your question"  # Use specific model
+    uv run rag_cli.py "Your question here"
+    uv run rag_cli.py --interactive  # Start chat mode
+    uv run rag_cli.py --model qwen3-1.7b "Your question"  # Use specific model
 """
 
 import argparse
-import sys
 from pathlib import Path
 
-# Add current directory to path for imports
-sys.path.append(str(Path(__file__).parent))
+from fastembed import TextEmbedding
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+import numpy as np
 
 from rag_system import create_rag_system, SMALL_LLM_OPTIONS
 from embedding_utils import (
@@ -23,13 +24,9 @@ from embedding_utils import (
     split_text,
     make_overlaps,
 )
-from fastembed import TextEmbedding
-from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
-import numpy as np
 
 
-def setup_rag_system(model_choice="qwen2-1.5b", data_path="../../../_posts"):
+def setup_rag_system(model_choice="qwen3-1.7b", data_path="../../../_posts"):
     """Set up the complete RAG system."""
 
     # Configuration
@@ -40,19 +37,20 @@ def setup_rag_system(model_choice="qwen2-1.5b", data_path="../../../_posts"):
     MIN_CHUNK_SIZE = 100
     SPLIT_CHARS = ["\n\n", "\n", [". ", "! ", "? "], "; ", ", ", " "]
 
-    print(f"Loading embedding model: {EMBEDDING_MODEL_NAME}")
+    print(f"⏳ Loading embedding model: {EMBEDDING_MODEL_NAME}")
     embedding_model = TextEmbedding(EMBEDDING_MODEL_NAME)
+    print("✅ Embedding model loaded")
 
     # Load and process documents
-    print(f"Loading documents from: {MD_PATH}")
+    print(f"\n⏳ Loading documents from: {MD_PATH}")
     files = collect_markdowns(MD_PATH)
 
     if not files:
-        print(f"No markdown files found in {MD_PATH}")
+        print(f"\n⚠️  No markdown files found in {MD_PATH}")
         return None
 
     texts, metadata = load_documents(files)
-    print(f"Loaded {len(texts)} documents")
+    print(f"✅ Loaded {len(texts)} documents")
 
     # Create chunks
     chunk_list = []
@@ -66,7 +64,8 @@ def setup_rag_system(model_choice="qwen2-1.5b", data_path="../../../_posts"):
         chunk_list.extend(chunks)
         chunk_metadata.extend([meta] * len(chunks))
 
-    print(f"Created {len(chunk_list)} chunks")
+    print("⏳ Chunking documents...")
+    print(f"\t✂️ Created {len(chunk_list)} chunks")
 
     # Compute embeddings
     embeddings = compute_embeddings(chunk_list, embedding_model)
@@ -103,7 +102,7 @@ def setup_rag_system(model_choice="qwen2-1.5b", data_path="../../../_posts"):
         points.append(point)
 
     client.upsert(collection_name=COLLECTION_NAME, points=points)
-    print(f"Vector database ready with {len(points)} chunks")
+    print(f"✅ Vector database ready with {len(points)} chunks")
 
     # Create RAG system
     rag = create_rag_system(
@@ -128,7 +127,7 @@ def main():
         "--model",
         "-m",
         choices=list(SMALL_LLM_OPTIONS.keys()),
-        default="qwen2-1.5b",
+        default="qwen3-1.7b",
         help="Choose the LLM model",
     )
     parser.add_argument(
@@ -159,7 +158,7 @@ def main():
     rag = setup_rag_system(model_choice=args.model, data_path=args.data_path)
 
     if rag is None:
-        print("Failed to set up RAG system")
+        print("❌ Failed to set up RAG system")
         return
 
     if args.interactive:
@@ -168,11 +167,11 @@ def main():
         result = rag.ask(args.query, top_k=args.top_k, max_length=args.max_length)
 
         print("\n" + "=" * 60)
-        print(f"Query: {result['query']}")
+        print(f"❓ Query: {result['query']}")
         print("-" * 60)
-        print(f"Answer: {result['answer']}")
+        print(f"💡 Answer: {result['answer']}")
         print("-" * 60)
-        print(f"Sources: {', '.join(result['sources'])}")
+        print(f"📚 Sources: {', '.join(result['sources'])}")
         print("=" * 60)
 
 

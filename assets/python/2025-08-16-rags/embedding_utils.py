@@ -110,10 +110,10 @@ def compute_embeddings(
     syntactically validated without heavy dependencies present.
     """
 
-    print(f"Computing embeddings for {len(texts)} texts...")
+    print(f"\t\tComputing embeddings for {len(texts)} texts...")
     embeddings = list(model.embed(texts))
     embeddings = np.array(embeddings)
-    print(f"Embeddings computed (shape={embeddings.shape})")
+    print(f"\t\tEmbeddings computed (shape={embeddings.shape})")
 
     return embeddings
 
