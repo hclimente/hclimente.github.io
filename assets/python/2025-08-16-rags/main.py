@@ -10,7 +10,7 @@
 #       format_version: '1.3'
 #       jupytext_version: 1.11.2
 #   kernelspec:
-#     display_name: 2025-08-16-rags
+#     display_name: .venv
 #     language: python
 #     name: python3
 # ---
@@ -268,7 +268,7 @@ save_plotly(
     "paragraphs_umap",
     xaxis_attr_dict,
     yaxis_attr_dict,
-    PLOTLY_LEGEND_ATTR_DICT,
+    legend_attr_dict=None,
     div_id=div_id,
     post_script=post_script,
 )

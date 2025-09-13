@@ -41,15 +41,24 @@ def save_plotly(
     colorway=plotly.colors.qualitative.T10,
     **kwargs,
 ):
+    if legend_attr_dict is not None:
+        legend_args = {
+            "legend": legend_attr_dict,
+            # Increase right margin to make space for legend
+            "margin": dict(l=0, r=180, t=0, b=0),
+        }
+    else:
+        legend_args = {
+            "showlegend": False,
+            "margin": dict(l=0, r=0, t=0, b=0),
+        }
+
     fig.update_layout(
         xaxis=xaxis_attr_dict,
         yaxis=yaxis_attr_dict,
         template="plotly_white",  # Clean base
-        margin=dict(
-            l=50, r=180, t=50, b=50
-        ),  # Increase right margin to make space for legend
-        legend=legend_attr_dict,
         colorway=colorway,
+        **legend_args,
     )
 
     fig.show()

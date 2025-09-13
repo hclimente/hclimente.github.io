@@ -75,7 +75,9 @@ We can clasify graphs into different types by using the [global properties](#glo
 
 **Regular** graphs are those in which every node has the same degree. They have a high average [clustering coefficient](#local-clustering-coefficient) and a large [diameter](#radius-and-diameter).
 
-## Small-world graph
+## Small world graphs
+
+Small world graphs have a high average [clustering coefficient](#local-clustering-coefficient) and a small [diameter](#radius-and-diameter). They are called small world because, despite their size, the average distance between any two nodes is small. This is often summarized as ["six degrees of separation"](https://en.wikipedia.org/wiki/Six_degrees_of_separation), the idea that any two people on Earth are connected by at most six social connections. This is because many real-world networks, like social networks, protein interaction networks, and neural networks, exhibit small-world properties.
 
 {% details Milgram's small-world experiment %}
 
@@ -83,7 +85,7 @@ We can clasify graphs into different types by using the [global properties](#glo
 
 They gave letters to randomly chosen people from Nebraska and Kansas, each of which was to reach a target random person from Massachusetts. To that end, they could only give it to their friend or relative they thought was most likely to know the target. These, in turn, were meant to do the same; and so on, until eventually the letter would reach the target. The majority of letters never reached their target; but those who did, made it in 5 to 6 hops.
 
-This ultimately lead to the postulation of the [six degrees of separation](https://en.wikipedia.org/wiki/Six_degrees_of_separation) and the realization that social graphs are small world graphs.
+This ultimately lead to the postulation of the six degrees of separation, and the realization that social graphs are small world graphs.
 
 {% enddetails %}
 
