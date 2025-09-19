@@ -43,7 +43,6 @@ from embedding_utils import (
     make_overlaps,
     split_text,
 )
-from rag_system import create_rag_system
 
 sys.path.append("../")
 
@@ -484,51 +483,3 @@ print(
 )
 print(f"Each vector has {embeddings.shape[1]} dimensions")
 print(f"Using {Distance.COSINE} distance metric for optimal similarity search")
-
-# %% [markdown]
-# # RAG System with Small LLM
-
-# %%
-# Initialize the RAG system with a small CPU-friendly model
-print("Initializing RAG system...")
-rag = create_rag_system(
-    qdrant_client=client,
-    collection_name=COLLECTION_NAME,
-    embedding_model=model,
-    model_choice="phi-3.5-mini",  # Options: phi-3.5-mini, phi-3-mini, qwen2-1.5b, gemma2-2b
-)
-
-# %%
-# Test the RAG system
-test_queries = [
-    "What is interpretable machine learning?",
-    "How can I visualize high-dimensional data?",
-    "What are some coding best practices mentioned in the blog?",
-]
-
-for query in test_queries:
-    print("=" * 80)
-    result = rag.ask(query, top_k=3, max_length=300)
-
-    print(f"\nQuery: {result['query']}")
-    print(f"\nAnswer: {result['answer']}")
-    print(f"\nSources: {', '.join(result['sources'])}")
-    print("\n" + "=" * 80 + "\n")
-
-# %% [markdown]
-# # Interactive Chat Interface
-
-# %%
-# Uncomment the line below to start an interactive chat session
-# rag.chat()
-
-print("RAG system is ready! You can now:")
-print("1. Use rag.ask('your question') to get answers")
-print("2. Use rag.chat() for an interactive session")
-print("3. Access rag.retrieve_context('query') for just retrieval")
-
-# Example usage:
-# result = rag.ask("How do I implement UMAP for dimensionality reduction?")
-# print(result['answer'])
-
-# %%
