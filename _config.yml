@@ -202,7 +202,7 @@ plugins:
   - jekyll-imagemagick
   - jekyll-jupyter-notebook
   - jekyll-link-attributes
-  - jekyll-minifier
+  # - jekyll-minifier  # temporarily disabled due to UTF-8 encoding issues
   - jekyll-paginate-v2
   - jekyll-regex-replace
   - jekyll/scholar
@@ -228,7 +228,6 @@ sass:
 # -----------------------------------------------------------------------------
 
 jekyll-minifier:
-  compress_html: false # temporarily disabled due to UTF-8 encoding issues
   compress_javascript: false # set to false since we are using terser as the js minifier
   exclude: ["robots.txt", "assets/js/search/*.js"]
 
