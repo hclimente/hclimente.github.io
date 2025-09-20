@@ -43,6 +43,7 @@ from embedding_utils import (
     make_overlaps,
     split_text,
 )
+from rag_system import create_rag_system
 
 sys.path.append("../")
 
