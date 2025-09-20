@@ -185,15 +185,7 @@ The core structure underlying bloom filters is a bit array, which makes it highl
 
 ## Skip lists
 
-_See [how they relate to RAGs]({% post_url 2025-08-16-rags %}#nearest-neighbor-search)._
-
 **Skip lists** are a data structure consisting of a set of [linked lists](#linked-lists), each one containing a subset of the items in the collection:
-
-{% include figure.liquid path="assets/img/posts/2025-08-16-rags/skip_list.png" class="img-fluid" %}
-
-<div class="caption">
-    Example of search path for a value (9) in a 5-layered skip list.
-</div>
 
 The topmost list contains only a few items, while the bottommost list contains all the items. Each item in a list points to the next item in the same list, and also to the next item in the lists below it. This allows us to quickly traverse the lists and find or insert items in logarithmic time with high probability:
 

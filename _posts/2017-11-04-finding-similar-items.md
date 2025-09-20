@@ -8,7 +8,6 @@ giscus_comments: true
 related_posts: false
 ---
 
-
 Here we address the problem of looking for similar, but not necessarily equal items. This is frequently the case of looking for related documents. For example, all the versions of the same news article: they all possibly come from the same source, each website makes slight modifications.
 
 # Distance measures
