@@ -7,3 +7,5 @@ github_repos:
   - riken-aip/pyHSICLasso
   - hclimente/martini
   - hclimente/gwas-tools
+  - hclimente/spada
+  - novonordisk-research/ML-Proteomics-CVD-Prediction
