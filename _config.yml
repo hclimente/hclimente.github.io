@@ -229,27 +229,7 @@ sass:
 
 jekyll-minifier:
   compress_javascript: false # set to false since we are using terser as the js minifier
-  exclude:
-    - "robots.txt"
-    - "assets/js/search/*.js"
-    - "**/*hf-transformers*"  # exclude the problematic post
-    - "**/*mendelian-randomization*"
-    - "**/*rags*"
-    - "**/*python-quirks*"
-    - "**/*graphs-random-walks*"
-    - "**/*familial-breast-cancer*"
-    - "**/*kernel-knockoffs*"
-    - "**/*cross-entropy*"
-    - "**/*precision-matrix*"
-    - "**/*graphs-basics*"
-    - "**/*shapley*"
-    - "**/*finding-similar-items*"
-    - "**/*data-centric-ml*"
-    - "**/*heritability*"
-    - "**/*python-uv*"
-    - "**/*python-vectors*"
-    - "**/*algorithms*"
-    - "**/about*"
+  exclude: ["robots.txt", "assets/js/search/*.js"]
 
 # -----------------------------------------------------------------------------
 # Terser
