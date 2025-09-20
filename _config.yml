@@ -232,7 +232,7 @@ jekyll-minifier:
   exclude:
     - "robots.txt"
     - "assets/js/search/*.js"
-    - "**/*hf-transformers*"  # exclude the problematic post
+    # - "**/*hf-transformers*"  # exclude the problematic post
     # - "**/*mendelian-randomization*"
     - "**/*rags*"
     # - "**/*python-quirks*"
