@@ -234,7 +234,7 @@ jekyll-minifier:
     - "assets/js/search/*.js"
     # - "**/*hf-transformers*"  # exclude the problematic post
     # - "**/*mendelian-randomization*"
-    - "**/*rags*.ipynb"
+    - "**/*rags*.html"
     # - "**/*python-quirks*"
     # - "**/*graphs-random-walks*"
     # - "**/*familial-breast-cancer*"
