@@ -9,13 +9,17 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 ## Development Commands
 
 ### Local Development
+
 - **Start development server (Docker - Recommended):**
+
   ```bash
   docker compose pull && docker compose up
   ```
+
   Site will be available at `http://localhost:8080`
 
 - **Alternative development (Docker Slim):**
+
   ```bash
   docker compose -f docker-compose-slim.yml up
   ```
@@ -27,7 +31,9 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
   ```
 
 ### Build and Deploy
+
 - **Build for production:**
+
   ```bash
   bundle exec jekyll build
   ```
@@ -35,7 +41,9 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 - **Deploy (handled automatically via GitHub Actions on push to main)**
 
 ### Code Quality
+
 - **Format code with Prettier:**
+
   ```bash
   npx prettier --write .
   ```
@@ -46,6 +54,7 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
   ```
 
 ### Testing
+
 - **Check for broken links (requires built site):**
   ```bash
   bundle exec htmlproofer ./_site --disable-external
@@ -54,6 +63,7 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 ## Architecture
 
 ### Key Directories
+
 - `_config.yml` - Main Jekyll configuration file
 - `_layouts/` - Page layout templates (Liquid)
 - `_includes/` - Reusable template components
@@ -65,6 +75,7 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 - `assets/` - Images, PDFs, and other static assets
 
 ### Content Collections
+
 - **Publications:** Managed through `_bibliography/papers.bib` using Jekyll Scholar plugin
 - **Projects:** Stored in `_projects/` directory
 - **Books:** Book reviews and reading list in `_books/`
@@ -72,6 +83,7 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 - **Blog posts:** Long-form content in `_posts/`
 
 ### Key Technologies
+
 - **Jekyll** - Static site generator
 - **Liquid** - Templating language
 - **Bootstrap** - CSS framework
@@ -80,6 +92,7 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 - **Multiple Jekyll plugins** - See Gemfile for full list
 
 ### Custom Features
+
 - Bibliography with citation metrics (Altmetric, Dimensions, Google Scholar)
 - Responsive image handling with ImageMagick
 - Dark/light mode toggle
@@ -90,7 +103,9 @@ This is a Jekyll-based academic website using the **al-folio** theme. It's a sta
 ## Configuration
 
 ### Main Settings
+
 Most site configuration is in `_config.yml`:
+
 - Personal information (name, contact, description)
 - Theme settings and colors
 - Plugin configurations
@@ -99,6 +114,7 @@ Most site configuration is in `_config.yml`:
 - Analytics setup
 
 ### Content Management
+
 - **Publications:** Add entries to `_bibliography/papers.bib`
 - **Projects:** Create markdown files in `_projects/`
 - **Blog posts:** Create markdown files in `_posts/` with YYYY-MM-DD-title.md format
@@ -107,26 +123,31 @@ Most site configuration is in `_config.yml`:
 ## Development Notes
 
 ### File Naming Conventions
+
 - Blog posts: `YYYY-MM-DD-title.md`
 - Projects: `project-name.md`
 - Pages: descriptive names like `about.md`, `publications.md`
 
 ### Image Handling
+
 - Place images in `assets/img/`
 - ImageMagick automatically generates responsive versions
 - Supports WebP conversion for performance
 
 ### Bibliography Management
+
 - Uses Jekyll Scholar for publication rendering
 - Supports various BibTeX fields: `pdf`, `code`, `website`, `arxiv`, etc.
 - Automatic citation metrics integration
 
 ### Styling
+
 - SCSS files in `_sass/`
 - Bootstrap-based with custom theme colors
 - Responsive design with mobile support
 
 ### Docker Development
+
 - Preferred development method
 - Handles Ruby/Jekyll dependencies automatically
 - Live reload enabled
