@@ -95,6 +95,9 @@ def load_documents(paths: List[Path]) -> Tuple[List[str], List[dict]]:
 
         m["url"] = infer_post_url(p)
 
+        # remove non-ASCII characters
+        body = "".join(c for c in body if ord(c) < 128)
+
         texts.append(body)
         metadatas.append(m)
 
