@@ -229,7 +229,8 @@ sass:
 
 jekyll-minifier:
   compress_javascript: false # set to false since we are using terser as the js minifier
-  exclude: ["robots.txt", "assets/js/search/*.js"]
+  # TODO (hclimente): some file(s) matching **/*rags* are causing issues with the minifier, need to investigate
+  exclude: ["robots.txt", "assets/js/search/*.js", "**/*rags*"]
 
 # -----------------------------------------------------------------------------
 # Terser
