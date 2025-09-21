@@ -1,0 +1,284 @@
+<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <title> DNA language model fine-tuning and inference | Héctor Climente-González </title> <meta name="author" content="Héctor Climente-González"> <meta name="description" content="Using Hugging Face transformers"> <meta name="keywords" content="machine-learning, genetics, pharma, drug-discovery, climente, climente-gonzalez"> <link rel="stylesheet" href="/assets/css/bootstrap.min.css?a4b3f509e79c54a512b890d73235ef04"> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous"> <link defer rel="stylesheet" href="/assets/css/academicons.min.css?f0b7046b84e425c55f3463ac249818f5"> <link defer rel="stylesheet" href="/assets/css/scholar-icons.css?62b2ac103a88034e6882a5be5f3e2772"> <link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap"> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light"> <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%AA%A2&lt;/text&gt;&lt;/svg&gt;"> <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e"> <link rel="canonical" href="https://hclimente.github.io/blog/hf-transformers/"> <script src="/assets/js/theme.js?a81d82887dd692e91686b43de4542f18"></script> <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark"> <script>
+    initTheme();
+  </script> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8.0.6/dist/styles.min.css" integrity="sha256-3qTIuuUWIFnnU3LpQMjqiXc0p09rvd0dmj+WkpQXSR8=" crossorigin="anonymous"> <link defer rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11.0.5/swiper-bundle.min.css" integrity="sha256-yUoNxsvX+Vo8Trj3lZ/Y5ZBf8HlBFsB6Xwm7rH75/9E=" crossorigin="anonymous"> <script src="/assets/js/distillpub/template.v2.js"></script> <script src="/assets/js/distillpub/transforms.v2.js"></script> </head> <body> <d-front-matter> <script async type="text/json">
+      {
+            "title": "DNA language model fine-tuning and inference",
+            "description": "Using Hugging Face transformers",
+            "published": "May 29, 2025",
+            "authors": [
+              
+            ],
+            "katex": {
+              "delimiters": [
+                {
+                  "left": "$",
+                  "right": "$",
+                  "display": false
+                },
+                {
+                  "left": "$$",
+                  "right": "$$",
+                  "display": true
+                }
+              ]
+            }
+          }
+    </script> </d-front-matter> <header> <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation"> <div class="container"> <a class="navbar-brand title font-weight-lighter" href="/"> <span class="font-weight-bold">Héctor</span> Climente-González </a> <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar top-bar"></span> <span class="icon-bar middle-bar"></span> <span class="icon-bar bottom-bar"></span> </button> <div class="collapse navbar-collapse text-right" id="navbarNav"> <ul class="navbar-nav ml-auto flex-nowrap"> <li class="nav-item "> <a class="nav-link" href="/">about </a> </li> <li class="nav-item active"> <a class="nav-link" href="/blog/">blog </a> </li> <li class="nav-item "> <a class="nav-link" href="/publications/">publications </a> </li> <li class="nav-item "> <a class="nav-link" href="/repositories/">repositories </a> </li> <li class="nav-item "> <a class="nav-link" href="/cv/">cv </a> </li> <li class="nav-item"> <button id="search-toggle" title="Search" onclick="openSearchModal()"> <span class="nav-link">ctrl k <i class="ti ti-search"></i></span> </button> </li> <li class="toggle-container"> <button id="light-toggle" title="Change theme"> <i class="ti ti-sun-moon" id="light-toggle-system"></i> <i class="ti ti-moon-filled" id="light-toggle-dark"></i> <i class="ti ti-sun-filled" id="light-toggle-light"></i> </button> </li> </ul> </div> </div> </nav> <progress id="progress" value="0"> <div class="progress-container"> <span class="progress-bar"></span> </div> </progress> </header> <div class="post distill"> <d-title> <h1>DNA language model fine-tuning and inference</h1> <p>Using Hugging Face transformers</p> </d-title> <d-article> <d-contents> <nav class="l-text figcaption"> <h3>Contents</h3> <div> <a href="#a-worked-out-training-example">A worked-out training example</a> </div> <div> <a href="#loading-a-pre-trained-model">Loading a pre-trained model</a> </div> <div> <a href="#building-an-inference-pipeline">Building an inference pipeline</a> </div> <div> <a href="#embedding-dna-sequences">Embedding DNA sequences</a> </div> <div> <a href="#fine-tuning-the-model">Fine-tuning the model</a> </div> <div> <a href="#conclusions">Conclusions</a> </div> </nav> </d-contents> <p>Picture this. A relevant model was just published. The results look compelling. You want to give it a try on your own data. If you have ever been there, the next steps will be painfully familiar: search for code in the paper; find a Zenodo hyperlink; download a tarball, extract it; look for a README, find none; cry; crawl through Jupyter notebooks to understand how the code is meant to be run; et cetera. After a couple of hours, maybe you can get the code working with a nagging discomfort that you might have missed something.</p> <p>This is the workflow that Hugging Face 🤗 and its <a href="https://huggingface.co/docs/transformers/index" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">transformers</code></a> Python library aim to eradicate. <code class="language-plaintext highlighter-rouge">transformers</code> provides a unified API to fetch, use and fine-tune many models, making it easy to switch between them without having to learn a new API each time, which has turned it into a staple of LLM work.</p> <p>Let’s dive into the <code class="language-plaintext highlighter-rouge">transformers</code> library. Although big tech is going crazy over LLMs, DNA language models are where the money is.<d-footnote>Citation required</d-footnote> In that spirit, in this post I use <code class="language-plaintext highlighter-rouge">transformers</code> to showcase an application of the <a href="https://www.nature.com/articles/s41592-024-02523-z" rel="external nofollow noopener" target="_blank">Nucleotide Transformer</a> (NT), a DNA language model. And I use the NT to showcase <code class="language-plaintext highlighter-rouge">transformers</code>.</p> <p>I will be providing snippets of code along with the text. If you are still curious about the nitty-gritty, all the code is available <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/" rel="external nofollow noopener" target="_blank">on Github</a>.</p> <h1 id="a-worked-out-training-example">A worked-out training example</h1> <p>The <a href="https://www.nature.com/articles/s41592-024-02523-z" rel="external nofollow noopener" target="_blank">Nucleotide Transformer</a> (NT) is an encoder-only transformer, essentially a <a href="https://en.wikipedia.org/wiki/BERT_(language_model)" rel="external nofollow noopener" target="_blank">BERT model</a> trained on the genomes of 850 species via masked language modelling (MLM).</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer-480.webp 480w,/assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer-800.webp 800w,/assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer-1400.webp 1400w," type="image/webp" sizes="95vw"></source> <img src="/assets/img/posts/2025-05-02-hf-transformers/nucleotide_transformer.jpg" class="img-fluid" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"> </picture> </figure> <div class="caption"> Training of the NT using masked language modelling (MLM). Adapted from Figure 1 in the <a href="https://www.nature.com/articles/s41592-024-02523-z" rel="external nofollow noopener" target="_blank">NT article</a>. </div> <p>In MLM a random bit of the input DNA sequence will be hidden from the model. The task of the model is to retrieve the masked subsequences using the rest of the sequence. Let’s say that the input sequence is <code class="language-plaintext highlighter-rouge">ATGGTAGCTACATCATCT</code>. The model will receive as input <code class="language-plaintext highlighter-rouge">ATGGTAGCTACA&lt;MASK&gt;</code> and we expect it to correctly guess that <code class="language-plaintext highlighter-rouge">&lt;MASK&gt;</code> equals <code class="language-plaintext highlighter-rouge">TCATCT</code>. The figure below gives the basic idea. Let’s break MLM down into its four steps:</p> <ol> <li> <p><strong>Tokenizer:</strong> First, we convert the input DNA sequence into a sequence of integers (<em>tokens</em>), each representing a subsequence of length 6 nucleotides (“6-mers”). The total number of tokens is 4,107: one for each of the \(4^6 = 4096\) possible 6-mers and 11 special tokens (<a href="https://en.wikipedia.org/wiki/Sentence_embedding" rel="external nofollow noopener" target="_blank">CLS</a>, MASK, PAD and a few others).<d-footnote>You can learn more about the tokenizer in the <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/supplementary.ipynb" rel="external nofollow noopener" target="_blank">supplementary notes</a>.</d-footnote></p> <p>In the case of our 18-nucleotide sequence <code class="language-plaintext highlighter-rouge">ATGGTAGCTACATCATCT</code>, the tokenizer transforms it into a tokenized sequence of length 4: <code class="language-plaintext highlighter-rouge">[3, 506, 3662, 1567]</code>. This includes the CLS token (<code class="language-plaintext highlighter-rouge">3</code>) and three tokens representing three 6-mers. During training, a random subset of 15% of the tokens are replaced by the MASK token (<code class="language-plaintext highlighter-rouge">2</code>). These are the parts of the sequence that the model will try to recover. Let’s mask the last token in our example: <code class="language-plaintext highlighter-rouge">[3, 506, 3662, 2]</code>.</p> </li> <li> <p><strong>Embedding layer:</strong> An embedding layer transforms the tokenized sequence of integers into an fixed-length vector of real values (<em>embedding</em>). On this embedding, a positional encoding is added to preserve information about the position of each token.</p> </li> <li> <p><strong>Transformer encoder:</strong> Here comes the main event: the stacked Transformer encoder blocks (since the NT is an encoder-only model, remember?). These blocks are where the magic actually happens, processing the initial embeddings to create context-aware representations. Each block uses self-attention mechanisms to let tokens interact across the sequence and feed-forward networks for position-specific processing.</p> </li> <li> <p><strong>Token probabilities:</strong> Finally the last layer’s embedding is transformed into a probability of each token in each of the input positions. Since there were 3 input positions and 4,107 possible tokens, the output for our sequence will be a matrix of size 3 × 4,107. The rows will sum to 1.</p> <p>In our example, the masked token was <code class="language-plaintext highlighter-rouge">1567</code> and was in the last position. If our model has done a good job, the matrix entry (3, 1567) will be close to 1, and the rest of the entries in that row will be close to 0. During training, the trainer evaluates the model’s output using the <a href="https://en.wikipedia.org/wiki/Cross-entropy" rel="external nofollow noopener" target="_blank">cross-entropy</a> loss, and adjusts the parameters of the model by <a href="https://en.wikipedia.org/wiki/Backpropagation" rel="external nofollow noopener" target="_blank">backpropagation</a>.</p> </li> </ol> <p>By repeating this process over and over, on DNA sequences obtained from very different species, the model learns to guess the hidden sequence from it’s genomic context. But, <strong>what is it <em>really</em> learning?</strong> My intuition is that it’s picking up general patterns across genomes. For instance, after looking at many protein-coding sequences it might learn the pattern that we would adscribe to an alpha helix. By putting together some of such patterns, it might learn that protein-coding sequences are related. Then, it could leverage this knowledge in the MLM task to predict a sequence that preserves the alpha helix with the observed codon usage. Similarly, it might learn that another mask is around the right genomic distance from an ORF, and deduce it should predict what we recognize as a promoter. In all this proess the NT has no access to phenotypic information or explicit knowledge about promoters, genes or alpha helices. It is flying blind regarding how this DNA sequence plays out in the real world. Although it is getting a glimpse of evolutionary constraints by being exposed to different genomes, it won’t be able to learn sophisticated genomic regulation patterns.</p> <h1 id="loading-a-pre-trained-model">Loading a pre-trained model</h1> <p>Now that the theory is out of the way, let’s start exploring the Hugging Face ecosystem. There are two elements of it that vastly facilitate sharing and leveraging pre-trained models.</p> <p>One is the <a href="https://huggingface.co/docs/hub/en/index" rel="external nofollow noopener" target="_blank">Model Hub</a>, a repository for the community to share and discover pre-trained models. In this post I use the smallest NT, <a href="https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species" rel="external nofollow noopener" target="_blank">a 50 million parameter model</a>, available from <a href="https://huggingface.co/InstaDeepAI" rel="external nofollow noopener" target="_blank">InstaDeep’s hub organization</a>.</p> <p>The other one is the many <a href="https://huggingface.co/docs/transformers/model_doc/auto" rel="external nofollow noopener" target="_blank"><code class="language-plaintext highlighter-rouge">transformers</code> AutoClasses</a>. They abstract away the specific model architecture, and the changes that would be needed to make it fit our use-case. For instance, fetching the NT adapted for masked language modeling is as easy as running:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForMaskedLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+  <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+  <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+    (layer_norm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
+    (decoder): Linear(in_features=512, out_features=4107, bias=False)
+  )
+)
+</code></pre></div></div> <p>As expected, the output is a vector of length 4,107, one for each possible token.</p> <p>By using the <code class="language-plaintext highlighter-rouge">from_pretrained</code> method, we are loading both the architecture and the weights of the model. By default, the model is in evaluation mode; if we were to further fine-tune it, we would need to set it to training mode using <code class="language-plaintext highlighter-rouge">model.train()</code>. In contrast, we could use <code class="language-plaintext highlighter-rouge">from_config</code> to load the model architecture only. This would be appropriate to train the model from scratch.</p> <p>If instead we wanted to leverage the pre-trained model for binary classification, we would run:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForSequenceClassification</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">num_labels</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</code></pre></div></div> <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+    (dropout): Dropout(p=0.0, inplace=False)
+    (out_proj): Linear(in_features=512, out_features=2, bias=True)
+  )
+)
+</code></pre></div></div> <p>As we can see, this added a (disabled) dropout layer, and a linear layer with two outputs, as requested.</p> <p>The model cannot be applied directly to a DNA sequence, which needs to be <a href="#a-worked-out-training-example">tokenized first</a>. Another AutoClasses, the <a href="https://huggingface.co/docs/transformers/model_doc/auto#transformers.AutoTokenizer" rel="external nofollow noopener" target="_blank">AutoTokenizer</a>, has got our back:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+  <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+  <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+</code></pre></div></div> <h1 id="building-an-inference-pipeline">Building an inference pipeline</h1> <p>The NT’s <a href="https://huggingface.co/InstaDeepAI/nucleotide-transformer-v2-50m-multi-species" rel="external nofollow noopener" target="_blank">Model Card</a> shows how to embed DNA sequences. I copied that code below for your convenience:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">AutoModelForMaskedLM</span>
+<span class="kn">import</span> <span class="n">torch</span>
+
+<span class="c1"># Import the tokenizer and the model
+</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+    <span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForMaskedLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+    <span class="p">)</span>
+
+<span class="c1"># Choose the length to which the input sequences are padded. By default, the
+# model max length is chosen, but feel free to decrease it as the time taken to
+# obtain the embeddings increases significantly with it.
+</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span>
+
+<span class="c1"># Create a dummy dna sequence and tokenize it
+</span><span class="n">sequences</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="s">ATGGTAGCTACATCATCT</span><span class="sh">"</span><span class="p">]</span>
+<span class="n">tokens_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="nf">batch_encode_plus</span><span class="p">(</span>
+    <span class="n">sequences</span><span class="p">,</span>
+    <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span><span class="p">)[</span><span class="sh">"</span><span class="s">input_ids</span><span class="sh">"</span><span class="p">]</span>
+
+<span class="c1"># Compute the embeddings
+</span><span class="n">attention_mask</span> <span class="o">=</span> <span class="n">tokens_ids</span> <span class="o">!=</span> <span class="n">tokenizer</span><span class="p">.</span><span class="n">pad_token_id</span>
+<span class="n">torch_outs</span> <span class="o">=</span> <span class="nf">model</span><span class="p">(</span>
+    <span class="n">tokens_ids</span><span class="p">,</span>
+    <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">,</span>
+    <span class="n">encoder_attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">,</span>
+    <span class="n">output_hidden_states</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Compute sequences embeddings
+</span><span class="n">embeddings</span> <span class="o">=</span> <span class="n">torch_outs</span><span class="p">[</span><span class="sh">'</span><span class="s">hidden_states</span><span class="sh">'</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nf">detach</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Embeddings shape: </span><span class="si">{</span><span class="n">embeddings</span><span class="p">.</span><span class="n">shape</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Embeddings per token: </span><span class="si">{</span><span class="n">embeddings</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Add embed dimension axis
+</span><span class="n">attention_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Compute mean embeddings per sequence
+</span><span class="n">mean_sequence_embeddings</span> <span class="o">=</span> <span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">attention_mask</span><span class="o">*</span><span class="n">embeddings</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">torch</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="n">attention_mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Mean sequence embeddings: </span><span class="si">{</span><span class="n">mean_sequence_embeddings</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+</code></pre></div></div> <p>This is a representation of a common workflow in inference, which looks like this:</p> <pre><code class="language-mermaid">---
+config:
+  layout: elk
+  look: handDrawn
+---
+flowchart LR
+    %% Style definitions
+    classDef process fill:#a8dadc,stroke:#2f4f4f,stroke-width:2px,rx:8,ry:8,color:#000
+    classDef data fill:#f9c74f,stroke:#2f4f4f,stroke-width:2px,rx:8,ry:8,color:#000
+
+    %% Process nodes
+    P2[Tokenizer]:::process
+    P3[Model Inference]:::process
+    P5[Postprocessing]:::process
+
+    %% Data nodes
+    D1[DNA Sequence]:::data
+    D21[Tokens]:::data
+    D22[Attention Mask]:::data
+    D3[Embeddings]:::data
+    D5[Masked Embeddings]:::data
+
+    %% Connections
+    D1 --&gt; P2
+    P2 --&gt; D21
+    P2 --&gt; D22
+    D21 --&gt; P3
+    D22 --&gt; P3
+    P3 --&gt; D3
+    D22 --&gt; P5
+    D3  --&gt; P5
+    P5 --&gt; D5
+</code></pre> <details><summary>Wondering what is the attention mask?</summary> <p>The attention mask is a binary mask that, for a given input sequence, identifies the padding tokens that are there just to make the sequence fit the desired shape. They help the model avoid wasting (C/G/T)PU cycles on processing useless information. Or even worse, learning the wrong information, when we are not in inference mode. This mask is passed along through the model, and forces the attention scores for these padding tokens to effectively become zero.</p> </details> <p><a href="https://huggingface.co/docs/transformers/pipeline_tutorial" rel="external nofollow noopener" target="_blank">Hugging Face’s <code class="language-plaintext highlighter-rouge">pipelines</code></a> exist to encapsulate these inference steps while cutting the boilerplate code. In particular, every pipeline requires defining four steps:</p> <ul> <li>A function to sanitize the pipeline user-provided arguments</li> <li>A preprocessing function that converts inputs (DNA sequences) into tokenized sequences</li> <li>A forward function that passes the tokenized sequence through the model</li> <li>A postprocessing function that postprocess the model’s outputs</li> </ul> <p>I implemented a small pipeline to embed DNA sequences. Its inputs are Python strings and the output are numpy arrays.</p> <details><summary><code class="language-plaintext highlighter-rouge">DNAEmbeddingPipeline</code> class implementation</summary> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">transformers</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+
+<span class="k">class</span> <span class="nc">DNAEmbeddingPipeline</span><span class="p">(</span><span class="n">Pipeline</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">_sanitize_parameters</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+        <span class="sh">"""</span><span class="s">
+        Sanitize the parameters for the pipeline.
+
+        Args:
+            **kwargs: The parameters to be sanitized.
+
+        Returns:
+            Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]: A tuple containing
+                the sanitized parameters for preprocessing, model forward pass, and
+                postprocessing, respectively.
+        </span><span class="sh">"""</span>
+        <span class="n">preprocess_params</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">recognized_params</span> <span class="o">=</span> <span class="nf">set</span><span class="p">([</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">preprocess_params</span><span class="p">[</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="sh">"</span><span class="s">max_length</span><span class="sh">"</span><span class="p">]</span>
+
+        <span class="n">unrecognized_params</span> <span class="o">=</span> <span class="nf">set</span><span class="p">(</span><span class="n">kwargs</span><span class="p">.</span><span class="nf">keys</span><span class="p">())</span> <span class="o">-</span> <span class="n">recognized_params</span>
+        <span class="k">if</span> <span class="n">unrecognized_params</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Unrecognized pipeline parameters: </span><span class="si">{</span><span class="n">unrecognized_params</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">preprocess_params</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">model_inputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">max_length</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">pt</span><span class="p">.</span><span class="n">Tensor</span><span class="p">]:</span>
+        <span class="sh">"""</span><span class="s">
+        Preprocess the input sequences before passing them to the model.
+
+        Args:
+            model_inputs (Union[str, List[str]]): The input sequence(s) to be tokenized.
+            max_length (Optional[int]): The maximum length of the tokenized sequences.
+                If None, the maximum length of the tokenizer is used.
+
+        Returns:
+            List[pt.Tensor]: The tokenized input sequences.
+        </span><span class="sh">"""</span>
+        <span class="k">if</span> <span class="n">max_length</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">max_length</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">model_max_length</span>
+
+        <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">model_inputs</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">model_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">model_inputs</span><span class="p">]</span>
+
+        <span class="n">tokens_ids</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="nf">batch_encode_plus</span><span class="p">(</span>
+            <span class="n">model_inputs</span><span class="p">,</span>
+            <span class="n">return_tensors</span><span class="o">=</span><span class="sh">"</span><span class="s">pt</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="sh">"</span><span class="s">longest</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
+            <span class="n">truncation</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="p">)[</span><span class="sh">"</span><span class="s">input_ids</span><span class="sh">"</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">tokens_ids</span>
+
+    <span class="k">def</span> <span class="nf">_forward</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">model_inputs</span><span class="p">:</span> <span class="n">pt</span><span class="p">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="sh">"""</span><span class="s">
+        Forward pass through the model.
+
+        Args:
+            model_inputs (pt.Tensor): The tokenized input sequence(s).
+
+        Returns:
+            Dict[str, Any]: The model outputs.
+        </span><span class="sh">"""</span>
+        <span class="c1"># find out which of the tokens are padding tokens
+</span>        <span class="c1"># these tokens will be ignored by the model
+</span>        <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">model_inputs</span> <span class="o">!=</span> <span class="n">self</span><span class="p">.</span><span class="n">tokenizer</span><span class="p">.</span><span class="n">pad_token_id</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">self</span><span class="p">.</span><span class="nf">model</span><span class="p">(</span>
+            <span class="n">model_inputs</span><span class="p">,</span>
+            <span class="n">attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">,</span>
+            <span class="n">encoder_attention_mask</span><span class="o">=</span><span class="n">attention_mask</span><span class="p">,</span>
+            <span class="n">output_hidden_states</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">out</span><span class="p">[</span><span class="sh">"</span><span class="s">attention_mask</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">attention_mask</span>
+
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">postprocess</span><span class="p">(</span>
+        <span class="n">self</span><span class="p">,</span>
+        <span class="n">model_outputs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sh">"""</span><span class="s">
+        Compute the mean sequence embedding from the last hidden layer (size 512).
+
+        Args:
+            model_outputs (Dict[str, Any]): The model outputs.
+
+        Returns:
+            dict[str, np.ndarray]: The mean sequence embeddings for each input sequence.
+        </span><span class="sh">"""</span>
+        <span class="n">embeddings</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">hidden_states</span><span class="sh">"</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="nf">detach</span><span class="p">()</span>
+        <span class="n">attention_mask</span> <span class="o">=</span> <span class="n">model_outputs</span><span class="p">[</span><span class="sh">"</span><span class="s">attention_mask</span><span class="sh">"</span><span class="p">].</span><span class="nf">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">).</span><span class="nf">cpu</span><span class="p">()</span>
+        <span class="n">masked_embeddings</span> <span class="o">=</span> <span class="n">attention_mask</span> <span class="o">*</span> <span class="n">embeddings</span>
+
+        <span class="n">mean_sequence_embeddings</span> <span class="o">=</span> <span class="n">masked_embeddings</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">attention_mask</span><span class="p">.</span><span class="nf">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mean_sequence_embeddings</span><span class="p">.</span><span class="nf">cpu</span><span class="p">().</span><span class="nf">numpy</span><span class="p">()</span>
+</code></pre></div></div> </details> <p>Once the pipeline is in place, embedding a sequence is as easy as:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModelForMaskedLM</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="nc">DNAEmbeddingPipeline</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">)</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="nf">pipeline</span><span class="p">(</span><span class="sh">"</span><span class="s">ATGGTAGCTACATCATCTG</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div> <p>Encapsulating the model into its own inference pipeline has a few advantages. Beyond the obvious benefit of cleaner code by separating inference steps into logical abstractions, it makes swapping models a breeze, as you’ll see when we <a href="#fine-tuning-the-model">fine-tune the model</a>.</p> <h1 id="embedding-dna-sequences">Embedding DNA sequences</h1> <p>I will be using the NT to embed protein-coding DNA sequences from six species: three animals (human, mouse and fruit fly); one plant (arabidopsis); one bacteria (<em>E. coli</em>); and one yeast (<em>S. cerevisiae</em>). I aim to obtain embeddings such that the sequences from each species are on aggregate closer to each other than to the sequences from other species. Note that this is not something the model was trained to do. But I hope that the model picked up that a piece of bacterial DNA is very different from a chunk of human DNA.</p> <p>To this end, I <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/prepare_data.sh" rel="external nofollow noopener" target="_blank">downloaded the DNA sequences</a> of all protein coding genes for the selected species. For each species I randomly subsampled 2,000 sequences of 60 nucleotides each. I chose the length of the sequence because of convenience: they are a common sequence length for FASTA files, and short enough for my modest home computer to handle. Half of them were the train set, used for model building; the other half constituted the test set, used exclusively for performance evaluation. All the results shown below are computed on the latter.</p> <p>I <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-05-02-hf-transformers/main.ipynb" rel="external nofollow noopener" target="_blank">embedded the sequences</a> and used a UMAP to visualize the embeddings:</p> <div class="l-page"> <iframe src="/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings.html" frameborder="0" scrolling="no" height="500px" width="100%"></iframe> </div> <div class="caption"> Scatter plot of the two UMAP dimensions from the embeddings computed by applying the <em>pre-trained</em> NT to the 6,000 DNA sequences test dataset, containing 1,000 sequences from each species. </div> <p>Some disclaimers need to be made. First, I took a minuscule sample of all protein coding sequences, which my sampling process slightly biases towards the beginning of the protein. Second, I am using the smallest NT, and its likely that larger models can represent these sequences more richly.</p> <p>Even with these limitations, sequences from the same species tend to inhabit similar regions of the underlying manifold. If you are unconvinced, just squint your eyes or toggle some species on and off. Since this is probably not too reassuring, maybe I can do better: I trained a multiclass logistic regression tasked with predicting the species from the sequence embeddings. This classifier achieved an accuracy of \(0.47\), convincingly above the accuracy of a random classifier (\(\frac 1 6 = 0.16\)). Furthermore, some of the errors are clearly between the two closest species from an evolutionary standpoint: human and mouse.</p> <figure> <picture> <source class="responsive-img-srcset" srcset="/assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" sizes="95vw"></source> <img src="/assets/python/2025-05-02-hf-transformers/img/confusion_matrix_test.webp" class="img-fluid" width="100%" height="auto" loading="eager" onerror="this.onerror=null; $('.responsive-img-srcset').remove();"> </picture> </figure> <h1 id="fine-tuning-the-model">Fine-tuning the model</h1> <p>The NT was trained via MLM, and it never got any explicit information about which species it was looking at. Hence, it’s not too surprising that it can’t separate different species right off the bat. Fine-tuning it to this task should provide more relevant representations. <code class="language-plaintext highlighter-rouge">transformers</code> also provides an easy way of doing that using <code class="language-plaintext highlighter-rouge">transformers.Trainer</code>. (For the record, I am unconvinced Hugging Face provides a better solution than <a href="https://lightning.ai" rel="external nofollow noopener" target="_blank">Lightning</a> and others; however, it can be convenient if you are already in teh Hugging Face ecosystem.)</p> <p>We will start by importing the model using a the right AutoClass for the task:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">classif_nt</span> <span class="o">=</span> <span class="n">AutoModelForSequenceClassification</span><span class="p">.</span><span class="nf">from_pretrained</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">InstaDeepAI/nucleotide-transformer-v2-50m-multi-species</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">num_labels</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">trust_remote_code</span><span class="o">=</span><span class="bp">True</span>
+<span class="p">)</span>
+</code></pre></div></div> <p>The <code class="language-plaintext highlighter-rouge">Trainer</code> makes fine-tuning the model quite easy. The task is to predict the species from the sequence. I froze the first few layers from the NT, which should capture low level features of the sequences, and will only train the last layers. Then, I specify the trainer configuration:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">training_args</span> <span class="o">=</span> <span class="nc">TrainingArguments</span><span class="p">(</span>
+    <span class="n">per_device_train_batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">per_device_eval_batch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+    <span class="n">num_train_epochs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">eval_strategy</span><span class="o">=</span><span class="sh">"</span><span class="s">epoch</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">save_strategy</span><span class="o">=</span><span class="sh">"</span><span class="s">epoch</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">load_best_model_at_end</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+    <span class="n">metric_for_best_model</span><span class="o">=</span><span class="sh">"</span><span class="s">accuracy</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+    <span class="n">dataloader_pin_memory</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>  <span class="c1"># not supported by mps
+</span><span class="p">)</span>
+<span class="n">data_collator</span> <span class="o">=</span> <span class="nc">DataCollatorWithPadding</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer_nt</span><span class="p">)</span>
+
+<span class="n">trainer</span> <span class="o">=</span> <span class="nc">Trainer</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">classif_nt</span><span class="p">,</span>
+    <span class="n">args</span><span class="o">=</span><span class="n">training_args</span><span class="p">,</span>
+    <span class="n">train_dataset</span><span class="o">=</span><span class="n">tr_train_ds</span><span class="p">,</span>    <span class="c1"># train on 90% of the train set
+</span>    <span class="n">eval_dataset</span><span class="o">=</span><span class="n">tr_val_ds</span><span class="p">,</span>       <span class="c1"># evaluate on 10% of the train set
+</span>    <span class="n">data_collator</span><span class="o">=</span><span class="n">data_collator</span><span class="p">,</span>
+    <span class="n">compute_metrics</span><span class="o">=</span><span class="n">compute_trainer_metrics</span><span class="p">,</span>
+<span class="p">)</span>
+</code></pre></div></div> <p>Last, I just begin training with:</p> <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">trainer</span><span class="p">.</span><span class="nf">train</span><span class="p">()</span>
+</code></pre></div></div> <p>After the model is trained, as specified in the trainer arguments, the model with the best performance on the validation dataset will be the loaded.</p> <p>We can create a new inference pipeline focus around classification. The pipeline will output both the probability of each class, as well as the embeddings, obtained from the last layer. Since this model is tasked explicitly with telling apart sequences coming from different species, the embedding should provides a much better separation:</p> <div class="l-page"> <iframe src="/assets/python/2025-05-02-hf-transformers/plotly/umap_embeddings_ft-model.html" frameborder="0" scrolling="no" height="500px" width="100%"></iframe> </div> <div class="caption"> Scatter plot of the two UMAP dimensions from the embeddings computed by applying the <em>fine-tuned</em> NT to the 6,000 DNA sequences test dataset, containing 1,000 sequences from each species. </div> <p>Maybe this time you won’t even need to squint your eyes to agree.</p> <h1 id="conclusions">Conclusions</h1> <p>In this post, I have given a primer on how to use Hugging Face’s libraries for a particular flavor of BioML work. Yet, in my opinion, Hugging Face’s greatest strength lies just in the boundaries of this post’s focus: on its community. With its <a href="https://huggingface.co/docs/hub/en/models-the-hub" rel="external nofollow noopener" target="_blank">Model Hub</a> they have made it easy for researchers to quickly prototype and share models, and to build on top of existing ones.</p> </d-article> <d-appendix> <d-footnote-list></d-footnote-list> <d-citation-list></d-citation-list> </d-appendix> <d-bibliography src="/assets/bibliography/"></d-bibliography> <d-article> <br> <br> <div id="giscus_thread"> <script defer src="/assets/js/giscus-setup.js"></script> <noscript> Please enable JavaScript to view the <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a> </noscript> </div> </d-article> </div> <footer class="sticky-bottom mt-5" role="contentinfo"> <div class="container"> © Copyright 2025 Héctor Climente-González. </div> </footer> <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script> <script src="/assets/js/bootstrap.bundle.min.js"></script> <script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script> <script src="/assets/js/distillpub/overrides.js"></script> <script defer src="https://cdn.jsdelivr.net/npm/mermaid@10.7.0/dist/mermaid.min.js" integrity="sha256-TtLOdUA8mstPoO6sGvHIGx2ceXrrX4KgIItO06XOn8A=" crossorigin="anonymous"></script> <script defer src="/assets/js/mermaid-setup.js?38ca0a0126f7328d2d9a46bad640931f" type="text/javascript"></script> <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script> <script defer src="/assets/js/zoom.js?85ddb88934d28b74e78031fd54cf8308"></script> <script src="/assets/js/no_defer.js?2781658a0a2b13ed609542042a859126"></script> <script defer src="/assets/js/common.js?e0514a05c5c95ac1a93a8dfd5249b92e"></script> <script defer src="/assets/js/copy_code.js?c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script> <script defer src="/assets/js/jupyter_new_tab.js?d9f17b6adc2311cbabd747f4538bb15f"></script> <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script> <script src="/assets/js/mathjax-setup.js?a5bb4e6a542c546dd929b24b8b236dfd"></script> <script defer src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script> <script defer src="/assets/js/progress-bar.js?2f30e0e6801ea8f5036fa66e1ab0a71a" type="text/javascript"></script> <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8.0.6/dist/index.min.js" integrity="sha256-EXHg3x1K4oIWdyohPeKX2ZS++Wxt/FRPH7Nl01nat1o=" crossorigin="anonymous"></script> <script defer src="https://cdn.jsdelivr.net/npm/swiper@11.0.5/swiper-element-bundle.min.js" integrity="sha256-BPrwikijIybg9OQC5SYFFqhBjERYOn97tCureFgYH1E=" crossorigin="anonymous"></script> <script src="/assets/js/vanilla-back-to-top.min.js?f40d453793ff4f64e238e420181a1d17"></script> <script>
+    addBackToTop();
+  </script> <script type="module" src="/assets/js/search/ninja-keys.min.js?a3446f084dcaecc5f75aa1757d087dcf"></script> <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys> <script src="/assets/js/search-setup.js?6c304f7b1992d4b60f7a07956e52f04a"></script> <script src="/assets/js/search-data.js"></script> <script src="/assets/js/shortcut-key.js?6f508d74becd347268a7f822bca7309d"></script> </body> </html>

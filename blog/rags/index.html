@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html>
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Metadata, OpenGraph and Schema.org -->
+
+
+
+
+<!-- Standard metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>
+  
+  
+    
+      How do vector databases work? | Héctor Climente-González
+    
+  
+</title>
+<meta name="author" content="Héctor Climente-González">
+<meta name="description" content="Finding similar documents in large collections">
+
+  <meta name="keywords" content="machine-learning, genetics, pharma, drug-discovery, climente, climente-gonzalez">
+
+
+
+
+
+
+
+
+
+
+<!-- Bootstrap & MDB -->
+<link rel="stylesheet" href="/assets/css/bootstrap.min.css?a4b3f509e79c54a512b890d73235ef04">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+
+
+<!-- Fonts & Icons -->
+<link defer rel="stylesheet" href="/assets/css/academicons.min.css?f0b7046b84e425c55f3463ac249818f5">
+<link defer rel="stylesheet" href="/assets/css/scholar-icons.css?62b2ac103a88034e6882a5be5f3e2772">
+<link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap">
+
+<!-- Code Syntax Highlighting -->
+<link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light">
+
+
+
+<!-- Styles -->
+
+
+
+
+  <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%F0%9F%AA%A2&lt;/text&gt;&lt;/svg&gt;">
+
+<link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+<link rel="canonical" href="https://hclimente.github.io/blog/rags/">
+
+
+  <!-- Dark Mode -->
+  <script src="/assets/js/theme.js?a81d82887dd692e91686b43de4542f18"></script>
+  <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark">
+  <script>
+    initTheme();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Distill js -->
+    <script src="/assets/js/distillpub/template.v2.js"></script>
+    <script src="/assets/js/distillpub/transforms.v2.js"></script>
+    
+  </head>
+
+  <body>
+<d-front-matter>
+    <script async type="text/json">
+      {
+            "title": "How do vector databases work?",
+            "description": "Finding similar documents in large collections",
+            "published": "August 09, 2025",
+            "authors": [
+              
+            ],
+            "katex": {
+              "delimiters": [
+                {
+                  "left": "$",
+                  "right": "$",
+                  "display": false
+                },
+                {
+                  "left": "$$",
+                  "right": "$$",
+                  "display": true
+                }
+              ]
+            }
+          }
+    </script>
+  </d-front-matter>
+
+  
+    <!-- Header -->
+    <header>
+  <!-- Nav Bar -->
+  <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation">
+    <div class="container">
+      
+        <a class="navbar-brand title font-weight-lighter" href="/">
+          
+            
+              <span class="font-weight-bold">Héctor</span>
+            
+            
+            Climente-González
+          
+        </a>
+      
+      <!-- Navbar Toggle -->
+      <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar top-bar"></span>
+        <span class="icon-bar middle-bar"></span>
+        <span class="icon-bar bottom-bar"></span>
+      </button>
+
+      <div class="collapse navbar-collapse text-right" id="navbarNav">
+        <ul class="navbar-nav ml-auto flex-nowrap">
+          
+
+          <!-- About -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/">about
+              
+            </a>
+          </li>
+
+          <!-- Other pages -->
+          
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+              
+                
+                <li class="nav-item active">
+                  <a class="nav-link" href="/blog/">blog
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+              
+                
+                <li class="nav-item ">
+                  <a class="nav-link" href="/publications/">publications
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+          
+            
+              
+                
+                <li class="nav-item ">
+                  <a class="nav-link" href="/repositories/">repositories
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+              
+                
+                <li class="nav-item ">
+                  <a class="nav-link" href="/cv/">cv
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+          
+            
+          
+            
+          
+          
+            <!-- Search -->
+            <li class="nav-item">
+              <button id="search-toggle" title="Search" onclick="openSearchModal()">
+                <span class="nav-link">ctrl k <i class="ti ti-search"></i></span>
+              </button>
+            </li>
+          
+          
+            <!-- Toogle theme mode -->
+            <li class="toggle-container">
+              <button id="light-toggle" title="Change theme">
+                <i class="ti ti-sun-moon" id="light-toggle-system"></i>
+                <i class="ti ti-moon-filled" id="light-toggle-dark"></i>
+                <i class="ti ti-sun-filled" id="light-toggle-light"></i>
+              </button>
+            </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+    <!-- Scrolling Progress Bar -->
+    <progress id="progress" value="0">
+      <div class="progress-container">
+        <span class="progress-bar"></span>
+      </div>
+    </progress>
+  
+</header>
+
+
+    <!-- Content -->
+    <div class="post distill">
+      <d-title>
+        <h1>How do vector databases work?</h1>
+        <p>Finding similar documents in large collections</p>
+      </d-title>
+      
+
+      <d-article>
+        
+        <p>A big part of data science revolves around structured data, data that can be neatly organized into tables. We love tables: they can be easily sliced, diced, summarized, and filtered using SQL or another similar language. To check if an item exists in our table, we can do that quickly by querying for rows matching certain criteria.</p>
+
+<p>However, large swaths of data can’t naturally fit in a table. This is the case with corpora of text, DNA sequences, or songs. In such cases, finding <em>equal</em> elements is still easy by, for instance, checking bit-wise equality. If we are feeling fancy, we might even do that efficiently using hash functions. However, <em>approximate matching</em> is even more important here. We want all the versions of <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" rel="external nofollow noopener" target="_blank">our favorite song</a>; all the pieces of news reporting on the same event; all the pictures containing a cat. This is where vector databases come in.</p>
+
+<h1 id="formalizing-the-problem">Formalizing the problem</h1>
+
+<p>Our goal is to find all documents in a collection of \(N\) items (like documents, images, or songs) that are similar, though not necessarily equal, to our query item. We will represent each item in a \(D\)-dimensional space. This problem can be decomposed into three subproblems:</p>
+
+<ol>
+  <li>
+<strong>Embedding the items</strong>, that is, finding a \(D\)-dimensional, meaningful vector representation of each item</li>
+  <li>Computing the <strong>similarity between items</strong>
+</li>
+  <li>Efficiently <strong>finding the nearest neighbors</strong> of the query item</li>
+</ol>
+
+<p>Let’s zoom in on each of these subproblems, then see how they come together in the context of large language models (LLMs) and retrieval-augmented generation (RAG).</p>
+
+<h1 id="the-embeddings">The embeddings</h1>
+
+<p><strong>Embeddings</strong> are vectors that meaningfully represent a piece of content—a song, a text, or <a href="/blog/hf-transformers/#embedding-dna-sequences">a sequence of DNA</a>. You can think of embeddings as the document’s coordinates in some arbitrary, very high-dimensional space. Related documents inhabit nearby regions of this space. If this sounds confusing, Simon Willison has a <a href="https://simonwillison.net/2023/Oct/23/embeddings/" rel="external nofollow noopener" target="_blank">great introduction to embeddings</a> that I recommend reading.</p>
+
+<figure>
+  <picture>
+    <!-- Auto scaling with imagemagick -->
+    <!--
+      See https://www.debugbear.com/blog/responsive-images#w-descriptors-and-the-sizes-attribute and
+      https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images for info on defining 'sizes' for responsive images
+    -->
+    
+      
+        <source class="responsive-img-srcset" srcset="/assets/img/posts/2025-08-16-rags/embedding.webp" sizes="95vw"></source>
+      
+    
+    <img src="/assets/img/posts/2025-08-16-rags/embedding.webp" class="img-fluid" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+  
+</figure>
+
+<div class="caption">
+    High-level diagram on embedding a text document. First, the document is converted into a context unaware numerical representation, a vector of integers called <em>tokens</em>.<d-footnote>The rule of thumb in English is that one token equals 0.75 words. For instance, "the" is usually one token, but "unbelievable" could be three ("un", "believ" and "able").</d-footnote> This tokenized version of the document is the input of a language model. Note that some of the tokens from the original document are truncated out, since the document is longer than the encoder's fixed context window. The language model finds a context-aware representation of each token, resulting in one vector per token. Finally, these vectors are pooled together, e.g., by taking their mean, to obtain a single vector representing the whole document. Semantically-similar documents will be close to each other in the embedding space.
+</div>
+
+<p>Embeddings are computed by a <strong>pre-trained model</strong>; they are often one of the intermediate representations of the model. This ensures two things. First, that the embeddings are <em>meaningful</em>. After all, the model learned a good representation of the data during training.<d-footnote>As long as the training data is representative of our use case</d-footnote> This also ensures that semantically similar items are near each other. Second, that they have the <em>same dimensionality</em>, since we obtain all the embeddings from the same layer from the same model. Hence we can compare them and neatly arrange them into a matrix.</p>
+
+<p>Embedding the items provides many advantages: where we once had amorphous blobs of unstructured data, we now have numerical representations that can be mathematically operated on. For instance, we can go from the 29 individual posts in my blog to a \(29 \times 384\) matrix of their embeddings. We can try to visualize their representation in two dimensions using <a href="https://umap-learn.readthedocs.io/en/latest/" rel="external nofollow noopener" target="_blank">UMAP</a>, a popular dimensionality reduction technique:</p>
+
+<div class=".l-body-outset">
+    <iframe src="/assets/python/2025-08-16-rags/plotly/posts_umap.html" frameborder="0" scrolling="no" height="550px" width="100%"></iframe>
+</div>
+
+<div class="caption">
+    Scatter plot of the two UMAP dimensions from the 384-dimensional embeddings computed by applying the <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2" rel="external nofollow noopener" target="_blank">all-MiniLM-L6-v2</a> LLM to my 29 blog posts. This model <a href="https://sbert.net/docs/sentence_transformer/pretrained_models.html#original-models" rel="external nofollow noopener" target="_blank">provides a good tradeoff</a> between performance and computational efficiency. They are colored by their highest ranking tag. Hover over the post to see the title; click on it to read the post.
+</div>
+
+<p>We can see that posts with similar tags are neatly close to each other. But the embeddings offer a bit more nuance than that. Posts about statistical methods live near those about machine learning. The post about <a href="/blog/hf-transformers/">data structures</a> lives between the posts related to Python and those discussing graphs.</p>
+
+<details><summary>Python implementation</summary>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">from</span> <span class="n">fastembed</span>
+<span class="kn">from</span> <span class="n">fastembed</span> <span class="kn">import</span> <span class="n">TextEmbedding</span>
+
+<span class="c1"># Small, high-quality model that is lightweight on CPU
+</span><span class="n">MODEL_NAME</span> <span class="o">=</span> <span class="sh">"</span><span class="s">sentence-transformers/all-MiniLM-L6-v2</span><span class="sh">"</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="nc">TextEmbedding</span><span class="p">(</span><span class="n">MODEL_NAME</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">compute_embeddings</span><span class="p">(</span>
+    <span class="n">texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">fastembed</span><span class="p">.</span><span class="n">text</span><span class="p">.</span><span class="n">TextEmbedding</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Compute embeddings using fastembed models.</span><span class="sh">"""</span>
+
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">model</span><span class="p">.</span><span class="nf">embed</span><span class="p">(</span><span class="n">texts</span><span class="p">))</span>
+    <span class="n">embeddings</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nf">array</span><span class="p">(</span><span class="n">embeddings</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">embeddings</span>
+</code></pre></div></div>
+
+</details>
+
+<p>However, I just glossed over a very important detail: embedding a whole document <em>is a bad idea</em>. We can think of an embedding as lossy compression; and, since the dimensionality is fixed, cramming more content means losing more information. Not too unlike stuffing a novel into a tweet. That’s why many popular embedders are trained on sentences and short paragraphs, not on long texts. In fact, <code class="language-plaintext highlighter-rouge">all-MiniLM-L6-v2</code> only used the first 256 tokens of each post and discarded the rest.</p>
+
+<p>Instead of dealing with the whole document, it’s better to split each post into semantically coherent chunks (e.g., paragraphs) and then embed the chunks individually. <em>Recursive character splitting</em> is a simple strategy to get reasonably-sized chunks. It starts by splitting the document into paragraphs. Most paragraphs will be shorter than the model’s context window, and are ready to be embedded. But those that remain too long are further split into sentences; and, if these are still too long, it keeps going, splitting them into subsentences, words and, finally, into individual characters if absolutely needed. Additionally, it is a good idea to pad each chunk with content from the preceding and the following chunk to ensure that some context is also considered by the model.</p>
+
+<figure>
+  <picture>
+    <!-- Auto scaling with imagemagick -->
+    <!--
+      See https://www.debugbear.com/blog/responsive-images#w-descriptors-and-the-sizes-attribute and
+      https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images for info on defining 'sizes' for responsive images
+    -->
+    
+      
+        <source class="responsive-img-srcset" srcset="/assets/img/posts/2025-08-16-rags/embedding_chunks.webp" sizes="95vw"></source>
+      
+    
+    <img src="/assets/img/posts/2025-08-16-rags/embedding_chunks.webp" class="img-fluid" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+  
+</figure>
+
+<div class="caption">
+    High-level diagram of the embedding of the chunks of a text document. The steps are the same as in the embedding of the whole document, but now we first split the document into smaller chunks. Each chunk is then embedded individually, and hence its closest neighbors in the embedding space might or might not come from the same document.
+</div>
+
+<details><summary>Python implementation</summary>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">split_text</span><span class="p">(</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">split_chars</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[</span><span class="sh">"</span><span class="se">\n\n</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="se">\n</span><span class="sh">"</span><span class="p">,</span> <span class="p">[</span><span class="sh">"</span><span class="s">. </span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">! </span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">? </span><span class="sh">"</span><span class="p">],</span> <span class="sh">"</span><span class="s">; </span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">, </span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s"> </span><span class="sh">"</span><span class="p">],</span>
+    <span class="n">max_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sh">"""</span><span class="s">Recursively split text into chunks no larger than max_size.</span><span class="sh">"""</span>
+
+    <span class="k">if</span> <span class="nf">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">max_size</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">split_chars</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">[:</span><span class="n">max_size</span><span class="p">]]</span>
+
+    <span class="n">splitter</span> <span class="o">=</span> <span class="n">split_chars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">splitter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">splitter</span> <span class="k">if</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="sh">"</span><span class="s">|</span><span class="sh">"</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="nf">map</span><span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">escape</span><span class="p">,</span> <span class="n">splitter</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">splits</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">re</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">text</span><span class="p">.</span><span class="nf">strip</span><span class="p">()):</span>
+        <span class="n">splits</span><span class="p">.</span><span class="nf">extend</span><span class="p">(</span><span class="nf">split_text</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">split_chars</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">max_size</span><span class="o">=</span><span class="n">max_size</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">splits</span>
+</code></pre></div></div>
+
+</details>
+
+<p>I applied this strategy to my 29 blog posts, obtaining 1,388 chunks of text. I then embedded each chunk individually. Here is the UMAP plot of the resulting embeddings:</p>
+
+<div class=".l-body-outset">
+    <iframe src="/assets/python/2025-08-16-rags/plotly/paragraphs_umap.html" frameborder="0" scrolling="no" height="600px" width="100%"></iframe>
+</div>
+
+<div class="caption">
+    Scatter plot of the two UMAP dimensions from the 384-dimensional embeddings computed by applying the <a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2" rel="external nofollow noopener" target="_blank">all-MiniLM-L6-v2</a> LLM to my 1,388 chunks of text from my 29 blog posts. They are colored by their highest post of origin tag. Hover over the point to see the title of their post of origin and the first words of the chunked text.
+</div>
+
+<p>The results here are now more nuanced. In general, the points are grouped by their post of origin, denoted by their color, which is a good sanity check. On the top right we find chunks coming from my posts on Python, which are understandably quite similar.</p>
+
+<h1 id="the-distance-measure">The distance measure</h1>
+
+<p>Now that we have a numerical representation of our items, we can start comparing them. But how do we define <em>similarity</em>?</p>
+
+<p>If our goal was to find <em>identical</em> documents, an efficient solution would be relatively straightforward: hash them and see which ones fall in the same bucket. But that’s not the task we’ve embarked on. If the number of documents is large enough, eye-balling the UMAP plot is not an option either. We need a <strong>distance</strong> measure, a function whose inputs are two items and whose output is a real value telling us how <em>far</em> they are. The distance will be small when the two items are alike, and large when they are not. Analogously, we can define a <strong>similarity</strong> measure, which is inversely related to distance.</p>
+
+<p>Many distance and similarity measures have been defined for different kinds of data. In the vector spaces in which our embeddings live, the most popular ones are:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Measure</th>
+      <th style="text-align: center">Formula</th>
+      <th>Meaning</th>
+      <th>Range</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<strong>Cosine</strong> similarity</td>
+      <td style="text-align: center">\(\frac {u \cdot v} {|u| |v|}\)</td>
+      <td>Extent to which $u$ and $v$ point in the same direction</td>
+      <td>\([-1, 1]\)</td>
+    </tr>
+    <tr>
+      <td><strong>Dot product</strong></td>
+      <td style="text-align: center">\(u \cdot v\)</td>
+      <td>Same as cosine, but multiplied by the magnitude of $u$ and $v$</td>
+      <td>\((-\infty, \infty)\)</td>
+    </tr>
+    <tr>
+      <td>
+<strong>Euclidean</strong> distance</td>
+      <td style="text-align: center">\(\sqrt{\sum_i (u_i - v_i)^2}\)</td>
+      <td>Distance between the tips of $u$ and $v$ in Euclidean space</td>
+      <td>\([0, \infty)\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The cosine similarity is a common choice to measure semantic similarity of embeddings. The intuition is that vector direction matters more than magnitude—two documents about the same topic should be similar regardless of their length. Furthermore, in practice negative cosine similarities between embeddings are rare, so the range of interest is really \([0, 1]\).</p>
+
+<details><summary>Python implementation</summary>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">cosine_similarity</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Compute the cosine similarity matrix between the rows in X.</span><span class="sh">"""</span>
+    <span class="n">norms</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">linalg</span><span class="p">.</span><span class="nf">norm</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">X_norm</span> <span class="o">=</span> <span class="n">X</span> <span class="o">/</span> <span class="p">(</span><span class="n">norms</span> <span class="o">+</span> <span class="mf">1e-8</span><span class="p">)</span>  <span class="c1"># Add epsilon to avoid division by zero
+</span>    <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="nf">dot</span><span class="p">(</span><span class="n">X_norm</span><span class="p">,</span> <span class="n">X_norm</span><span class="p">.</span><span class="n">T</span><span class="p">)</span>
+</code></pre></div></div>
+
+</details>
+
+<p>For instance, here is the similarity matrix between all 1,388 text chunks:</p>
+
+<div class=".l-body-outset">
+    <iframe src="/assets/python/2025-08-16-rags/plotly/paragraph_similarity_heatmap.html" frameborder="0" scrolling="no" height="550px" width="100%"></iframe>
+</div>
+
+<div class="caption">
+    Pairwise cosine similarities between all 1,388 text chunks.
+</div>
+
+<h1 id="nearest-neighbor-search">Nearest neighbor search</h1>
+
+<p>Let’s say we are interested in the 5 chunks most related to interpretable machine learning. A way to finding them is to compare the embedding of our query (<code class="language-plaintext highlighter-rouge">Interpretable machine learning</code>) against that of all my chunks. Here are the five chunks with the highest cosine similarity:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Post title</th>
+      <th>Cosine similarity</th>
+      <th>Text sample</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SHAP values</td>
+      <td>0.514</td>
+      <td>Machine learning models like linear regression…</td>
+    </tr>
+    <tr>
+      <td>SHAP values</td>
+      <td>0.505</td>
+      <td>- Interpretable Machine Learning: Shapley valu…</td>
+    </tr>
+    <tr>
+      <td>SHAP values</td>
+      <td>0.403</td>
+      <td>To establish the connection to Shapley values,…</td>
+    </tr>
+    <tr>
+      <td>SHAP values</td>
+      <td>0.391</td>
+      <td>Let’s understand SHAP values better by looking…</td>
+    </tr>
+    <tr>
+      <td>SHAP values</td>
+      <td>0.388</td>
+      <td>Global explanations can be derived by aggregat…</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>I would say the search worked reasonably well!</p>
+
+<p>However, this brute-force approach has a time complexity of \(O(D \cdot N)\), where \(D\) is the dimension of the embeddings (384) and \(N\) is the number of chunks (1,388). For large collections, this becomes prohibitively slow. That’s why we need approximate methods that can find good matches efficiently.</p>
+
+<p>In the past, <a href="/blog/finding-similar-items/">I described</a> a method to find similar items using <strong>local-sensitivity hashing</strong> (LSH). The idea is to hash the items in such a way that similar items are likely to fall in the same bucket. This way, we can quickly scan over a corpus and find the items that are similar to our query. However, LSH has high memory requirements and requires careful parameter tuning. Here I will focus on <strong>hierarchical navigable small world graphs</strong> (HNSW) instead, a more modern method that is the backbone of vector databases. They build on two concepts: <em>skip lists</em> and <em>navigable small world graphs</em>.</p>
+
+<details><summary>Skip lists</summary>
+<p><a href="/blog/data-structures/#skip-lists"><strong>Skip lists</strong></a> are a data structure consisting of a set of <a href="/blog/data-structures/#linked-lists">linked lists</a>, containing nested subsets of the items in the collection:</p>
+
+<figure>
+  <picture>
+    <!-- Auto scaling with imagemagick -->
+    <!--
+      See https://www.debugbear.com/blog/responsive-images#w-descriptors-and-the-sizes-attribute and
+      https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images for info on defining 'sizes' for responsive images
+    -->
+    
+      
+        <source class="responsive-img-srcset" srcset="/assets/img/posts/2025-08-16-rags/skip_list.drawio-480.webp 480w,/assets/img/posts/2025-08-16-rags/skip_list.drawio-800.webp 800w,/assets/img/posts/2025-08-16-rags/skip_list.drawio-1400.webp 1400w," type="image/webp" sizes="95vw"></source>
+      
+    
+    <img src="/assets/img/posts/2025-08-16-rags/skip_list.drawio.png" class="img-fluid" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+  
+</figure>
+
+<div class="caption">
+    Example of search path for a value (9) in a 5-layered skip list.
+</div>
+
+<p>The topmost list contains only a few items, while the bottommost list contains all the items. Each item in a list points to the next item in the same list, and also to the next item in the lists below it. This allows us to quickly traverse the lists and find or insert items in logarithmic time with high probability.</p>
+
+</details>
+
+<details><summary>Navigable small world graphs</summary>
+<p><a href="/blog/graph-properties/#small-world-graphs">Small world graphs</a> are graphs with two key properties: small mean shortest-paths and high clustering coefficients. The classic example is the “six degrees of separation” phenomenon in social networks, where any two people are connected through at most six intermediate connections.</p>
+
+<p><strong>Navigable small world graphs</strong> extend this concept by ensuring we can find a path between any two nodes via a greedy strategy that chooses the neighbor closest according to a <a href="#the-distance-measure">distance function</a>. The key insight is that not all small world graphs are navigable: you need the right balance of local and long-range connections.</p>
+
+<p>In a navigable small world graph:</p>
+
+<ul>
+  <li>
+<strong>Local connections</strong>: each node connects to its immediate neighbors (high clustering); they are akin to <em>local streets</em> in a city.</li>
+  <li>
+<strong>Long-range connections</strong>: some nodes have connections that “jump” across the graph (short paths); they are akin to <em>highways</em> connecting distant parts of the city.</li>
+  <li>
+<strong>Greedy navigability</strong>: at each step, you can always find a neighbor that gets you closer to your target.</li>
+</ul>
+
+<p>The challenge is constructing these graphs so that the greedy algorithm actually works. If you have too many random long-range connections, you might get stuck in local optima. If you have too few, the paths become too long. The magic happens when the probability of a long-range connection decreases with distance \(d\) in a specific way (roughly proportional to \(1/d^k\) where \(k\) is the dimensionality of the space).</p>
+
+</details>
+
+<h2 id="the-search-algorithm">The search algorithm</h2>
+
+<p>HNSW graphs combine the layered structure of skip lists with the navigability properties of small world graphs to create an efficient approximate nearest neighbor search algorithm.</p>
+
+<p><em>Like skip lists</em>, HNSW graphs are organized in layers (typically 3-6 layers). The bottommost layer contains all the items in the collection, while the upper layers contain progressively fewer items. Each item has a randomly assigned maximum layer level, with the probability of being in a given layer following an exponential decay. This ensures that most items are in the lower layers, while only a few “hub” items exist in the upper layers,</p>
+
+<p><em>Like navigable small world graphs</em>, each item in a layer is connected to several of its nearest neighbors in the same layer. Additionally, items connect to themselves in lower layers, creating vertical connections that allow movement between layers.</p>
+
+<figure>
+  <picture>
+    <!-- Auto scaling with imagemagick -->
+    <!--
+      See https://www.debugbear.com/blog/responsive-images#w-descriptors-and-the-sizes-attribute and
+      https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images for info on defining 'sizes' for responsive images
+    -->
+    
+      
+        <source class="responsive-img-srcset" srcset="/assets/img/posts/2025-08-16-rags/hnsw.drawio-480.webp 480w,/assets/img/posts/2025-08-16-rags/hnsw.drawio-800.webp 800w,/assets/img/posts/2025-08-16-rags/hnsw.drawio-1400.webp 1400w," type="image/webp" sizes="95vw"></source>
+      
+    
+    <img src="/assets/img/posts/2025-08-16-rags/hnsw.drawio.png" class="img-fluid" width="100%" height="auto" loading="lazy" onerror="this.onerror=null; $('.responsive-img-srcset').remove();">
+  </picture>
+
+  
+</figure>
+
+<div class="caption">
+    Example of search path for query item in a 3-layered HNSW graph.
+</div>
+
+<p>The search process is what makes HNSW particularly effective:</p>
+
+<ol>
+  <li>
+<strong>Start high</strong>: begin at the top layer with a default entry point</li>
+  <li>
+<strong>Greedy descent</strong>: at each layer, greedily move to the neighbor closest to your query</li>
+  <li>
+<strong>Layer transition</strong>: when you can’t improve further, drop to the next layer down</li>
+  <li>
+<strong>Refine at bottom</strong>: perform a more thorough search in the bottommost layer</li>
+</ol>
+
+<p>This multi-scale approach allows HNSW to quickly “zoom in” on the right region of the space. The upper layers provide coarse navigation (like highways), while the bottom layer provides fine-grained search (like local streets).</p>
+
+<h2 id="vector-databases">Vector databases</h2>
+
+<p>Vector databases like <a href="https://qdrant.tech/" rel="external nofollow noopener" target="_blank">Qdrant</a> are specialized in storing embeddings and finding the nearest neighbors of a query embedding. They do the latter via HNSW graphs, which they use as <em>indexing</em> structures. They are built incrementally: every time we add a new item to our collection, we update the graph. Graph building requires specifying some hyperparameters that affect its performance:</p>
+
+<ul>
+  <li>
+<strong>M</strong>: the maximum number of connections per node (typically 12-48)</li>
+  <li>
+<strong>efConstruction</strong>: the size of candidate set during construction (affects build quality vs. speed)</li>
+  <li>
+<strong>ef</strong>: the size of candidate set during search (affects accuracy vs. speed)</li>
+</ul>
+
+<p>The navigability property inherited from small world graphs is what makes this greedy strategy work: you can start from any entry point and confidently “walk” toward your query, finding good approximate neighbors without exhaustive search.</p>
+
+<p>On top of fast nearest neighbor search, vector databases provide additional functionality like ACID transactions, filtering by metadata, versioning, and replication. They are optimized for high-dimensional data and can handle millions of items efficiently.</p>
+
+<h1 id="why-does-this-matter-llms-and-rags">Why does this matter? LLMs and RAGs</h1>
+
+<p>Typically, an LLM leverages two sources of information to produce an output: its <em>memory</em> and the provided <em>query</em>. The LLM’s memory consists of large swaths of patterns learned during training and stored in its weights. The query is the user request, which gives the LLM relevant context, potentially additional information, and puts all those weights to find the most plausible answer. Vector databases can extend LLMs, allowing them to efficiently retrieve relevant documents from a corpus and leverage them in its answer. This is called <strong>retrieval-augmented generation</strong> or RAG.</p>
+
+<p>The idea of RAG is straightforward. First we embed the corpus and store the embeddings in a vector database. When a query arrives, we embed it and find its closest neighbors from the database. Then, both the query and the retrieved chunks are passed to the LLM, which uses both to generate the final answer. As a proof of concept, I <a href="https://github.com/hclimente/hclimente.github.io/blob/main/assets/python/2025-08-16-rags/rag_system.py" rel="external nofollow noopener" target="_blank">built a simple RAG system</a> that leverages the embeddings of my blog posts and the <a href="https://qdrant.tech/" rel="external nofollow noopener" target="_blank">Qdrant vector database</a> to answer questions:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uv run rag_cli.py <span class="s2">"What's the best way of doing interpretable ML?"</span>
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Setting up RAG system with qwen3-1.7b model...
+⏳ Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+✅ Embedding model loaded
+
+⏳ Loading documents from: ../../../_posts
+✅ Loaded 29 documents
+⏳ Chunking documents...
+        ✂️ Created 1388 chunks
+                Computing embeddings for 1388 texts...
+                Embeddings computed (shape=(1388, 384))
+✅ Vector database ready with 1388 chunks
+
+⏳ Creating RAG system with qwen3-1.7b (Qwen/Qwen3-1.7B)
+        ⏳ Loading small LLM: Qwen/Qwen3-1.7B. This may take a few minutes on
+        first run...
+✅ RAG system initialized successfully!
+        ⏳ Processing query: What's the best way of doing interpretable ML?
+        ⏳ Retrieving relevant contexts...
+                Computing embeddings for 1 texts...
+                Embeddings computed (shape=(1, 384))
+        ✅ Found 3 relevant chunks
+                1. SHAP values (similarity: 0.470)
+                2. How do vector databases work? (similarity: 0.438)
+                3. SHAP values (similarity: 0.429)
+        💭 Generating answer...
+
+============================================================
+❓ Query: What's the best way of doing interpretable ML?
+------------------------------------------------------------
+💡 Answer: The best way of doing interpretable ML is to use SHAP values, which
+provide a way to explain the output of any machine learning model. SHAP values
+are based on the Shapley value concept from game theory, which helps quantify
+the contribution of each feature to a model's prediction. This method allows
+for a clear understanding of how individual features affect the model's output,
+making it a powerful tool for interpreting complex models like neural networks
+or random forests.
+
+The provided context mentions that SHAP values are covered in the book
+"Interpretable Machine Learning: Shapley values" and other resources, which
+further supports the recommendation of SHAP as a key method for achieving
+interpretability in machine learning models.
+</code></pre></div></div>
+
+<p>To improve its answers, the first step would be to introduce a benchmark to evaluate the quality of the answers. Then, I would try to improve the chunking strategy, the embedding model, and the LLM. Finally, I would try to tune the hyperparameters of the vector database to see if that improves the quality of the retrieved chunks. But that will be left for another day.</p>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="/blog/finding-similar-items/">My previous, pre-LLM write-up on this topic</a></li>
+  <li><a href="https://simonwillison.net/2023/Oct/23/embeddings/" rel="external nofollow noopener" target="_blank">Embeddings: What they are and why they matter</a></li>
+  <li><a href="https://www.pinecone.io/learn/series/faiss/hnsw/" rel="external nofollow noopener" target="_blank">Pinecone: Hierarchical Navigable Small Worlds</a></li>
+  <li><a href="https://medium.com/thedeephub/understading-hnsw-hierarchical-navigable-small-world-ff1a72d98605" rel="external nofollow noopener" target="_blank">Understanding HNSW — Hierarchical Navigable Small World</a></li>
+</ul>
+
+      </d-article>
+
+      <d-appendix>
+        <d-footnote-list></d-footnote-list>
+        <d-citation-list></d-citation-list>
+      </d-appendix>
+
+      <d-bibliography src="/assets/bibliography/"></d-bibliography>
+
+      <d-article>
+        
+          
+        
+        <br>
+        <br>
+        
+        
+          <div id="giscus_thread">
+  
+
+  
+    <script defer src="/assets/js/giscus-setup.js"></script>
+    <noscript>
+      Please enable JavaScript to view the
+      <a href="http://giscus.app/?ref_noscript" rel="external nofollow noopener" target="_blank">comments powered by giscus.</a>
+    </noscript>
+  
+</div>
+
+        
+      </d-article>
+    </div>
+
+    <!-- Footer -->
+    
+
+
+  <footer class="sticky-bottom mt-5" role="contentinfo">
+    
+
+    <div class="container">
+      
+  © Copyright 2025
+  Héctor
+  
+  Climente-González. 
+  
+  
+
+    </div>
+  </footer>
+
+
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<!-- Bootsrap & MDB scripts -->
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+<!-- Custom overrides -->
+<script src="/assets/js/distillpub/overrides.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js?85ddb88934d28b74e78031fd54cf8308"></script>
+
+
+
+
+
+
+<!-- Load Common JS -->
+<script src="/assets/js/no_defer.js?2781658a0a2b13ed609542042a859126"></script>
+<script defer src="/assets/js/common.js?e0514a05c5c95ac1a93a8dfd5249b92e"></script>
+<script defer src="/assets/js/copy_code.js?c8a01c11a92744d44b093fc3bda915df" type="text/javascript"></script>
+
+<!-- Jupyter Open External Links New Tab -->
+<script defer src="/assets/js/jupyter_new_tab.js?d9f17b6adc2311cbabd747f4538bb15f"></script>
+
+<!-- Removed Badges -->
+
+
+  <!-- MathJax -->
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script>
+  <script src="/assets/js/mathjax-setup.js?a5bb4e6a542c546dd929b24b8b236dfd"></script>
+  <script defer src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script>
+  <!-- Removed Pseudocode -->
+
+
+
+
+
+
+
+
+
+  <!-- Scrolling Progress Bar -->
+  <script defer src="/assets/js/progress-bar.js?2f30e0e6801ea8f5036fa66e1ab0a71a" type="text/javascript"></script>
+
+
+
+
+
+
+
+  <!-- Back to Top -->
+  <script src="/assets/js/vanilla-back-to-top.min.js?f40d453793ff4f64e238e420181a1d17"></script>
+  <script>
+    addBackToTop();
+  </script>
+
+
+
+  <!-- Search -->
+  <script type="module" src="/assets/js/search/ninja-keys.min.js?a3446f084dcaecc5f75aa1757d087dcf"></script>
+  <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys>
+  <script src="/assets/js/search-setup.js?6c304f7b1992d4b60f7a07956e52f04a"></script>
+  <script src="/assets/js/search-data.js"></script>
+  <script src="/assets/js/shortcut-key.js?6f508d74becd347268a7f822bca7309d"></script>
+
+
+  
+</body>
+</html>
