@@ -2,16 +2,13 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Motto. Etc.
+subtitle: Lead Scientist at <a href='https://www.novonordisk.com/science-and-technology/research-and-technology-centres/oxford-research-centre.html'>Novo Nordisk</a>. London, United Kingdom.
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: hclimente_prof_pic.jpg
   image_circular: false # crops the image to make it circular
-  more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
+  more_info:
 
 selected_papers: true # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
@@ -19,7 +16,7 @@ social: true # includes social icons at the bottom of the page
 announcements:
   enabled: true # includes a list of news items
   scrollable: true # adds a vertical scroll bar if there are more than 3 news items
-  limit: 5 # leave blank to include all the news in the `_news` folder
+  limit: 3 # leave blank to include all the news in the `_news` folder
 
 latest_posts:
   enabled: true
@@ -27,8 +24,8 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+As a Lead Data Scientist at Novo Nordisk, I design and deploy AI/ML methodologies for early target discovery and precision medicine — with a strong focus on genetics.
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+I have 13+ years of experience in computational biology and applied statistics. I completed my PhD at [CBIO](https://cbio.mines-paristech.fr), a leading bioML laboratory, under the supervision of [Chloé-Agathe Azencott](https://cazencott.info/), where I explored [graph-based methods for genetic studies](https://pastel.hal.science/tel-03270879). I then conducted my postdoctoral research at [RIKEN AIP](https://www.riken.jp/en/research/labs/aip/) with [Makoto Yamada](https://www.oist.jp/research/makoto-yamada), developing novel AI/ML methods for feature selection.
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+My research focuses on multi-omics integration, explainable ML and systems biology. I’m an advocate for reproducible research and an advanced Nextflow developer. I’m detail-oriented, proactive, and wired to fix what’s broken — ideally before anyone notices.
