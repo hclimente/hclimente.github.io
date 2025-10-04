@@ -14,62 +14,91 @@
 #     name: python3
 # ---
 
+# %% [markdown]
+# # Example from scikit-learn
+
 # %%
+import sys
+
+import matplotlib.pyplot as plt
 import numpy as np
-np.random.seed(0) # for reproducibility
+from sklearn.decomposition import PCA, FastICA
 
-# %%
-# Create 3 independent, non-Gaussian source signals
-num_samples = 500
-S1 = np.random.uniform(-1, 1, num_samples) # Uniform distribution
-S2 = np.random.laplace(0, 1, num_samples) # Laplace distribution
-S3 = np.random.beta(a=2, b=5, size=num_samples) - 0.5 # Beta distribution
+sys.path.append("../")
 
-# %%
-# Create a random mixing matrix
-num_sources = 3
-num_genes = 3
-A = np.random.rand(num_genes, num_sources)
+from utils import (
+    save_fig,
+)
 
-# %%
-# Stack sources into a matrix (rows are sources, columns are samples)
-S_matrix = np.vstack((S1, S2, S3))
+# Generate sample data
+rng = np.random.RandomState(42)
+S = rng.standard_t(1.5, size=(20000, 2))
+S[:, 0] *= 2.0
 
-# %%
-# Generate the observed data
-X_matrix = A @ S_matrix
+## Mix data
+A = np.array([[1, 1], [0, 2]])  # Mixing matrix
 
-# %%
-# Add some noise to make it more realistic
-noise = np.random.normal(0, 0.1, X_matrix.shape)
-X_matrix_noisy = X_matrix + noise
+X = np.dot(S, A.T)  # Generate observations
 
-# %%
-import numpy as np
-from sklearn.decomposition import FastICA
+pca = PCA()
+S_pca_ = pca.fit(X).transform(X)
 
-# %%
-# Assuming X_matrix_noisy from the last example is your data
-# The data needs to have shape (n_samples, n_features) for scikit-learn
-# Here, n_samples = number of genes, n_features = number of samples
-X_data_ica = X_matrix_noisy.T
+ica = FastICA(random_state=rng, whiten="arbitrary-variance")
+S_ica_ = ica.fit(X).transform(X)  # Estimate the sources
 
-# %%
-# Center the data
-X_centered = X_data_ica - X_data_ica.mean(axis=0)
 
-# %%
-# Create and fit the ICA model
-ica = FastICA(n_components=3, random_state=0)
-S_recovered = ica.fit_transform(X_centered) # Recover the independent components
+# Plot results
+def plot_samples(S, axis_list=None):
+    plt.scatter(
+        S[:, 0], S[:, 1], s=2, marker="o", zorder=10, color="steelblue", alpha=0.5
+    )
+    if axis_list is not None:
+        for axis, color, label in axis_list:
+            x_axis, y_axis = axis / axis.std()
+            plt.quiver(
+                (0, 0),
+                (0, 0),
+                x_axis,
+                y_axis,
+                zorder=11,
+                width=0.01,
+                scale=6,
+                color=color,
+                label=label,
+            )
 
-# %%
-# Recover the mixing matrix
-A_recovered = ica.mixing_ # This attribute holds the recovered mixing matrix
+    plt.hlines(0, -5, 5, color="black", linewidth=0.5)
+    plt.vlines(0, -3, 3, color="black", linewidth=0.5)
+    plt.xlim(-5, 5)
+    plt.ylim(-3, 3)
+    plt.gca().set_aspect("equal")
+    plt.xlabel("x")
+    plt.ylabel("y")
 
-# %%
-(S_recovered - S_matrix.T) / S_matrix.std(axis = 1)
 
-# %%
+plt.figure(dpi=300)  # Increased figure size and DPI
+plt.subplot(2, 2, 1)
+plot_samples(S / S.std())
+plt.title("True Independent Sources")
+
+axis_list = [(pca.components_.T, "orange", "PCA"), (ica.mixing_, "red", "ICA")]
+plt.subplot(2, 2, 2)
+plot_samples(X / np.std(X), axis_list=axis_list)
+legend = plt.legend(loc="upper left")
+legend.set_zorder(100)
+
+plt.title("Observations")
+
+plt.subplot(2, 2, 3)
+plot_samples(S_pca_ / np.std(S_pca_))
+plt.title("PCA recovered signals")
+
+plt.subplot(2, 2, 4)
+plot_samples(S_ica_ / np.std(S_ica_))
+plt.title("ICA recovered signals")
+
+plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.36)
+plt.tight_layout()
+save_fig(plt.gcf(), "ica_pca_sklearn_example")
 
 # %%
