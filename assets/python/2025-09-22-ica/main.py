@@ -200,3 +200,46 @@ plt.xlabel("Time (s)")
 
 plt.tight_layout()
 save_fig(plt.gcf(), "cocktail_ica_signals")
+
+# %% [markdown]
+# # ICA implementation
+
+# %%
+# Generate sample data
+m = 2
+n = 20000
+rng = np.random.RandomState(42)
+S = rng.standard_t(1.5, size=(n, m))
+S[:, 0] *= 2.0
+
+## Mix data
+A = np.array([[1, 1], [0, 2]])  # Mixing matrix
+
+X = np.dot(S, A.T)  # Generate observations
+
+
+# %%
+def kurtosis(x):
+    n = x.shape[0]
+    mean = np.mean(x)
+    var = np.var(x)
+    return np.sum((x - mean) ** 4) / (n * var**2) - 3
+
+
+step_size = 0.01
+n_iterations = 10000
+
+w = np.array([1.0, 0.0])  # Initial weight vector
+
+for i in range(n_iterations):
+    # Project data onto weight vector
+    s = np.dot(X, w)
+    print(kurtosis(s))
+
+    # Compute the gradient
+    gradient = 4 / m * np.dot(np.pow(s, 3), X)
+    # Update the weight vector
+    w += step_size * gradient
+
+    # Normalize the weight vector
+    w /= np.linalg.norm(w)
