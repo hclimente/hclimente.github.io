@@ -40,6 +40,10 @@ Intuitively, by comparing the association measure computed for each original fea
 
 ## 1. Generate knockoffs
 
+Generating features that are independent of $$Y$$ is easy: simply generate them without looking at the outcome. Generating features that, additionally, __look like__ the original features is considerably more challenging. The two most important families of methods are Gaussian and deep learning methods.
+
+In a nutshell, **Gaussian** methods assume that $$X$$ comes from a multivariate Gaussian distribution. If we can parametrize this distribution, we can sample from it.
+
 Create synthetic copies of the features that retain the original correlation structure without any outcome information. An obvious question is how to synthesize such knockoff copies.
 
 ## 2. Compute association measures
