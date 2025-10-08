@@ -23,6 +23,8 @@
 import sys
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.animation import PillowWriter
 import numpy as np
 from scipy import signal
 from sklearn.decomposition import PCA, FastICA
@@ -217,8 +219,127 @@ A = np.array([[1, 1], [0, 2]])  # Mixing matrix
 
 X = np.dot(S, A.T)  # Generate observations
 
+# Preprocess data: center and whiten
+X_centered = X - np.mean(X, axis=0)
+X_scaled = X_centered / np.std(X_centered, axis=0)
+
+pca = PCA(whiten=True)
+X_whitened = pca.fit_transform(X_centered)
+
 
 # %%
+def animate(
+    frame,
+    animation_data,
+    X_alter,
+    alter_title,
+    previous_w_white=None,
+    previous_w_raw=None,
+):
+    data = animation_data[frame]
+
+    plt.suptitle(
+        f"Iteration {data['iteration']}",
+        fontsize=16,
+        horizontalalignment="left",
+        fontweight="bold",
+    )
+
+    # Clear axes
+    ax1.clear()
+    ax2.clear()
+    ax3.clear()
+
+    # Plot histogram
+    cropped_projection = data["projection"][
+        (data["projection"] > -5) & (data["projection"] < 5)
+    ]
+    ax1.hist(cropped_projection, bins=10, alpha=0.7, color="steelblue", density=True)
+    ax1.set_title(f"Excess kurtosis: {data['kurtosis']:.2f}")
+    ax1.set_xlabel("Projected values (cropped to [-5, 5])")
+    ax1.set_ylabel("Density")
+    ax1.grid(True, alpha=0.3)
+    ax1.set_xlim(-5, 5)  # Fixed x-axis for better comparison
+    ax1.set_ylim(0, 0.9)  # Fixed y-axis for better comparison
+
+    # Plot weight vector direction on original data
+    ax2.scatter(X_alter[:, 0], X_alter[:, 1], s=2, alpha=0.5, color="steelblue")
+
+    ax2.hlines(0, -5, 5, color="black", linewidth=0.5)
+    ax2.vlines(0, -5, 5, color="black", linewidth=0.5)
+
+    if previous_w_white is not None:
+        ax2.arrow(
+            0,
+            0,
+            previous_w_white[0],
+            previous_w_white[1],
+            head_width=0.2,
+            head_length=0.3,
+            fc="black",
+            ec="black",
+            linewidth=2,
+        )
+    ax2.arrow(
+        0,
+        0,
+        data["weight_white"][0],
+        data["weight_white"][1],
+        head_width=0.2,
+        head_length=0.3,
+        fc="red",
+        ec="red",
+        linewidth=2,
+    )
+
+    ax2.set_xlim(-5, 5)
+    ax2.set_ylim(-5, 5)
+    ax2.set_xlabel("x")
+    ax2.set_ylabel("y")
+    ax2.set_title(alter_title)
+    ax2.grid(True, alpha=0.3)
+
+    # Draw weight vector
+    ax3.scatter(X_scaled[:, 0], X_scaled[:, 1], s=2, alpha=0.5, color="steelblue")
+
+    ax3.hlines(0, -5, 5, color="black", linewidth=0.5)
+    ax3.vlines(0, -3, 3, color="black", linewidth=0.5)
+
+    if previous_w_raw is not None:
+        ax3.arrow(
+            0,
+            0,
+            previous_w_raw[0],
+            previous_w_raw[1],
+            head_width=0.2,
+            head_length=0.3,
+            fc="black",
+            ec="black",
+            linewidth=2,
+        )
+    ax3.arrow(
+        0,
+        0,
+        data["weight"][0],
+        data["weight"][1],
+        head_width=0.2,
+        head_length=0.3,
+        fc="red",
+        ec="red",
+        linewidth=2,
+    )
+
+    ax3.set_xlim(-5, 5)
+    ax3.set_ylim(-3, 3)
+    ax3.set_xlabel("x")
+    ax3.set_ylabel("y")
+    ax3.set_title("Original space")
+    ax3.grid(True, alpha=0.3)
+
+    # Apply tight layout to each frame
+    plt.tight_layout()
+
+
 def kurtosis(x):
     n = x.shape[0]
     mean = np.mean(x)
@@ -226,20 +347,124 @@ def kurtosis(x):
     return np.sum((x - mean) ** 4) / (n * var**2) - 3
 
 
-step_size = 0.01
-n_iterations = 10000
+# %%
+STEP_SIZE = 1e-3
+N_ITERATIONS = 50
 
-w = np.array([1.0, 0.0])  # Initial weight vector
+# Random initial weight vector
+np.random.seed(0)
+w1 = rng.rand(m)
+w1 /= np.linalg.norm(w1) + 1e-10
+w1_raw = pca.components_.T @ w1
 
-for i in range(n_iterations):
+animation_data = []
+
+for i in range(N_ITERATIONS):
     # Project data onto weight vector
-    s = np.dot(X, w)
-    print(kurtosis(s))
+    s = np.dot(X_whitened, w1)
+    k = kurtosis(s)
+
+    # Store data for animation
+    animation_data.append(
+        {
+            "iteration": i,
+            "projection": s.copy(),
+            "kurtosis": k,
+            # Transform back to original space for visualization
+            "weight": w1_raw,
+            "weight_white": w1.copy(),
+        }
+    )
 
     # Compute the gradient
-    gradient = 4 / m * np.dot(np.pow(s, 3), X)
+    gradient = 4 / n * np.dot(np.pow(s, 3), X_whitened)
+
     # Update the weight vector
-    w += step_size * gradient
+    w1 += STEP_SIZE * gradient
 
     # Normalize the weight vector
-    w /= np.linalg.norm(w)
+    w1 /= np.linalg.norm(w1) + 1e-10
+    w1_raw = pca.components_.T @ w1
+
+# Create the animation
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4), dpi=300)
+
+# Create animation
+anim = animation.FuncAnimation(
+    fig,
+    animate,
+    frames=11,
+    interval=100,
+    repeat=True,
+    fargs=(animation_data[:11], X_whitened, "Whitened space"),
+)
+
+# Save as GIF
+writer = PillowWriter(fps=5)
+anim.save("img/ica_kurtosis_gd_component_1.gif", writer=writer)
+
+plt.show()
+
+# %%
+np.random.seed(1)
+w2 = rng.rand(m)
+w2 /= np.linalg.norm(w2) + 1e-10
+# w2 = w2 - np.dot(w2, w1) * w1  # Start orthogonal
+# w2 /= np.linalg.norm(w2) + 1e-10
+
+# Deflate the whitened data to remove first component
+X_deflated = X_whitened.copy()
+X_deflated = X_deflated - np.outer(np.dot(X_whitened, w1), w1)
+
+animation_data = []
+
+for i in range(N_ITERATIONS):
+    # Project data onto weight vector
+    s = np.dot(X_deflated, w2)
+    k = kurtosis(s)
+
+    # Store data for animation
+    animation_data.append(
+        {
+            "iteration": i,
+            "projection": s.copy(),
+            "kurtosis": k,
+            "weight": pca.components_.T @ w2,
+            "weight_white": w2.copy(),
+        }
+    )
+
+    # Compute the gradient
+    gradient = 4 / n * np.dot(np.pow(s, 3), X_deflated)
+
+    # Update the weight vector
+    w2 += STEP_SIZE * gradient
+
+    # Normalize the weight vector
+    w2 /= np.linalg.norm(w2) + 1e-10
+
+
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(10, 4), dpi=300)
+anim = animation.FuncAnimation(
+    fig,
+    animate,
+    frames=11,
+    interval=100,
+    repeat=True,
+    fargs=(
+        animation_data[:11],
+        X_deflated,
+        "Whitened, deflated space",
+        w1,
+        w1_raw,
+    ),
+)
+
+# Save as GIF
+writer = PillowWriter(fps=5)
+anim.save("img/ica_kurtosis_gd_component_2.gif", writer=writer)
+
+plt.show()
+
+# Finally, check for orthogonality
+print(f"Dot product of w1 and w2 in whitened space: {np.dot(w1, w2):.4f}")
