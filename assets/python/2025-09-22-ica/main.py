@@ -24,7 +24,6 @@ import sys
 
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.animation import PillowWriter
 import numpy as np
 from scipy import signal
 from sklearn.decomposition import PCA, FastICA
@@ -32,6 +31,7 @@ from sklearn.decomposition import PCA, FastICA
 sys.path.append("../")
 
 from utils import (
+    save_animation,
     save_fig,
 )
 
@@ -399,11 +399,7 @@ anim = animation.FuncAnimation(
     fargs=(animation_data[:11], X_whitened, "Whitened space"),
 )
 
-# Save as GIF
-writer = PillowWriter(fps=5)
-anim.save("img/ica_kurtosis_gd_component_1.gif", writer=writer)
-
-plt.show()
+save_animation(anim, "ica_kurtosis_gd_component_1")
 
 # %%
 np.random.seed(1)
@@ -460,11 +456,7 @@ anim = animation.FuncAnimation(
     ),
 )
 
-# Save as GIF
-writer = PillowWriter(fps=5)
-anim.save("img/ica_kurtosis_gd_component_2.gif", writer=writer)
-
-plt.show()
+save_animation(anim, "ica_kurtosis_gd_component_2", fps=5)
 
 # Finally, check for orthogonality
 print(f"Dot product of w1 and w2 in whitened space: {np.dot(w1, w2):.4f}")
