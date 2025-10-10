@@ -37,7 +37,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-how-do-vector-databases-work",
+        },{id: "post-independent-component-analysis",
+        
+          title: "Independent Component Analysis",
+        
+        description: "Cocktail parties make me anxious",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/ica/";
+          
+        },
+      },{id: "post-how-do-vector-databases-work",
         
           title: "How do vector databases work?",
         
