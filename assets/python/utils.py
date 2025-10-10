@@ -12,6 +12,16 @@ def save_fig(fig, basename):
     plt.close(fig)
 
 
+def save_animation(anim, basename, fps=10):
+    anim.save(f"img/{basename}.webp", writer="pillow", fps=fps, dpi=300)
+    dpi_800 = 800 / anim._fig.get_size_inches()[0]
+    anim.save(f"img/{basename}-800.webp", writer="pillow", fps=fps, dpi=dpi_800)
+    dpi_1600 = 1600 / anim._fig.get_size_inches()[0]
+    anim.save(f"img/{basename}-1600.webp", writer="pillow", fps=fps, dpi=dpi_1600)
+    plt.show()
+    plt.close()
+
+
 PLOTLY_AXIS_ATTR_DICT = {
     "showgrid": False,  # Hide grid lines
     "zeroline": False,  # Hide zero line
