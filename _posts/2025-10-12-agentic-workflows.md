@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Agentic workflows
+title: Agentic Workflows
 date: 2025-10-12 11:59:00 +0000
 description: The secret sauce of machine learning
 tags:
@@ -13,20 +13,53 @@ I can't be the only scientist that struggles to keep up with scientific papers. 
 
 In this post, I will describe my journey creating an agentic workflow to parse and prioritize scientific articles.
 
-# From computational workflows to agentic workflows
+# From computational to agentic workflows
 
-Classically, writing code implicitly creates a directed graph. Modern orchestrators like [Airflow](https://airflow.apache.org/) or [nextflow](https://www.nextflow.io/) not only make this explicit, but force the code to define a directed _acyclic_ graph (DAG), which ensures that there are no infinite loops.
+Classically, writing code implicitly creates a directed graph:
 
-Agentic workflows still rely on deterministic, pre-defined steps. However, it's not the human who decides how to combine them into the final workflow: it's an AI agent. The AI agent is given a goal and a set of tools, and is thrown into a job. If I were to summarize it into a piece of pseudocode:
+{% include figure.liquid
+    loading="eager"
+    path="assets/img/posts/2025-10-12-agentic-workflows/python_dag.webp"
+    class="img-fluid mx-auto d-block"
+    width="33%"
+%}
+
+This paradigm is common in data science scripts, and in most applications people use in their day to day.
+
+With the advent of big data, computational needs grew. A lot. That's when modern orchestrators like [Airflow](https://airflow.apache.org/) or [nextflow](https://www.nextflow.io/) appeared. They not only make the computational graph explicit, but force the code to define a directed _acyclic_ graph (DAG), which ensures that there are no infinite loops:
+
+{% include figure.liquid
+    loading="eager"
+    path="assets/img/posts/2025-10-12-agentic-workflows/nextflow_dag.webp"
+    class="img-fluid mx-auto d-block"
+    width="50%"
+%}
+
+This paradigm is common in large-scale computational workflows. Each process often has its own dependencies, and hence runs in its own container. It allows to easily parallelize and distribute the work.
+
+Recently, the advent of LLMs has enabled **agentic workflows**, in which the programmer doesn't define a graph, only a set
+of steps. However, it's not the programmer who decides how to combine them into the final workflow: it's an AI agent. The AI agent is given a goal and a set of tools, and is thrown into a job.
+
+{% include figure.liquid
+    loading="eager"
+    path="assets/img/posts/2025-10-12-agentic-workflows/langchain_dag.webp"
+    class="img-fluid mx-auto d-block"
+    width="50%"
+%}
+
+# Components of an agentic workflow
+
+An agentic workflow can be trivially coded in a few lines:
 
 ```python
-user_input = """
+user_request = """
 A prompt specifying a goal and a context
 """
 
-# a sequence of steps and outputs
+# a sequence of steps and outputs:
+# step -> output -> step -> output -> ...
 # provides the context to the agent
-context = [user_input]
+context = [user_request]
 
 while True:
     # next_step = {
