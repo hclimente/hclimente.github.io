@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Agentic workflows
-date: 2025-08-02 11:59:00 +0000
+date: 2025-10-12 11:59:00 +0000
 description: The secret sauce of machine learning
 tags:
   - machine_learning
@@ -9,16 +9,24 @@ giscus_comments: true
 related_posts: false
 ---
 
-In a very in-fashion call, I will build a small workflow to optimize how I prioritize literature articles.
+I can't be the only scientist that struggles to keep up with scientific papers. There are so many interesting articles published _every day_, I get into a decision paralysis of sorts, and I end up reading much less than I should. Hey, it's my rationalization; don't you dare popping my bubble! Surely, the solution this is a problem I can solve with AI, right? Surely once I have
 
-# Background: agentic workflows
+In this post, I will describe my journey creating an agentic workflow to parse and prioritize scientific articles.
 
-Classically, writing code implicitly creates a directed graph. Modern orchestrators like [Airflow](https://airflow.apache.org/) or [nextflow](https://www.nextflow.io/) not only make this explicit, but force the code to define a directed _acyclic_ graph (DAG), which ensures that there are no infinite loops. Agentic workflows still rely on deterministic, pre-defined steps. However, it's not the human who decides how to combine them into the final workflow: it's an AI agent. The AI agent is given a goal and a set of tools, and is thrown into a job. If I were to summarize it into a piece of pseudocode:
+# From computational workflows to agentic workflows
+
+Classically, writing code implicitly creates a directed graph. Modern orchestrators like [Airflow](https://airflow.apache.org/) or [nextflow](https://www.nextflow.io/) not only make this explicit, but force the code to define a directed _acyclic_ graph (DAG), which ensures that there are no infinite loops.
+
+Agentic workflows still rely on deterministic, pre-defined steps. However, it's not the human who decides how to combine them into the final workflow: it's an AI agent. The AI agent is given a goal and a set of tools, and is thrown into a job. If I were to summarize it into a piece of pseudocode:
 
 ```python
+user_input = """
+A prompt specifying a goal and a context
+"""
+
 # a sequence of steps and outputs
 # provides the context to the agent
-context = [initial_event]
+context = [user_input]
 
 while True:
     # next_step = {
@@ -46,13 +54,18 @@ As the code shows, the main components of an agentic workflow:
 - Context: a list of steps so far and their outputs
 - Loop: an iterative approach that keeps getting asking the agent what tool to use next. Importantly, it needs a mechanism to determine when to exit the loop (e.g., when the agent's task is concluded).
 
+Additional elements:
+
+- Handoff: the action of an agent delegating a task to another agent.
+- Guardrails: make sure that the agent stays on track.
+
 ## Tools
 
-We have gloss
+Many frameworks come already with tools (e.g., for websearch) and allow to create new tools.
 
-# Pre-requisites: the free version
+# Agentic workflows
 
-I started out playing with open source & open weights components, namely [Ollama](https://ollama.ai/) and its [Langchain integration](https://python.langchain.com/docs/integrations/chat/ollama/).
+While an agentic workflow doesn't need more than 9 lines of code, there are multiple frameworks that further simplify the process. In this post, I will focus on Google's [Agent Development Kit](https://google.github.io/adk-docs/), using Gemini 2.5 Pro in AI Studio's [Free tier](https://ai.google.dev/gemini-api/docs/pricing).
 
 # Further reading
 

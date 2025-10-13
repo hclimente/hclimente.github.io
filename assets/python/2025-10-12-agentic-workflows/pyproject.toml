@@ -1,11 +1,12 @@
 [project]
-name = "2025-08-02-langchain"
+name = "2025-10-12-agentic-workflows"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "feedparser>=6.0.11",
+    "google-adk>=1.16.0",
 ]
 
 [dependency-groups]
