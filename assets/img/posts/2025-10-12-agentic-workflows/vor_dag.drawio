@@ -1,12 +1,9 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:143.0) Gecko/20100101 Firefox/143.0" version="28.2.7">
   <diagram name="Page-1" id="NrY68FwM1_2_B4ExSwOb">
-    <mxGraphModel dx="555" dy="440" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="690" math="0" shadow="0">
+    <mxGraphModel dx="321" dy="255" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="690" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="85ccNBmtwH2c0TXYNyeP-1" value="í ¾í·™â€â™€ï¸" style="text;whiteSpace=wrap;fontSize=60;" vertex="1" parent="1">
-          <mxGeometry x="630" y="340" width="60" height="70" as="geometry" />
-        </mxCell>
         <mxCell id="85ccNBmtwH2c0TXYNyeP-2" value="í ½í·žï¸" style="text;whiteSpace=wrap;fontSize=40;align=center;verticalAlign=middle;" vertex="1" parent="1">
           <mxGeometry x="32" y="34" width="50" height="50" as="geometry" />
         </mxCell>
@@ -49,6 +46,24 @@
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="147" y="140" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-16" value="&lt;div&gt;&amp;nbsp; Agent&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;b&gt;&amp;nbsp; Screen articles&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="670" y="32" width="250" height="148" as="geometry" />
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-19" value="&amp;nbsp;&amp;nbsp;&lt;font style=&quot;font-size: 15px;&quot;&gt;LLM: VÃ¶r&lt;/font&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="670" y="77" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-1" value="í ¾í·™â€â™€ï¸" style="text;whiteSpace=wrap;fontSize=57;" vertex="1" parent="1">
+          <mxGeometry x="683" y="100" width="60" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-20" value="&lt;div align=&quot;left&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Tools&lt;/font&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="764" y="77" width="65" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-21" value="&lt;div&gt;&amp;nbsp; &amp;nbsp;í ½í±“ Read abstract&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp;í ½í³¡ Fetch full text&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp;í ½í´Ž Google search&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp;í ½í³š Compare to literature&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=top;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="764" y="100" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="85ccNBmtwH2c0TXYNyeP-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.161;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=3;" edge="1" parent="1" source="85ccNBmtwH2c0TXYNyeP-9" target="85ccNBmtwH2c0TXYNyeP-16">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
