@@ -13,7 +13,7 @@ I have been a [Nextflow](https://www.nextflow.io/) evangelizer for close to 10 y
 
 > I can't be the only scientist that struggles to keep up with scientific papers. There are so many interesting articles published _every day_, I get into a decision paralysis of sorts, and I end up reading much less than I should. Hey, it's my rationalization; don't you dare popping my bubble! Wouldn't it be cool to have a pipeline that checks all my favorite journals daily, screens out all the papers I won't be interested in, and gives me the papers that I should read?
 
-In this post, I will describe my journey creating an agentic workflow to parse and prioritize scientific articles.
+In this post, I will describe my journey creating an agentic workflow to parse and prioritize scientific articles. The name of our agent? Vör 🧙‍♀️.
 
 # From Jupyter notebooks to agentic workflows
 
@@ -50,6 +50,15 @@ of steps. However, it's not the programmer who decides how to combine them into 
 %}
 
 As of October 2025, agents have issues with long contexts. A rule of thumb is to keep agentic workflows shorter than 10 steps or so. Since often our workflows will be much more complex than that, workflows will be hybrids that combine conventional workflows and (micro-)agentic workflows that take care of specific steps.
+
+With this in mind, here's a possible design for Vör:
+
+{% include figure.liquid
+    loading="eager"
+    path="assets/img/posts/2025-10-12-agentic-workflows/vor_dag.webp"
+    class="img-fluid mx-auto d-block"
+    width="50%"
+%}
 
 # Flavors of agentic workflow
 
