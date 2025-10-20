@@ -51,15 +51,6 @@ of steps. However, it's not the programmer who decides how to combine them into 
 
 As of October 2025, agents have issues with long contexts. A rule of thumb is to keep agentic workflows shorter than 10 steps or so. Since often our workflows will be much more complex than that, workflows will be hybrids that combine conventional workflows and (micro-)agentic workflows that take care of specific steps.
 
-With this in mind, here's a possible design for Vör:
-
-{% include figure.liquid
-    loading="eager"
-    path="assets/img/posts/2025-10-12-agentic-workflows/vor_dag.webp"
-    class="img-fluid mx-auto d-block"
-    width="50%"
-%}
-
 # Flavors of agentic workflow
 
 An agentic workflow can be trivially expressed in a few lines of pseudocode:
@@ -99,16 +90,65 @@ The main components of an agentic workflow are:
 - The **context**: a list of the steps carried out so far and their outputs.
 - The **loop**: an iterative approach that keeps asking the agent what to do next and executing it. Importantly, it needs a mechanism to determine when to exit the loop (e.g., when the agent's task is concluded).
 
-Despite their relative simplicity, there are multiple frameworks that further simplify the process, like Google's [Agent Development Kit](https://google.github.io/adk-docs/), OpenAI's [Agent Builder](https://platform.openai.com/docs/guides/agent-builder) or LangChain's [LangGraph](https://www.langchain.com/langgraph). Because I am quite familiar with the Google ecosystem, I will focus on Google's Agent Development Kit (ADK) and use Gemini 2.5 Pro in AI Studio's [Free tier](https://ai.google.dev/gemini-api/docs/pricing).
+Despite their relative simplicity, there are multiple frameworks that further simplify the process, like Google's [Agent Development Kit](https://google.github.io/adk-docs/), OpenAI's [Agent Builder](https://platform.openai.com/docs/guides/agent-builder) or LangChain's [LangGraph](https://www.langchain.com/langgraph).
 
 Additional elements:
 
 - Handoff: the action of an agent delegating a task to another agent.
 - Guardrails: make sure that the agent stays on track.
 
-## The tools
+# Our workflow
 
-The tools are modular pieces of code that agents can call, like a function. Importantly, they must be well documented with a docstring that comprehensively describes that the tool can do and how to use it. Additionally, the ADK also comes with built-in tools. For instance, `google.adk.tools.google_search` allows the agent to search Google.
+Enough background. Let's get hands on.
+
+I will be developing a pipeline to retrieve and prioritize scientific articles. The pipeline will fetch the most recent articles published in the journals I follow, annotate them with metadata and prioritize them based on my stated preferences. This is a use case in which agentic workflows should shine. Each journal publishes their articles in a very different format. While writing a parser for each editorial would be a punishment, an LLM equipped with a few tools should breeze through it. Then, assessing the relevance to me of an article should just be a matter of matching that metadata to my preferences.
+
+For development, I will work on a toy dataset containing 267 entries retrieved from [some of the journals I follow](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv). I will focus on the Gemini family of models tying to make the most of their [Free tier](https://ai.google.dev/gemini-api/docs/pricing) while getting acceptable results.
+
+Here is the design of the pipeline I pursued:
+
+{% include figure.liquid
+    loading="eager"
+    path="assets/img/posts/2025-10-12-agentic-workflows/vor_dag.webp"
+    class="img-fluid mx-auto d-block"
+    width="50%"
+%}
+
+# Lessons learnt
+
+## Different models for different tasks
+
+## Good prompting is _hard_
+
+## Account for the model will misbehaving
+
+LLMs are not deterministic. Despite your best efforts, they not always will stick to your prompts; in particular, when using relatively smaller models. However, computational pipelines needs that every step produces exactly what we want. That means that we need to account for the unexpected. In practice, this means that the outputs of each LLM-powered step need to be thouroughly validated.
+
+A perfect example comes from the metadata extractor. The model here is expected to produce a JSON-formatted string containing three pieces of metadata:
+
+```json
+{
+    "title": "...",
+    "summary": "...",
+    "doi": "..."
+}
+```
+
+However, the model won't always stick to this format. A common departure involves wrapping the outcome in Markdown notes:
+
+```
+\```json
+{
+    "title": "...",
+    "summary": "...",
+    "doi": "..."
+}
+\```
+```
+
+During training, the model got used to see these two together. Old habits die hard.
+
+To account for this, I needed to thoroughly validate and process the model's output before using it. First, by examining failure cases by hand, I learnt which **preprocessing operations** might be needed often. A common case was removing leading and trailing backticks. Second, I thorougly **verified** that the response had the expected properties: keys were the expected ones, the values had the right types, the DOI looked like a DOI, etc. Otherwise, the step would fail. And third, the pipeline would be **robust to errors**. In particular, when the response verification fails, we will simply roll the dice again and cross out fingers that this time the model behaves. But if the same input always produces the wrong answer, we will need to examine it by hand. Which leads us to, forth and last, **thoroughly logging** each step, to ensure swift debugging.
 
 # Further reading
 
