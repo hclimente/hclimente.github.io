@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Agentic Workflows
+title: Lessons in Agentic Workflows
 date: 2025-10-12 11:59:00 +0000
 description: Is this the future? Idk.
 tags:
@@ -120,7 +120,67 @@ Here is the design of the pipeline I pursued:
 
 ## Good prompting is _hard_
 
-## Account for the model will misbehaving
+Some folks will roll their eyes here, but a good prompt makes a massive difference. Here is an example of my first attempt at prompting:
+
+```
+You are a helpful assistant for prioritizing scientific articles. Your job is to prioritize which articles
+are worth reading by the user assigning it a priority: low, medium or high.
+
+Note that the articles have already been screened for relevance. An article receiving a low priority will still be read eventually; however, high priority articles should be read first.
+
+Use as much information as you need from the article; retrieving additional information when needed.
+
+Here is a description of the user's interests:
+
+{research_interests}
+
+You must answer ONLY low, medium or high. No other text, punctuation, or explanation.
+```
+
+The results were just not good. Most articles were marked as high priority, even ones that I would be horrified to read. This is the current one:
+
+```
+You are an expert AI assistant for prioritizing scientific articles for a researcher. Your job is to assign a priority level (`high`, `medium`, or `low`) to articles that have **already been screened for general relevance**.
+
+Your output MUST be a single, minified JSON object with NO additional text, explanation, or markdown formatting.
+
+# User's Research Interests:
+
+{research_interests}
+
+# Prioritization Rubric:
+You will assign priority based on how many of the user's interest dimensions the article satisfies.
+
+*   **high:** A must-read. These articles directly combine multiple high-priority interests. They are typically **Reviews** or **New Computational Methods** that fall squarely within the user's **Core Applications** and **Key Subfields** (e.g., a new Network Biology method for drug discovery in cancer).
+*   **medium:** A standard, relevant article. These are solid contributions that strongly align with one or two interest areas but aren't a perfect multi-point match. This could be a **Large-Scale Analysis** in a key subfield or a new method that is slightly peripheral to the core applications.
+*   **low:** Relevant, but can wait. These articles passed the initial screen but are on the periphery of the user's core focus. They might use established methods to study a specific disease that is not cancer, or focus on a subfield of lesser interest.
+
+# JSON Output Structure:
+
+{{
+  "decision": "<string, one of: 'high', 'medium', or 'low'>",
+  "reasoning": "<string, a brief one-sentence explanation for the assigned priority>"
+}}
+
+# Example 1: High Priority
+**Article Title:** "A Review of Network-Based Methods for Drug Target Identification in Oncology"
+**Correct Output:**
+{{"decision":"high","reasoning":"This is a review article that perfectly combines three core interests: Network Biology, Drug Target Discovery, and Cancer Biology."}}
+
+# Example 2: Medium Priority
+**Article Title:** "A large-scale benchmark of machine learning models for predicting gene essentiality in 1,000 human cancer cell lines"
+**Correct Output:**
+{{"decision":"medium","reasoning":"This is a preferred article type (benchmark, large-scale analysis) in a key subfield (Cancer Biology), but does not introduce a new method or focus on drug discovery."}}
+
+# Example 3: Low Priority
+**Article Title:** "Application of gene co-expression networks to identify candidate genes for Alzheimer's disease"
+**Correct Output:**
+{{"decision":"low","reasoning":"While it uses a relevant method (Network Biology), its application is on a disease outside the user's core focus on cancer."}}
+```
+
+There are some things to note. First, adding a **reasoning** to the response improves the grounding of the model. Those few extra tokens are completely ignored by the pipeline, but they make the decision more relevant and help with debugging. Second, **examples are key**. They not only reduce formatting errors, but help the model tell apart shades of gray. To non-computational biologists, the three examples might look very similar and relevant; to me, there is a clear separation, and these examples help the model understand that.
+
+## The model will misbehave; plan accordingly
 
 LLMs are not deterministic. Despite your best efforts, they not always will stick to your prompts; in particular, when using relatively smaller models. However, computational pipelines needs that every step produces exactly what we want. That means that we need to account for the unexpected. In practice, this means that the outputs of each LLM-powered step need to be thouroughly validated.
 
