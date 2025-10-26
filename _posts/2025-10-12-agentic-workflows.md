@@ -118,6 +118,8 @@ Here is the design of the pipeline I pursued:
 
 ## Different models for different tasks
 
+Operations are batched to reduce the number of API calls.
+
 ## Good prompting is _hard_
 
 Some folks will roll their eyes here, but a good prompt makes a massive difference. Here is an example of my first attempt at prompting:
@@ -208,7 +210,15 @@ However, the model won't always stick to this format. A common departure involve
 
 During training, the model got used to see these two together. Old habits die hard.
 
-To account for this, I needed to thoroughly validate and process the model's output before using it. First, by examining failure cases by hand, I learnt which **preprocessing operations** might be needed often. A common case was removing leading and trailing backticks. Second, I thorougly **verified** that the response had the expected properties: keys were the expected ones, the values had the right types, the DOI looked like a DOI, etc. Otherwise, the step would fail. And third, the pipeline would be **robust to errors**. In particular, when the response verification fails, we will simply roll the dice again and cross out fingers that this time the model behaves. But if the same input always produces the wrong answer, we will need to examine it by hand. Which leads us to, forth and last, **thoroughly logging** each step, to ensure swift debugging.
+To account for this, I needed to thoroughly validate and process the model's output before using it.
+
+First, by examining failure cases by hand, I learnt which **preprocessing operations** might be needed often. A common case was removing the leading and trailing backticks, as shown above. Another common case was failing to produce a valid JSON, which led me to refine the prompt by being more explicit about the expected format.
+
+Second, I thorougly **verified** that the response had the expected properties: keys were the expected ones, the values had the right types, the DOI looked like a DOI, etc. Otherwise, the step would fail. For this task, [Pydantic](https://pydantic.dev/) was an invaluable ally, allowing me to [define exactly](https://github.com/hclimente/nf-papers-please/blob/main/bin/common/models.py) what the LLM's response should look like, and validating it with a few lines of code.
+
+Third, the pipeline needs to be **robust to errors** caused by unexpected responses. In particular, LLM-powered steps are allowed to fail a few times before giving up. Furthermore, because API calls are precious, each step tries to savage the parts of the batched-response that were valid, and only re-requests the invalid parts. But if the same input always produces the wrong answer, we will need to examine it by hand.
+
+Which leads us to, forth and last, a **modular design** was key. Each step is isolated from the others, so that debugging and fixing issues is straightforward. And throrough logging within each step ensured swift debugging.
 
 # Further reading
 
