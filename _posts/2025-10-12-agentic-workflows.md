@@ -99,20 +99,19 @@ Despite their relative simplicity, there are multiple frameworks that further si
 
 # Papers, Please!
 
-Enough background. Let's get hands on.
+Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-papers-please). It is written in Nextflow, and the agentic steps are powered by Gemini's [free tier](https://ai.google.dev/gemini-api/docs/pricing). There are three such agentic steps, which are in charge of extracting metadata from raw RSS content, run a quick screening on each paper, and finally prioritize the ones that made the cut:
 
-For development, I will work on a toy dataset containing 267 entries retrieved from [some of the journals I follow](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv). I will focus on the Gemini family of models tying to make the most of their [Free tier](https://ai.google.dev/gemini-api/docs/pricing) while getting acceptable results.
+{% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-dag.webp" class="img-fluid" %}
 
-Here is what `nf-papers-please` looks like:
+Each of these steps could be considered a very modest agentic workflow. For instance, in the Extract Metadata step, the LLM is equipped with a few tools and requested to provide four fields: an abstract, a DOI, a title and an URL. In some cases, it can extract them directly from the original text. In others, it will need to run a Google Search, or look up an abstract on [Crossref](https://www.crossref.org/).
 
-```
-Input Sources          Processing Pipeline           Output Destinations
-┌─────────────┐       ┌──────────────────┐         ┌─────────────┐
-│ RSS Feeds   │       │ Metadata Extract │         │ JSON File   │
-│ JSON File   │──────>│ Screen Articles  │────────>│ Zotero API  │
-│ DuckDB      │       │ Prioritize       │         │ DuckDB      │
-└─────────────┘       └──────────────────┘         └─────────────┘
-```
+{% details Materials & Methods %}
+
+During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. I manually labelled each article, providing a label on whether it should pass the screening (pass/fail decision); and, for those that passed, a second label indicating how relevant it is to me (low/medium/high).
+
+{% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/target_priority.webp" class="img-fluid" %}
+
+{% enddetails Evaluation %}
 
 # Lessons learnt
 
@@ -361,7 +360,7 @@ later
 
 There are some things to note.
 
-First, adding a **reasoning** to the response improves the grounding of the model. Those few extra tokens are completely ignored by the pipeline, but they make the decision more relevant and help with debugging.
+First, forcing the model to **justify its response** improved the grounding of the model. Those few extra tokens are completely ignored by the pipeline, but they make the decision more relevant and help with debugging.
 
 Second, **examples are key**. Few-shot learning not only reduced formatting errors, but helped the model tell apart shades of gray. To non-computational biologists, the three examples might look very similar and relevant; to me, there is a clear separation, and these examples help the model understand that.
 
