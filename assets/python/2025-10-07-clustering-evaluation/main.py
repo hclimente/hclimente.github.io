@@ -18,11 +18,25 @@
 import sys
 import time
 import warnings
-from itertools import cycle, islice
+from itertools import cycle, islice, product
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import cluster, datasets, mixture
+from sklearn import mixture
+from sklearn.datasets import (
+    make_blobs,
+    make_circles,
+    make_moons,
+)
+from sklearn.cluster import (
+    KMeans,
+    AgglomerativeClustering,
+    SpectralClustering,
+)
+from sklearn.metrics import (
+    rand_score,
+    adjusted_rand_score,
+)
 from sklearn.neighbors import kneighbors_graph
 from sklearn.preprocessing import StandardScaler
 
@@ -34,32 +48,178 @@ from utils import (
 
 warnings.filterwarnings("ignore")
 
-
-# data = fetch_openml(name="AP_Colon_Kidney", version=1, as_frame=True, parser="auto")
-
-# %%
-# # do a PCA and plot the first two components
-# # data.frame
-# X = data.frame.drop(columns=["Tissue"])
-# y = data.frame["Tissue"]
-# X_std = StandardScaler().fit_transform(X)
-# pca = PCA(n_components=2)
-# X_pca = pca.fit_transform(X_std)
-
-# plt.figure(figsize=(8, 6))
-# plt.scatter(
-#     X_pca[:, 0],
-#     X_pca[:, 1],
-#     c=y.map({"Colon": 0, "Kidney": 1}),
-#     cmap="viridis",
-#     alpha=0.7,
-# )
-# plt.xlabel("PCA Component 1")
-# plt.ylabel("PCA Component 2")
-# plt.title("PCA of AP_Colon_Kidney Dataset")
+# %% [markdown]
+# # Toy example
+#
+# From https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html
 
 # %%
-# FROM https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html
+n_samples = 500
+seed = 0
+
+noisy_circles = make_circles(
+    n_samples=n_samples, factor=0.5, noise=0.05, random_state=seed
+)
+noisy_moons = make_moons(n_samples=n_samples, noise=0.05, random_state=seed)
+blobs = make_blobs(n_samples=n_samples, random_state=seed)
+
+# random data, no structure
+rng = np.random.RandomState(seed)
+no_structure = rng.rand(n_samples, 2), np.zeros(n_samples, dtype=int)
+
+# anisotropicly distributed data
+X, y = make_blobs(n_samples=n_samples, random_state=170)
+transformation = [[0.6, -0.6], [-0.4, 0.8]]
+X_aniso = np.dot(X, transformation)
+aniso = (X_aniso, y)
+
+# blobs with varied variances
+varied = make_blobs(n_samples=n_samples, cluster_std=[1.0, 2.5, 0.5], random_state=170)
+
+# %%
+datasets = {
+    "Noisy Circles": noisy_circles,
+    "Noisy Moons": noisy_moons,
+    "Blobs": blobs,
+    "Anisotropicly Distributed": aniso,
+    "Varied": varied,
+    "No Structure": no_structure,
+}
+
+clustering_algorithms = {
+    "Ground Truth": (None, None),
+    "K-Means": (KMeans, {"n_clusters": range(2, 6)}),
+    "AgglomerativeClustering": (AgglomerativeClustering, {"n_clusters": range(2, 6)}),
+    "SpectralClustering": (SpectralClustering, {"n_clusters": range(2, 6)}),
+}
+
+metrics = {
+    "Rand Index": rand_score,
+    "Adjusted Rand Index": adjusted_rand_score,
+}
+
+res = {}
+
+
+def get_params(param_grid):
+    if not param_grid:
+        yield {}
+        return
+
+    keys, values = zip(*param_grid.items())
+    for v in product(*values):
+        params = dict(zip(keys, v))
+        yield params
+
+
+for i_dataset, (dataset_name, (X, y)) in enumerate(datasets.items()):
+    for i_clustering, (clustering_name, (cluster, clustering_param_grid)) in enumerate(
+        clustering_algorithms.items()
+    ):
+        for i_metric, (metric_name, metric) in enumerate(metrics.items()):
+            res.setdefault(metric_name, {})
+            res[metric_name].setdefault(dataset_name, {})
+
+            if clustering_name == "Ground Truth":
+                res[metric_name][dataset_name][clustering_name] = (
+                    None,
+                    metric(y, y),
+                    y,
+                    None,
+                )
+                continue
+
+            best_score = float("-inf")
+            best_params = {}
+
+            for params in get_params(clustering_param_grid):
+                clf = cluster(**params)
+                y_pred = clf.fit_predict(X)
+                try:
+                    y_pred = clf.labels_.astype(int)
+                except AttributeError:
+                    y_pred = clf.predict(X)
+
+                fit_time = clf._fit_time if hasattr(clf, "_fit_time") else 0.0
+
+                score = metric(y, y_pred)
+
+                if score > best_score:
+                    best_score = score
+                    res[metric_name][dataset_name][clustering_name] = (
+                        best_score,
+                        params,
+                        y_pred,
+                        fit_time,
+                    )
+
+# %%
+plotting_metric = "Adjusted Rand Index"
+
+plt.figure(figsize=(12.6, 6.6))
+plt.subplots_adjust(
+    left=0.02, right=0.98, bottom=0.001, top=0.95, wspace=0.05, hspace=0.01
+)
+
+plot_num = 1
+for i_dataset, (dataset_name, res_dataset) in enumerate(res[plotting_metric].items()):
+    print(i_dataset, dataset_name)
+    # Get the correct X, y for this dataset
+    X, y = datasets[dataset_name]
+    X = StandardScaler().fit_transform(X)
+
+    for i_clustering, (clustering_name, (_, _, y_pred_best, _)) in enumerate(
+        res_dataset.items()
+    ):
+        plt.subplot(len(datasets), len(clustering_algorithms), plot_num)
+        if i_dataset == 0:
+            plt.title(clustering_name, size=14)
+
+        colors = np.array(
+            list(
+                islice(
+                    cycle(
+                        [
+                            "#377eb8",
+                            "#ff7f00",
+                            "#4daf4a",
+                            "#f781bf",
+                            "#a65628",
+                            "#984ea3",
+                            "#999999",
+                            "#e41a1c",
+                            "#dede00",
+                        ]
+                    ),
+                    int(max(y_pred_best) + 1),
+                )
+            )
+        )
+        # add black color for outliers (if any)
+        colors = np.append(colors, ["#000000"])
+        plt.scatter(X[:, 0], X[:, 1], s=10, color=colors[y_pred_best])
+
+        plt.xlim(-2.5, 2.5)
+        plt.ylim(-2.5, 2.5)
+        plt.xticks(())
+        plt.yticks(())
+
+        plot_num += 1
+
+plt.show()
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
+# %%
+
 
 # ============
 # Generate datasets. We choose the size big enough to see the scalability

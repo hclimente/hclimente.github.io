@@ -9,7 +9,7 @@ giscus_comments: true
 related_posts: false
 ---
 
-It is fair to say that I am not a fan of clustering algorithms. To summarize my concerns, just have a look at this plot:
+It is fair to say that I am not a fan of clustering algorithms. This plot summarizes my feelings quite well:
 
 {% include
   figure.liquid path="assets/python/2025-10-07-clustering-evaluation/img/clustering_on_toy_datasets.webp"
