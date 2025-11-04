@@ -17,10 +17,12 @@ It is fair to say that I am not a fan of clustering algorithms. This plot summar
 %}
 
 <div class="caption">
-    Different clustering algorithms. Adapted from <a href="https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html">the scikit-learn examples</a>: "With the exception of the last dataset, the parameters of each of these dataset-algorithm pairs has been tuned to produce good clustering results."
+    Ground truth (left-most column), and output of different clustering algorithms. For each clustering algorithm, I selected the hyperparameters that maximied the [silhouette](https://en.wikipedia.org/wiki/Silhouette_(clustering)). Adapted from <a href="https://scikit-learn.org/stable/auto_examples/cluster/plot_cluster_comparison.html">the scikit-learn examples</a>.
 </div>
 
-These are simple 2-dimensional datasets. We can have a look at them and immediately see the clusters or lack thereof. However the different algorithms give very different results, in many cases clearly wrong. Yet, they all maximize some objective function. Now, in data science, we often have to deal with high-dimensional data, where we cannot visualize the results, and hence we similarly rely on maximizing some metric. How can we trust the quality of the clustering? How can we make sure we are not just seeing patterns in noise or cherry-picking the results that we want to see?
+These are simple 2-dimensional datasets. We can have a look at them and immediately see the clusters or lack thereof. However the different algorithms give very different results, in many cases clearly wrong. Yet, they maximize the silhouette score, a commonly used metric for clustering quality.
+
+In data science we rarely have the luxury of visualizing our raw data. Rather, we deal with high-dimensional data, where we cannot visualize the results, and hence we similarly rely on maximizing some metric. How can we trust the quality of the clustering? How can we make sure we are not just seeing patterns in noise or cherry-picking the results that we want to see?
 
 In this post, I challenge my own assumptions about clustering, and try to understand how I can include it in my toolbox.
 
@@ -28,7 +30,7 @@ In this post, I challenge my own assumptions about clustering, and try to unders
 
 Clustering is often defined as the art of grouping similar points together, and dissimilar points apart. And here lies the first problem: how do we define similarity? How similar is similar enough? On one extreme, we can imagine a very loose definition such that every point is similar to every other point, and hence we have one big cluster. On the other end, the case in which every point is unique in its own way.
 
-The second problem is that similarity is not [transitive](https://en.wikipedia.org/wiki/Transitive_relation). Let's say we have three points, A, B and C. A is to B, and B to C, but A are very different. If we group all the points into one cluster, we satisfy the similarity requirement, but violate the dissimilarity one. If we put them all in different clusters, it's the other way around.
+The second problem is that similarity is not [transitive](https://en.wikipedia.org/wiki/Transitive_relation). Let's say we have three people: Alice, Bob and Carol. Alice is like Bob, because they both love pasta. And Bob is like Carol, because they both enjoy Star Wars. But Alice would rather watch Frozen, and Carol prefers sushi. If we group all the points into one cluster, we satisfy the similarity requirement, but violate the dissimilarity one. If we put them all in different clusters, it's the other way around.
 
 And here lies the problem of clustering: it is an ill-defined task. There is no single correct answer, and different applications call for different trade-offs. As data scientists, our goal is to pick an algorithm and tune its hyperparameters in the way that best nagivates this trade-off. So how do we make the right choice?
 
