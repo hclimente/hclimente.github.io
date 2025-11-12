@@ -15,6 +15,7 @@
 # ---
 
 # %%
+import json
 import sys
 
 import duckdb
@@ -22,6 +23,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from sklearn.model_selection import train_test_split
 
 sys.path.append("../")
 
@@ -29,13 +31,20 @@ from utils import (
     save_fig,
 )
 
-json_file_path = (
-    "/Users/hclimente/Developer/papers_please/results/validated_articles.json"
-)
+# articles.json is stored where the agent can't see it
+results_json = "articles.json"
 
-con = duckdb.connect(database=":memory:")
 
-df = con.sql(f"SELECT * FROM read_json_auto('{json_file_path}');").df()
+def process_screening(col):
+    screening_map = {
+        True: "Pass",
+        False: "Fail",
+    }
+    col = col.map(screening_map)
+
+    decision_categories = ["Pass", "Fail"]
+    col = pd.Categorical(col, categories=decision_categories, ordered=True)
+    return col
 
 
 def process_priority(col):
@@ -52,90 +61,71 @@ def process_priority(col):
     return col
 
 
-# as categorical with specific order: low, medium, high
-df["my_priority"] = process_priority(df["my_priority"])
-df["priority_decision"] = process_priority(df["priority_decision"])
-
-
-def process_screening(col):
-    screening_map = {
-        True: "Pass",
-        False: "Fail",
-    }
-    col = col.map(screening_map)
-
-    decision_categories = ["Pass", "Fail"]
-    col = pd.Categorical(col, categories=decision_categories, ordered=True)
-    return col
-
-
-df["my_screening"] = process_screening(df["my_screening"])
-df["screening_decision"] = process_screening(df["screening_decision"])
-
-
-# %%
-def barplot_priority(data, column, title, subtitle, xlabel):
+def cool_barplot(
+    values, title, subtitle, xlabel, palette=["#DB444B", "#6c7a89", "#006BA2"], ax=None
+):
     """
     Create an Economist-style bar plot with three categories (High, Medium, Low).
 
     Parameters:
     -----------
-    data : pd.DataFrame
+    values: pd.Series
         The dataframe containing the data to plot
-    column : str
-        The column name to count and plot
     title : str
         Main title for the plot
     subtitle : str
         Subtitle (italicized) for the plot
     xlabel : str
         Label for the x-axis
+    palette : list
+        List of colors to use for the bars
+    ax : matplotlib.axes.Axes, optional
+        Axes object to plot on. If None, creates new figure and axes.
+
+    Returns:
+    --------
+    ax : matplotlib.axes.Axes
+        The axes object with the plot
     """
-    fig, ax = plt.subplots(figsize=(8, 6))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 6))
 
-    # The Economist color palette (their signature red/blue scheme)
-    economist_colors = ["#e3120b", "#6c7a89", "#3b6182"]
+    counts = values.value_counts()
+    counts = counts[counts > 0]
 
-    # Create the count plot
-    counts = (
-        data[column].value_counts().reindex(["High", "Medium", "Low"], fill_value=0)
+    bars = ax.bar(
+        range(len(counts)), counts.values, color=palette[: len(counts)], width=0.6
     )
-    bars = ax.bar(range(len(counts)), counts.values, color=economist_colors, width=0.6)
 
-    # Styling in The Economist manner
     ax.set_xticks(range(len(counts)))
-    ax.set_xticklabels(counts.index, fontsize=11, fontfamily="sans-serif")
-    ax.set_ylabel("Count", fontsize=11, fontfamily="sans-serif")
-    ax.set_xlabel(xlabel, fontsize=11, fontfamily="sans-serif")
+    ax.set_xticklabels(counts.index, fontsize=12, fontfamily="sans-serif")
+    ax.set_ylabel("Count", fontsize=12, fontfamily="sans-serif")
+    ax.set_xlabel(xlabel, fontsize=12, fontfamily="sans-serif")
 
-    # The Economist typically uses subtle gridlines
     ax.yaxis.grid(True, linestyle="-", alpha=0.2, color="gray", linewidth=0.5)
     ax.set_axisbelow(True)
 
-    # Remove top and right spines
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_linewidth(0.5)
     ax.spines["bottom"].set_linewidth(0.5)
 
-    # Title in The Economist style (clear, informative)
     ax.text(
         0.0,
-        1.08,
+        1.12,
         title,
         transform=ax.transAxes,
-        fontsize=14,
+        fontsize=16,
         fontweight="bold",
         fontfamily="sans-serif",
     )
     ax.text(
         0.0,
-        1.03,
+        1.06,
         subtitle,
         transform=ax.transAxes,
-        fontsize=10,
+        fontsize=11,
         fontfamily="sans-serif",
-        style="italic",
         color="#555555",
     )
 
@@ -149,17 +139,121 @@ def barplot_priority(data, column, title, subtitle, xlabel):
                 f"{int(height)}",
                 ha="center",
                 va="bottom",
-                fontsize=10,
+                fontsize=14,
                 fontfamily="sans-serif",
             )
 
-    plt.tight_layout()
+    return ax
 
 
 # %%
+con = duckdb.connect(database=":memory:")
+
+df = con.sql(f"SELECT * FROM read_json_auto('{results_json}');").df()
+
+df["date"] = df["date"].astype("str")
+df["access_date"] = df["access_date"].astype("str")
+
+# create train/test splits
+train_df, test_df = train_test_split(df, test_size=0.25, random_state=42)
+
+priority_fields = ["doi", "my_screening", "my_priority"]
+json_fields = ["title", "url", "journal_name", "date", "access_date", "raw_contents"]
+
+priority2_fields = ["doi", "screening_decision", "priority_decision"]
+train_df[priority2_fields].to_csv("results/0_train_screen_priority.csv", index=False)
+test_df[priority2_fields].to_csv("results/0_test_screen_priority.csv", index=False)
+
+train_df[priority_fields].to_csv("train_articles.csv", index=False)
+json.dump(
+    [row.dropna().to_dict() for _, row in train_df[json_fields].iterrows()],
+    open("train_articles.json", "w"),
+    indent=4,
+)
+test_df[priority_fields].to_csv("test_articles.csv", index=False)
+json.dump(
+    [row.dropna().to_dict() for _, row in test_df[json_fields].iterrows()],
+    open("test_articles.json", "w"),
+    indent=4,
+)
+
+train_df["my_priority"] = process_priority(train_df["my_priority"])
+train_df["priority_decision"] = process_priority(train_df["priority_decision"])
+train_df["my_screening"] = process_screening(train_df["my_screening"])
+train_df["screening_decision"] = process_screening(train_df["screening_decision"])
+
+# %%
+perc_pass = 100 * sum(train_df["my_screening"] == "Pass") / train_df.shape[0]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+
+cool_barplot(
+    values=train_df["my_screening"],
+    title=f"{perc_pass:.0f}% of articles pass",
+    subtitle="Based on manual review",
+    xlabel="Screening decision",
+    palette=["#DB444B", "#006BA2"],
+    ax=ax1,
+)
+
+perc_high = (
+    100
+    * sum((train_df["my_screening"] == "Pass") & (train_df["my_priority"] == "High"))
+    / sum(train_df["my_screening"] == "Pass")
+)
+cool_barplot(
+    values=train_df[(train_df["my_screening"] == "Pass")]["my_priority"],
+    title=f"{perc_high:.0f}% of articles are high priority",
+    subtitle="Based on manual review ",
+    xlabel="Priority",
+    ax=ax2,
+)
+
+plt.tight_layout()
+
+save_fig(plt.gcf(), "target_priority")
+
+# %% [markdown]
+# # Comparison to score systems
+
+# %%
+tr_score_df = pd.read_json("results/1_train_scoring.json")
+tr_score_df = tr_score_df.merge(
+    train_df[["doi", "my_priority", "priority_decision"]], on="doi", how="left"
+)
+
+# %%
+# boxplot my decisions vs LLM score
+sns.boxplot(
+    data=tr_score_df,
+    x="my_priority",
+    y="score",
+    order=["Low", "Medium", "High"],
+    palette=["#006BA2", "#FFB400", "#DB444B"],
+)
+plt.title("LLM Final Score vs. My Priority Decisions")
+plt.xlabel("Manual Priority")
+plt.ylabel("LLM Score")
+
+# %%
+tr_score_df[(tr_score_df["my_priority"] == "Medium") & (tr_score_df["score"] > 8)][
+    "title"
+].values
+
+# %%
+tr_score_df[(tr_score_df["my_priority"] == "High") & (tr_score_df["score"] < 4)][
+    ["title", "doi", "score", "reasoning"]
+].values
+
+# %%
+tr_score_df[(tr_score_df["my_priority"] == "High") & (tr_score_df["score"] < 3)][
+    "title"
+].values
+
+# %%
 confusion_matrix = pd.crosstab(
-    df["my_screening"],
-    df["screening_decision"],
+    train_df["my_screening"],
+    train_df["screening_decision"],
     rownames=["Target decision"],
     colnames=["LLM Decision"],
 )
@@ -227,20 +321,11 @@ plt.show()
 
 
 # %%
-barplot_priority(
-    data=df[(df["my_screening"] == "Pass")],
-    column="my_priority",
-    title="Target Priority*",
-    subtitle="*Only for articles that passed the screening",
-    xlabel="Target Priority",
-)
-
-save_fig(plt.gcf(), "target_priority")
-
-# %%
-barplot_priority(
-    data=df[(df["my_screening"] == "Fail") & (df["screening_decision"] == "Pass")],
-    column="priority_decision",
+cool_barplot(
+    values=train_df[
+        (train_df["my_screening"] == "Fail")
+        & (train_df["screening_decision"] == "Pass")
+    ]["priority_decision"],
     title="Priority of the false positives",
     subtitle="Articles that should be excluded, but were included by LLM",
     xlabel="LLM Priority Decision",
@@ -248,7 +333,7 @@ barplot_priority(
 
 
 # %%
-screened_df = df[(df["my_screening"] == "Pass")]
+screened_df = train_df[(train_df["my_screening"] == "Pass")]
 
 confusion_matrix = pd.crosstab(
     screened_df["my_priority"],

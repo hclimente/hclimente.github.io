@@ -113,7 +113,7 @@ During development, I worked on a toy dataset containing 249 articles published 
 
 {% enddetails Evaluation %}
 
-# Lessons learnt
+# What did I learn?
 
 ## Different models for different tasks
 
@@ -366,6 +366,12 @@ Second, **examples are key**. Few-shot learning not only reduced formatting erro
 
 Third, **providing the examples in the same format as the expected output** is crucial. In particular, I was particularly succesful when I provided the prompt as a successful conversation, instead of a monologue. In particular, I break down the examples as a list of queries and responses, mimicking the actual interaction with the model. By the time the model receives the actual queries, it has already seen a few successful interactions. This is definitely one of the most important tricks I learnt.
 
+## Stay objective
+
+The above prompt produced decent, but uncalibrated results. The LLM was just moderately amazed by any paper in Computational Biology (one of my stated fields of interests), and equally boosted them all, regardless of what they were about. I didn't find this too surprising. If you are not too into the weeds of _my_ flavour of Computational Biology, the safest bet is to give it a weak recommendation.
+
+To help the model stay calibrated, I replaced that prompt by a scoring system. This had two goals: giving an univocal quantity representing how much I care about each property; and replacing hard categories by a semi-continuous score.
+
 ## The model will misbehave; plan accordingly
 
 LLMs are not deterministic. Despite your best efforts, they not stick to your instructions 100% of the time. However, computational pipelines needs that every step produces exactly what we want. That means that we need to account for the unexpected. In practice, this means that the outputs of each LLM-powered step need to be thouroughly validated.
@@ -396,9 +402,9 @@ During training, the model got used to see these two together. Old habits die ha
 
 To account for this, I needed to thoroughly validate and process the model's output before using it.
 
-First, by examining failure cases by hand, I learnt which **preprocessing operations** might be needed often. A common case was removing the leading and trailing backticks, as shown above. Another common case was failing to produce a valid JSON, which led me to refine the prompt by being more explicit about the expected format.
+First, I thorougly **verified** that the response had the expected properties: keys were the expected ones, the values had the right types, the DOI looked like a DOI, etc. Otherwise, the step would fail. For this task, [Pydantic](https://pydantic.dev/) was an invaluable ally, allowing me to [define exactly](https://github.com/hclimente/nf-papers-please/blob/main/bin/common/models.py) what the LLM's response should look like, and validating it with a few lines of code.
 
-Second, I thorougly **verified** that the response had the expected properties: keys were the expected ones, the values had the right types, the DOI looked like a DOI, etc. Otherwise, the step would fail. For this task, [Pydantic](https://pydantic.dev/) was an invaluable ally, allowing me to [define exactly](https://github.com/hclimente/nf-papers-please/blob/main/bin/common/models.py) what the LLM's response should look like, and validating it with a few lines of code.
+Second, I moved **all deterministic behavior out of the LLM**. Rather than trying to get the model to get correctly follow the instructions 100% of the time, move as many pieces as possible outside of it. For instance, by examining failure cases by hand, I learnt which preprocessing operations might be needed often. A common case was removing the leading and trailing backticks, as shown above. Another common case was failing to produce a valid JSON, which led me to refine the prompt by being more explicit about the expected format. Similarly, when prioritizing articles it would ignore my instructions and bump articles even when the scoring system didn't warrant it. It was more efficient to let the LLM simply compute the score, and let me threshold it after the fact.
 
 Third, the pipeline needs to be **robust to errors** caused by unexpected responses. In particular, LLM-powered steps are allowed to fail a few times before giving up. Furthermore, because API calls are precious, each step tries to salvage the parts of the batched-response that were valid, and only re-requests the invalid parts. But if the same input always produces the wrong answer, we will need to examine it by hand.
 
