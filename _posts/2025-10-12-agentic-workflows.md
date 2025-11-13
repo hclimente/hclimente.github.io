@@ -16,7 +16,7 @@ I have been a [Nextflow](https://www.nextflow.io/) evangelizer for close to 10 y
 
 In this post, I describe my journey creating [`nf-papers-please`](https://github.com/hclimente/nf-papers-please), an agentic workflow to prioritize scientific articles according to my interests. It first fetches the most recent articles published in the journals I follow, then annotates them with metadata and prioritizes them based on my stated preferences.
 
-This is a use case in which agentic workflows shine. For starters, each journal's format it wildly different. While writing a parser for each would be a punishment, an LLM breezes through it. And then, while having a classical machine learning model to classify papers is doable, and could fit right into a Nextflow pipeline, lightly editing a prompt and having an LLM do the prioritization is faster and likely to produce better results.
+This is a use case in which agentic workflows should shine. For starters, each journal's format it wildly different. While writing a parser for each would be a punishment, an LLM breezes through it. And then, while having a classical machine learning model to classify papers is doable, and could fit right into a Nextflow pipeline, lightly editing a prompt and having an LLM do the prioritization is faster and likely to produce better results.
 
 # How did we get here?
 
@@ -99,11 +99,7 @@ Despite their relative simplicity, there are multiple frameworks that further si
 
 # Papers, Please!
 
-Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-papers-please). It is written in Nextflow, and the agentic steps are powered by Gemini's [free tier](https://ai.google.dev/gemini-api/docs/pricing). There are three such agentic steps, which are in charge of extracting metadata from raw RSS content, run a quick screening on each paper, and finally prioritize the ones that made the cut:
-
-{% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-dag.webp" class="img-fluid" %}
-
-Each of these steps could be considered a very modest agentic workflow. For instance, in the Extract Metadata step, the LLM is equipped with a few tools and requested to provide four fields: an abstract, a DOI, a title and an URL. In some cases, it can extract them directly from the original text. In others, it will need to run a Google Search, or look up an abstract on [Crossref](https://www.crossref.org/).
+Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-papers-please). It is written in Nextflow, and the agentic steps are powered by Gemini's [free tier](https://ai.google.dev/gemini-api/docs/pricing).
 
 {% details Materials & Methods %}
 
@@ -111,7 +107,35 @@ During development, I worked on a toy dataset containing 249 articles published 
 
 {% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/target_priority.webp" class="img-fluid" %}
 
+I then randomly split the dataset into a training set (200 articles) and a test set (49 articles). During development, I only used the training set to refine my prompts, the pipeline and generate examples for few-shot learning. Once I was satisfied with the results, I ran the final pipeline on the test set to evaluate its performance. Unless otherwise noted, all results reported in this post correspond to the test set.
+
+Unless otherwise noted, all LLM calls were made to [Gemini 2.5 Flash Lite](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash-lite).
+
 {% enddetails Evaluation %}
+
+## v0.1: The naive take
+
+In my [first approach](https://github.com/hclimente/nf-papers-please/tree/v0.1-beta), I encoded my manual curation process into a workflow with three agentic steps. They repectively extract metadata from raw RSS content, screen each paper for broad relevance, and finally prioritize the ones that made the cut:
+
+{% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-dag.webp" class="img-fluid" %}
+
+Each of these steps could be considered a very modest agentic workflow. For instance, in the Extract Metadata step, the LLM is equipped with a few tools and requested to provide four fields: an abstract, a DOI, a title and an URL. In some cases, it can extract them directly from the original text. In others, it will need to run a Google Search, or look up an abstract on [Crossref](https://www.crossref.org/).
+
+## v0.2: the scoring system
+
+On my [second approach](https://github.com/hclimente/nf-papers-please/tree/v0.2-beta) I tried to encode my preferences as a scoring system. I would [assign a positive or negative weight](https://github.com/hclimente/nf-papers-please/blob/v0.2-beta/config/research_interests.md) to the different dimensions I cared about, and have the LLM detect which ones applied to each article. For instance, if an article was published in Nature Genetics, it would get a +2 boost. If it was a preprint, it would get a soft -1 penalty. If it focused on network biology, it would get a +3 boost. And so on.
+
+I got two learnings from this exercise: the LLM is terrible at basic arithmetic, and interactions matter a lot.
+
+## v0.3: the RAG
+
+Encoding my preferences into a prompt, even with points proved to be quite hard. So, in my [third attempt](https://github.com/hclimente/nf-papers-please/tree/v0.3-beta) I gave the LLM access to the articles I have actually read to guide its decisions. To that end, I created a small [retrieval-augmented generation (RAG) system]({% post_url 2025-08-16-rags %}) to retreive the most similar articles to the one being evaluated, and provide them as context to the LLM. This should help the model calibrate its decision, by comparing how similar the retrieved articles were among themselves and to the target article.
+
+# What went wrong?
+
+I believe my approach had two major flaws. For one, being limited to free tiers severely limits the quality of my results. While Gemini 2.5 Pro rocks the #1 position at [LMArena](https://lmarena.ai/leaderboard/text), Gemini 2.5 Flash Lite is at #50. This matters. When I presented bad decisions made by Flash Lite to Pro, Pro usually agreed that they were bad decisions.
+
+Another problems come from the lack of supervised data. The model only has my prompt, or some positive examples. But not a set of negative examples. In particular, not negative examples that are _close_ to the positive ones. This makes it hard for the model to learn the fine distinctions that matter to me.
 
 # What did I learn?
 
@@ -121,9 +145,7 @@ Operations are batched to reduce the number of API calls.
 
 ## Good prompting is _hard_
 
-Some folks will roll their eyes here, but a good prompt makes a massive difference. My first attempt at the prioritization prompt was _not good_.
-
-{% details Initial (bad) prioritization prompt %}
+Some folks will roll their eyes here, but a good prompt makes a massive difference. My first attempt at the prioritization prompt was _not good_:
 
 ```
 You are a helpful assistant for prioritizing scientific articles.
@@ -145,218 +167,7 @@ You must answer ONLY low, medium or high. No other text, punctuation,
 or explanation.
 ```
 
-{% enddetails %}
-
-Most articles were marked as high priority, even ones that I would be horrified to read. After several iterations, I ended up with the a much better prompt.
-
-{% details Final (good) prioritization prompt %}
-
-```
-You are an expert research prioritization assistant. Your task is to assign
-priority levels to scientific articles that have **already passed relevance
-screening**. You help researchers efficiently allocate their reading time.
-
-# Task
-Assign each article one of three priority levels: `high`, `medium`, or `low`
-based on alignment with the user's multi-dimensional research interests.
-
-# User's Research Interests
-
-{research_interests}
-
-# Prioritization Framework
-
-## HIGH Priority - Must Read Immediately
-Articles that satisfy **3 or more** of the following criteria:
-- **Multi-dimensional match**: Combines multiple research interests (e.g.
-multiple Subfields + Applications)
-- **Preferred type**: Matches Preferred Article Types
-- **Core application**: Directly addresses stated Applications
-- **Perfect domain fit**: Strong alignment across Fields + Subfields + Applications
-- **High impact potential**: Novel frameworks, paradigm shifts, or
-comprehensive surveys
-
-**Typical examples**: Reviews in core areas, novel methods for specific
-applications, comprehensive benchmarks in key subfields.
-
-## MEDIUM Priority - Standard Relevance
-Articles that satisfy **2** of the high-priority criteria:
-- **Solid contribution**: Strong alignment with one or two interest areas
-- **Methodological value**: Introduces useful methods but not in perfect
-domain match
-- **Domain relevance**: Addresses key subfields with established methods
-- **Large-scale studies**: Comprehensive analyses that provide useful
-insights or datasets
-- **Adjacent innovation**: Novel approaches in related but not core applications
-
-**Typical examples**: Large-scale studies in core subfields, new methods in
-adjacent areas, well-executed applications of key methodologies.
-
-## LOW Priority - Peripheral Relevance
-Articles that satisfy **1 or fewer** high-priority criteria:
-- **Minimal overlap**: Passed screening but on the periphery of core interests
-- **Tangential methods**: Uses relevant methods but for non-core applications
-- **Lower interest subfield**: Solid work but in areas of secondary interest
-- **Established approaches**: Standard applications without novelty in methods
-or insights
-- **Peripheral scope**: Work that meets field requirements but outside primary
-focus areas
-
-**Typical examples**: Standard applications outside core subfields, methodological
-papers for non-preferred applications, solid work in peripheral interest areas.
-
-# Output Format Requirements
-
-## Critical Rules:
-1. Output ONLY valid JSON array - no markdown, no explanations, no additional text
-2. Each object must have exactly: `doi`, `decision`, `reasoning`
-3. `decision` must be one of: `"high"`, `"medium"`, or `"low"` (string, not enum)
-4. `reasoning` is a single clear sentence (max 25 words) explaining the specific
-criteria matched
-5. Use double quotes for all JSON keys and string values
-6. String values must be single-line (escape newlines as \n if needed)
-7. Start your response with `[` and end with `]` - nothing else
-
-## JSON Schema:
-\```json
-[
-  {{
-    "doi": "<string>",
-    "decision": "<string: 'high' | 'medium' | 'low'>",
-    "reasoning": "<string: one sentence explaining matched criteria>"
-  }}
-]
-\```
-
-# Important Considerations
-- **Context matters**: A review in a peripheral area may be HIGH, while a standard
-study in a core area may be MEDIUM
-- **Be selective with HIGH**: Reserve for articles that truly warrant immediate
-attention
-- **Medium is the default**: Most solid, relevant papers should be MEDIUM
-- **Low doesn't mean irrelevant**: These passed screening and may still be valuable
-later
-
-# Examples
-
-\```json
-[
-  {
-    "query": [
-      {
-        "title": "A Review of Network-Based Methods for Drug Target Identification in
-                  Oncology",
-        "summary": "This comprehensive review synthesizes current network-based
-                    computational approaches for identifying therapeutic targets in
-                    cancer research...",
-        "doi": "10.1234/example1"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example1",
-        "decision": "high",
-        "reasoning": "Review combining multiple core subfields and applications."
-      }
-    ]
-  },
-  {
-    "query": [
-      {
-        "title": "DeepTarget: A deep learning framework for cancer drug target
-                  prediction using multi-omics networks",
-        "summary": "We present DeepTarget, a novel deep learning framework that
-                    integrates multi-omics data within biological networks to
-                    predict cancer drug targets...",
-        "doi": "10.1234/example2"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example2",
-        "decision": "high",
-        "reasoning": "Novel method for core application combining multiple key
-                      subfields."
-      }
-    ]
-  },
-  {
-    "query": [
-      {
-        "title": "Pan-cancer analysis of gene essentiality across 1,000 human cancer
-                  cell lines",
-        "summary": "We performed a comprehensive analysis of gene essentiality data
-                    from 1,000 cancer cell lines across multiple cancer types...",
-        "doi": "10.1234/example3"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example3",
-        "decision": "medium",
-        "reasoning": "Large-scale study in key subfield using established methods."
-      }
-    ]
-  },
-  {
-    "query": [
-      {
-        "title": "Graph neural networks for protein function prediction from sequence
-                  data",
-        "summary": "This study introduces a graph neural network approach for predicting
-                    protein functions directly from sequence information...",
-        "doi": "10.1234/example4"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example4",
-        "decision": "medium",
-        "reasoning": "Novel method in relevant field but for non-core application."
-      }
-    ]
-  },
-  {
-    "query": [
-      {
-        "title": "Network analysis identifies potential therapeutic targets in
-                  Alzheimer's disease",
-        "summary": "Using network-based approaches, we identified potential therapeutic
-                    targets for Alzheimer's disease treatment...",
-        "doi": "10.1234/example5"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example5",
-        "decision": "low",
-        "reasoning": "Relevant methodology applied outside primary research focus."
-      }
-    ]
-  },
-  {
-    "query": [
-      {
-        "title": "Machine learning predicts patient outcomes from electronic health
-                  records",
-        "summary": "We developed machine learning models to predict patient outcomes
-                    using electronic health record data...",
-        "doi": "10.1234/example6"
-      }
-    ],
-    "response": [
-      {
-        "doi": "10.1234/example6",
-        "decision": "low",
-        "reasoning": "Standard application outside core subfields and applications."
-      }
-    ]
-  }
-]
-\```
-```
-
-{% enddetails %}
+Most articles were marked as high priority, even ones that I would be horrified to read. After several iterations, I ended up with the a [much longer prompt](https://github.com/hclimente/nf-papers-please/blob/992bb02d48efd2fb4653549ff0ef12061d2d8d8f/prompts/prioritization.md) that produced more nuanced results.
 
 There are some things to note.
 
