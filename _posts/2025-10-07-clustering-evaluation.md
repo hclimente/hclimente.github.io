@@ -30,7 +30,7 @@ In this post, I challenge my own assumptions about clustering, and try to unders
 
 Clustering is often defined as the art of grouping similar points together, and dissimilar points apart. And here lies the first problem: how do we define similarity? How similar is similar enough? On one extreme, we can imagine a very loose definition such that every point is similar to every other point, and hence we have one big cluster. On the other end, the case in which every point is unique in its own way.
 
-The second problem is that similarity is not [transitive](https://en.wikipedia.org/wiki/Transitive_relation). Let's say we have three people: Alice, Bob and Carol. Alice is like Bob, because they both love pasta. And Bob is like Carol, because they both enjoy Star Wars. But Alice would rather watch Frozen, and Carol prefers sushi. If we group all the points into one cluster, we satisfy the similarity requirement, but violate the dissimilarity one. If we put them all in different clusters, it's the other way around.
+The second problem is that similarity is not [transitive](https://en.wikipedia.org/wiki/Transitive_relation). Let's say we have three people: Alice, Bob and Carol. Alice is like Bob, because they both love pasta. And Bob is like Carol, because they both enjoy Star Wars. But Alice would rather watch Frozen, and Carol fancies sushi. If we group all the points into one cluster, we satisfy the similarity requirement, but violate the dissimilarity one. If we put them all in different clusters, it's the other way around.
 
 And here lies the problem of clustering: it is an ill-defined task. There is no single correct answer, and different applications call for different trade-offs. As data scientists, our goal is to pick an algorithm and tune its hyperparameters in the way that best nagivates this trade-off. So how do we make the right choice?
 
@@ -63,3 +63,17 @@ In practice, how are algorithms picked?
 To turn clustering into a well-defined task, one needs to add some bias, expressing some prior domain knowledge. Ideally, we could come up with a set of properties for each clustering algorithm, and then pick the one that best matches our needs.
 
 ## Computational complexity
+
+## Clustering is extremely qualitative
+
+We won't find the best clusters by optimizing some metric. We will find them by iteratively trying shit out on our data, visualizing them, and seeing if they make sense. Sometimes they are obvious; sometimes they aren't. It is an intensive data analysis process. Also, we should make sure that the assumptions of the clustering algorithm make sense. Again: it is very qualitative. While there is no clustering method that gets all toy examples right, most of them get a few of the datasets right.
+
+What do we care most about? ASK THE SMEs, we are trying to encode their knowledge here. Some options:
+
+- Within-cluster homogeneity
+- Within-cluster homogeneous distributional shape
+- Between cluster separation
+- Stability
+- Little loss of information from original distance between objects
+- Good representation by centroids
+- Clusters are regions of high density without within-cluster gaps
