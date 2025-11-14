@@ -10,11 +10,9 @@ giscus_comments: true
 related_posts: false
 ---
 
-I have been a [Nextflow](https://www.nextflow.io/) evangelizer for close to 10 years. I have pioneered and promoted its use in numerous jobs, showing how it can facilitate computational tasks at any scale. Yet, there are some tasks that are impossible to tackle with Nextflow and other similar tools. Here's one:
+I can't be the only scientist that struggles to keep up with scientific papers. There are so many interesting articles published _every day_, I get into a decision paralysis of sorts, and I end up reading much less than I should. Hey, it's my rationalization; don't you dare popping my bubble! Wouldn't it be cool to have a pipeline that checks all my favorite journals daily, screens out all the papers I won't be interested in, and gives me the papers that I should read?
 
-> I can't be the only scientist that struggles to keep up with scientific papers. There are so many interesting articles published _every day_, I get into a decision paralysis of sorts, and I end up reading much less than I should. Hey, it's my rationalization; don't you dare popping my bubble! Wouldn't it be cool to have a pipeline that checks all my favorite journals daily, screens out all the papers I won't be interested in, and gives me the papers that I should read?
-
-In this post, I describe my journey creating [`nf-papers-please`](https://github.com/hclimente/nf-papers-please), an agentic workflow to prioritize scientific articles according to my interests. It first fetches the most recent articles published in the journals I follow, then annotates them with metadata and prioritizes them based on my stated preferences.
+In this post, I describe my journey creating [`nf-papers-please`](https://github.com/hclimente/nf-papers-please), an agentic workflow to prioritize scientific articles according to my interests. It fetches the most recent articles published in my favorite journals, annotates them with metadata and prioritizes them based on my reading preferences.
 
 This is a use case in which agentic workflows should shine. For starters, each journal's format it wildly different. While writing a parser for each would be a punishment, an LLM breezes through it. And then, while having a classical machine learning model to classify papers is doable, and could fit right into a Nextflow pipeline, lightly editing a prompt and having an LLM do the prioritization is faster and likely to produce better results.
 
@@ -105,6 +103,8 @@ Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-
 
 During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. I manually labelled each article, providing a label on whether it should pass the screening (pass/fail decision); and, for those that passed, a second label indicating how relevant it is to me (low/medium/high).
 
+<!--TODO show train & test distribution-->
+
 {% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/target_priority.webp" class="img-fluid" %}
 
 I then randomly split the dataset into a training set (200 articles) and a test set (49 articles). During development, I only used the training set to refine my prompts, the pipeline and generate examples for few-shot learning. Once I was satisfied with the results, I ran the final pipeline on the test set to evaluate its performance. Unless otherwise noted, all results reported in this post correspond to the test set.
@@ -119,7 +119,9 @@ In my [first approach](https://github.com/hclimente/nf-papers-please/tree/v0.1-b
 
 {% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-dag.webp" class="img-fluid" %}
 
-Each of these steps could be considered a very modest agentic workflow. For instance, in the Extract Metadata step, the LLM is equipped with a few tools and requested to provide four fields: an abstract, a DOI, a title and an URL. In some cases, it can extract them directly from the original text. In others, it will need to run a Google Search, or look up an abstract on [Crossref](https://www.crossref.org/).
+Each of these steps is a very modest agentic workflow. For instance, in the Extract Metadata step, the LLM is equipped with a few tools and requested to provide four fields: an abstract, a DOI, a title and an URL. In some cases, it can extract them directly from the original text. In others, it will need to run a Google Search, or look up an abstract on [Crossref](https://www.crossref.org/).
+
+<!--TODO show confusion matrix-->
 
 ## v0.2: the scoring system
 
@@ -127,9 +129,13 @@ On my [second approach](https://github.com/hclimente/nf-papers-please/tree/v0.2-
 
 I got two learnings from this exercise: the LLM is terrible at basic arithmetic, and interactions matter a lot.
 
+<!--TODO show boxplot-->
+
 ## v0.3: the RAG
 
 Encoding my preferences into a prompt, even with points proved to be quite hard. So, in my [third attempt](https://github.com/hclimente/nf-papers-please/tree/v0.3-beta) I gave the LLM access to the articles I have actually read to guide its decisions. To that end, I created a small [retrieval-augmented generation (RAG) system]({% post_url 2025-08-16-rags %}) to retreive the most similar articles to the one being evaluated, and provide them as context to the LLM. This should help the model calibrate its decision, by comparing how similar the retrieved articles were among themselves and to the target article.
+
+<!--TODO show confusion matrix-->
 
 # What went wrong?
 
