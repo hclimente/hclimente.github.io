@@ -143,6 +143,8 @@ I believe my approach had two major flaws. For one, being limited to free tiers 
 
 Another problems come from the lack of supervised data. The model only has my prompt, or some positive examples. But not a set of negative examples. In particular, not negative examples that are _close_ to the positive ones. This makes it hard for the model to learn the fine distinctions that matter to me.
 
+Last, the model can't capture my _evolving_ interests. An interesting conversation with a colleague might make me want to read more about a topic I'd have ignored before. Also, my Zotero library goes back nearly a decade, adding noise to the RAG step.
+
 # What did I learn?
 
 ## Different models for different tasks
