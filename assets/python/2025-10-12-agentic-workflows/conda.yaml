@@ -1,0 +1,9 @@
+name: r-tidy
+channels:
+  - conda-forge
+dependencies:
+  - r-irkernel
+  - r-jsonlite
+  - r-patchwork
+  - r-tidyverse
+  - jupyterlab

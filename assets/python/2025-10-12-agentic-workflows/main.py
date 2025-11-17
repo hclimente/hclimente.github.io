@@ -161,8 +161,8 @@ priority_fields = ["doi", "my_screening", "my_priority"]
 json_fields = ["title", "url", "journal_name", "date", "access_date", "raw_contents"]
 
 priority2_fields = ["doi", "screening_decision", "priority_decision"]
-train_df[priority2_fields].to_csv("results/0_train_screen_priority.csv", index=False)
-test_df[priority2_fields].to_csv("results/0_test_screen_priority.csv", index=False)
+# train_df[priority2_fields].to_csv("results/0_train_screen_priority.csv", index=False)
+# test_df[priority2_fields].to_csv("results/0_test_screen_priority.csv", index=False)
 
 train_df[priority_fields].to_csv("train_articles.csv", index=False)
 json.dump(
@@ -194,6 +194,7 @@ cool_barplot(
     xlabel="Screening decision",
     palette=["#DB444B", "#006BA2"],
     ax=ax1,
+    values2=test_df["my_screening"],
 )
 
 perc_high = (
@@ -207,6 +208,7 @@ cool_barplot(
     subtitle="Based on manual review ",
     xlabel="Priority",
     ax=ax2,
+    values2=test_df[(test_df["my_screening"] == "Pass")]["my_priority"],
 )
 
 plt.tight_layout()

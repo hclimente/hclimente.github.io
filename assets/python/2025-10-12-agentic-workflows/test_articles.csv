@@ -13,7 +13,7 @@ doi,my_screening,my_priority
 10.1126/science.aed4209,False,
 10.1126/science.adw4487,False,
 10.1093/nar/gkaf1157,False,
-10.1101/2025.10.29.25338961,False,
+10.1101/2025.10.29.25338961,True,low
 10.1126/science.aeb2629,False,
 10.1038/s41587-025-02906-3,False,
 10.1101/2025.10.30.685502,False,
@@ -24,13 +24,13 @@ doi,my_screening,my_priority
 10.1371/journal.pcbi.1013528,False,
 10.1101/2025.10.29.25339044,False,
 10.1093/bib/bbaf567,False,
-10.1038/s41586-025-09632-5,True,medium
+10.1038/s41586-025-09632-5,False,
 10.1093/bib/bbaf552,True,low
 10.1101/2025.10.30.685633,False,
 10.1101/2025.10.28.684891,True,medium
 10.1371/journal.pcbi.1013589,False,
 10.1126/science.adu7392,False,
-10.1186/s12859-025-06290-2,True,medium
+10.1186/s12859-025-06290-2,True,low
 10.1038/s41586-025-09816-z,False,
 10.1038/s41586-025-09630-7,False,
 10.1101/2025.10.29.685036,False,

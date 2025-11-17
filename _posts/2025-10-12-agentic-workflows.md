@@ -101,7 +101,15 @@ Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-
 
 {% details Materials & Methods %}
 
-During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. I manually labelled each article, providing a label on whether it should pass the screening (pass/fail decision); and, for those that passed, a second label indicating how relevant it is to me (low/medium/high).
+During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. I manually labelled each article in two passes:
+
+- A screening pass consisted on a quick, binary decision about the broad relevance of the article (pass/fail decision)
+- Those that passed the screening received a priority:
+    - High: articles directly linked to my current research interests
+    - Medium: articles related to my work, but not directly applicable
+    - Low: articles covering topics I care about, but not directly relevant to my work
+
+To this end, I used the same information `nf-papers-please` will have access to: the title, authors, journal and, usually, an abstract.
 
 <!--TODO show train & test distribution-->
 
