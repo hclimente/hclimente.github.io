@@ -2,7 +2,7 @@
 layout: about
 title: about
 permalink: /
-subtitle: Lead Scientist at <a href='https://www.novonordisk.com/science-and-technology/research-and-technology-centres/oxford-research-centre.html'>Novo Nordisk</a>. London, United Kingdom.
+subtitle: <b>Senior Scientist</b> at <b><a href='https://www.isomorphiclabs.com/'>Isomorphic Labs</a></b>. London, United Kingdom.
 
 profile:
   align: right
@@ -24,8 +24,10 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-As a Lead Data Scientist at Novo Nordisk, I design and deploy AI/ML methodologies for early target discovery and precision medicine — with a strong focus on genetics.
+With over 13 years of experience in computational biology and applied statistics, I apply AI/ML to drug discovery, with a focus on genetics, multi-omics integration, explainable ML, and systems biology.
 
-I have 13+ years of experience in computational biology and applied statistics. I completed my PhD at [CBIO](https://cbio.mines-paristech.fr), a leading bioML laboratory, under the supervision of [Chloé-Agathe Azencott](https://cazencott.info/), where I explored [graph-based methods for genetic studies](https://pastel.hal.science/tel-03270879). I then conducted my postdoctoral research at [RIKEN AIP](https://www.riken.jp/en/research/labs/aip/) with [Makoto Yamada](https://www.oist.jp/research/makoto-yamada), developing novel AI/ML methods for feature selection.
+Prior to joining Isomorphic Labs, I served as **Systems Biology Lead** at [Novo Nordisk](https://www.novonordisk.com/science-and-technology/research-and-technology-centres/oxford-research-centre.html), where I developed solutions for target identification and validation.
 
-My research focuses on multi-omics integration, explainable ML and systems biology. I’m an advocate for reproducible research and an advanced Nextflow developer. I’m detail-oriented, proactive, and wired to fix what’s broken — ideally before anyone notices.
+Following a double degree in Biotechnology and Biochemistry and a Master's in Bioinformatics, I specialized in **AI/ML applications to biology**, particularly [graph-based methods for genetic studies](https://pastel.hal.science/tel-03270879) (PhD at [CBIO](https://cbio.mines-paristech.fr) with [Chloé-Agathe Azencott](https://cazencott.info/)) and novel AI/ML methods for feature selection (Postdoc at [RIKEN AIP](https://www.riken.jp/en/research/labs/aip/) with [Makoto Yamada](https://www.oist.jp/research/makoto-yamada)). Check out my [publications](https://scholar.google.com/citations?user=tK7i7zwAAAAJ&hl=en) and [GitHub profile](https://github.com/hclimente) for more details.
+
+I'm an advocate for reproducible research and **well-engineered** research solutions, with a focus on Nextflow pipelines. I'm detail-oriented, proactive, and wired to fix what's broken—ideally before anyone else notices.
