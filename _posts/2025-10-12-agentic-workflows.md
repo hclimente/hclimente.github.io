@@ -99,9 +99,11 @@ Despite their relative simplicity, there are multiple frameworks that further si
 
 Enough background, back to [`nf-papers-please`](https://github.com/hclimente/nf-papers-please). It is written in Nextflow, and the agentic steps are powered by Gemini's [free tier](https://ai.google.dev/gemini-api/docs/pricing).
 
-{% details Materials & Methods %}
+During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. The articles were fetched from their RSS feeds, and followed an annotation process:
 
-During development, I worked on a toy dataset containing 249 articles published in [some of my favorite journals](https://github.com/hclimente/literature_agent/blob/main/config/journals.tsv) between the 25th of October and the 1st of November. I manually labelled each article in two passes:
+{% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-metadata-dag.webp" class="img-fluid" %}
+
+I manually labelled each article in two passes:
 
 - A screening pass consisted on a quick, binary decision about the broad relevance of the article (pass/fail decision)
 - Those that passed the screening received a priority:
@@ -111,19 +113,28 @@ During development, I worked on a toy dataset containing 249 articles published 
 
 To this end, I used the same information `nf-papers-please` will have access to: the title, authors, journal and, usually, an abstract.
 
-<!--TODO show train & test distribution-->
+{% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/r_target_priority.png" class="img-fluid" %}
 
-{% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/target_priority.webp" class="img-fluid" %}
-
-I then randomly split the dataset into a training set (200 articles) and a test set (49 articles). During development, I only used the training set to refine my prompts, the pipeline and generate examples for few-shot learning. Once I was satisfied with the results, I ran the final pipeline on the test set to evaluate its performance. Unless otherwise noted, all results reported in this post correspond to the test set.
+This problem can be posed as a 4-class classification task: irrelevant, low, medium and high priority. I randomly split the dataset into a training set (200 articles) and a test set (49 articles). During development, I only used the training set to refine my prompts, the pipeline and generate examples for few-shot learning. Once I was satisfied with the results, I ran the final pipeline on the test set to evaluate its performance. Unless otherwise noted, all results reported in this post correspond to the test set.
 
 Unless otherwise noted, all LLM calls were made to [Gemini 2.5 Flash Lite](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash-lite).
 
-{% enddetails Evaluation %}
+I followed three main approaches to prioritize articles.
+
+- _Naive_: as a baseline, I simply [assigned a positive or negative weight](https://github.com/hclimente/nf-papers-please/blob/v0.2-beta/config/research_interests.md) to the different pieces of metadata. For instance, if an article was published in Nature Genetics, it would get a +2 boost. If it was a preprint, it would get a soft -1 penalty. If it focused on network biology, it would get a +3 boost. And so on.
+- _Just ask_: the [first LLM approach](https://github.com/hclimente/nf-papers-please/tree/v0.1-beta) consisted on encoding my manual curation process into a workflow with three agentic steps. They repectively extract metadata from raw RSS content, screen each paper for broad relevance, and finally prioritize the ones that made the cut:
+
+    {% include figure.liquid loading="eager" path="assets/python/2025-10-12-agentic-workflows/img/r_score_performance.png" class="img-fluid" %}
+
+- _RAG_: in my [second LLM approach](https://github.com/hclimente/nf-papers-please/tree/v0.3-beta) I gave the LLM access to the articles I have actually read to guide its decisions. To that end, I created a small [retrieval-augmented generation (RAG) system]({% post_url 2025-08-16-rags %}) to retrive the most similar articles to the one being evaluated, and provide them as context to the LLM. This should help the model calibrate its decision, by comparing how similar the retrieved articles were among themselves and to the target article.
+
+## Naive results
+
+I got two learnings from this exercise: the LLM is terrible at basic arithmetic, and interactions matter a lot.
 
 ## v0.1: The naive take
 
-In my [first approach](https://github.com/hclimente/nf-papers-please/tree/v0.1-beta), I encoded my manual curation process into a workflow with three agentic steps. They repectively extract metadata from raw RSS content, screen each paper for broad relevance, and finally prioritize the ones that made the cut:
+
 
 {% include figure.liquid loading="eager" path="assets/img/posts/2025-10-12-agentic-workflows/papers-please-dag.webp" class="img-fluid" %}
 
@@ -131,17 +142,11 @@ Each of these steps is a very modest agentic workflow. For instance, in the Extr
 
 <!--TODO show confusion matrix-->
 
-## v0.2: the scoring system
 
-On my [second approach](https://github.com/hclimente/nf-papers-please/tree/v0.2-beta) I tried to encode my preferences as a scoring system. I would [assign a positive or negative weight](https://github.com/hclimente/nf-papers-please/blob/v0.2-beta/config/research_interests.md) to the different dimensions I cared about, and have the LLM detect which ones applied to each article. For instance, if an article was published in Nature Genetics, it would get a +2 boost. If it was a preprint, it would get a soft -1 penalty. If it focused on network biology, it would get a +3 boost. And so on.
-
-I got two learnings from this exercise: the LLM is terrible at basic arithmetic, and interactions matter a lot.
-
-<!--TODO show boxplot-->
 
 ## v0.3: the RAG
 
-Encoding my preferences into a prompt, even with points proved to be quite hard. So, in my [third attempt](https://github.com/hclimente/nf-papers-please/tree/v0.3-beta) I gave the LLM access to the articles I have actually read to guide its decisions. To that end, I created a small [retrieval-augmented generation (RAG) system]({% post_url 2025-08-16-rags %}) to retreive the most similar articles to the one being evaluated, and provide them as context to the LLM. This should help the model calibrate its decision, by comparing how similar the retrieved articles were among themselves and to the target article.
+Encoding my preferences into a prompt, even with points proved to be quite hard. So, in my [third attempt]
 
 <!--TODO show confusion matrix-->
 

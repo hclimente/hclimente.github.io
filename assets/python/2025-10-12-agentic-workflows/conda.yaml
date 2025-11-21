@@ -2,6 +2,8 @@ name: r-tidy
 channels:
   - conda-forge
 dependencies:
+  - r-caret
+  - r-ggbeeswarm
   - r-irkernel
   - r-jsonlite
   - r-patchwork

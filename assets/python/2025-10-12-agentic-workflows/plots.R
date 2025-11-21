@@ -15,6 +15,7 @@
 # ---
 
 # %%
+library(caret)
 library(ggbeeswarm)
 library(jsonlite)
 library(patchwork)
@@ -22,11 +23,11 @@ library(tidyverse)
 
 # %%
 screening_to_str <- function(col) {
-    ifelse(col, "Pass", "Fail")
+    ifelse(col, "In scope", "Out of scope")
 }
 
 priority_to_str <- function(col) {
-    ifelse(is.na(col), "Screening Failed", str_to_title(col))
+    ifelse(is.na(col), "Out of scope", str_to_title(col))
 }
 
 labels <- bind_rows(
@@ -41,7 +42,7 @@ labels <- bind_rows(
         dataset = factor(dataset, levels = c("Train", "Test")),
         my_priority = factor(
             my_priority,
-            levels = c("Screening Failed", "Low", "Medium", "High")
+            levels = c("Out of scope", "Low", "Medium", "High")
         )
     )
 
@@ -110,7 +111,7 @@ screening_plt <- labels %>%
 
 # %%
 priority_plt <- labels %>%
-    filter(my_screening == "Pass") %>%
+    filter(my_screening == "In scope") %>%
     rename(plotting_col = my_priority) %>%
     group_by(dataset, plotting_col) %>%
     summarise(
@@ -169,7 +170,7 @@ scores_screen_plt <- scores %>%
         )
 
 scores_priority_plt <- scores %>%
-    filter(my_screening == "Pass") %>%
+    filter(my_screening == "In scope") %>%
     ggplot(aes(x = my_priority, y = score, fill = my_priority, alpha=dataset)) +
         geom_boxplot(outlier.shape=NA, width = 0.3) +
         geom_beeswarm(shape=21, size=1) +
@@ -216,8 +217,59 @@ scores_screen_plt + scores_priority_plt + plot_layout(widths = c(1.5, 2))
 ggsave("img/r_score_performance.png", width = 8, height = 4)
 
 # %%
+lda_model <- scores %>%
+    filter(my_screening == "In scope", dataset == "Train") %>%
+    mutate(my_priority = droplevels(my_priority)) %>%
+    train(
+        my_priority ~ score,
+        data = .,
+        method = "lda",
+        trControl = trainControl(method = "cv", number = 10)
+    )
+
+predictions <- scores %>%
+    filter(dataset == "Train") %>%
+    mutate(my_priority = droplevels(my_priority)) %>%
+    predict(lda_model, newdata = .)
 
 # %%
+# create a heatmap in the same style as the previous plots
+confusionMatrix(predictions, scores %>% filter(dataset == "Train") %>% pull(my_priority), mode = "everything")$table
+
+ggplot() +
+    geom_tile(
+        data = as.data.frame(confusionMatrix(predictions, scores %>% filter(dataset == "Train") %>% pull(my_priority), mode = "everything")$table) %>%
+            rename(True = Reference, Predicted = Prediction, Freq = Freq),
+        aes(x = True, y = Predicted, fill = Freq)
+    ) +
+    geom_text(
+        data = as.data.frame(confusionMatrix(predictions, scores %>% filter(dataset == "Train") %>% pull(my_priority), mode = "everything")$table) %>%
+            rename(True = Reference, Predicted = Prediction, Freq = Freq),
+        aes(x = True, y = Predicted, label = Freq),
+        color = "white",
+        size = 6
+    ) +
+    scale_fill_gradient(low = "#006BA2", high = "#DB444B") +
+    labs(
+        title = "LDA Model Confusion Matrix",
+        x = "True Priority",
+        y = "Predicted Priority",
+        fill = "Number of Articles"
+    ) +
+    theme_minimal() +
+    theme(
+        plot.title = element_text(size = 16, face = "bold", hjust = 0, margin = margin(b = 10)),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black", linewidth = 0.5),
+        panel.background = element_rect(fill = "white", colour = NA),
+        plot.background = element_rect(fill = "white", colour = NA),
+        panel.border = element_blank(),
+        plot.margin = margin(t = 20, r = 10, b = 10, l = 10),
+        legend.position = "right",
+    )
 
 # %%
 labels
