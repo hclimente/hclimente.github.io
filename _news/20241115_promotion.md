@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I was promoted to Lead Data Scientist. I will be working on AI/ML for target and biomarker discovery.
+I was promoted to Specialist Scientist. I will be working on AI/ML for target and biomarker discovery.
