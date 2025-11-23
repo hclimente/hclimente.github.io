@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-Our [preprint](https://www.medrxiv.org/content/10.1101/2024.01.12.24301213v1) on predicting cardiovascular disease risk using interpretable ML is out! This work was conducted in partnership with [Microsoft Research](https://www.microsoft.com/en-us/research/).
+Our [preprint](https://www.medrxiv.org/content/10.1101/2024.01.12.24301213v1) on **predicting cardiovascular disease risk using interpretable ML** is out! This work was conducted in partnership with [Microsoft Research](https://www.microsoft.com/en-us/research/).
