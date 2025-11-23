@@ -5,4 +5,4 @@ inline: true
 related_posts: false
 ---
 
-I joined the Novo Nordisk Research Center Oxford as Senior Data Scientist. I will be applying machine learning to genetics.
+I joined the Novo Nordisk Research Center Oxford as Senior Data Scientist. I will be applying machine learning to genetic-based target discovery.

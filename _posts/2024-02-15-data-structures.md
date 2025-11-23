@@ -189,7 +189,7 @@ _See [how they relate to RAGs]({% post_url 2025-08-16-rags %}#nearest-neighbor-s
 
 **Skip lists** are a data structure consisting of a set of [linked lists](#linked-lists), each one containing a subset of the items in the collection:
 
-{% include figure.liquid path="assets/img/posts/2025-08-16-rags/skip_list.png" class="img-fluid" %}
+{% include figure.liquid path="assets/img/posts/2025-08-16-rags/skip_list.drawio.png" class="img-fluid" %}
 
 <div class="caption">
     Example of search path for a value (9) in a 5-layered skip list.
