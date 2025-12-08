@@ -13,14 +13,14 @@ related_posts: false
 
 Most activities in our digital life can be broken down four three cryptographic goals:
 
-- __Encryption__: ensure that our data and communications are private
+- __Confidentiality__: ensure that our data and communications are private
 - __Authentication__: ensure that we are who we say we are
 - __Integrity__: ensure that our data and communications are not tampered with
 - __Non-repudiation__: ensure that we cannot deny having authored a message
 
 Let's see how each of them is relevant in our day-to-day online activities.
 
-| Threat                 | Encryption | Authentication | Integrity | Non-repudiation |
+| Threat                 | Confidentiality | Authentication | Integrity | Non-repudiation |
 |------------------------|------------|----------------|-----------|-----------------|
 | Private communications | ✓          |                |           |                 |
 | Phishing attacks       | ✓          | ✓              | ✓         |                 |
@@ -34,31 +34,42 @@ Let's see how each of them is relevant in our day-to-day online activities.
 
 In this post, I go over the main algorithms behind each goal, and how I use them to stay safe online. If you don't care about the theory, simply skip to the TL;DR of each section.
 
-# Algorithm
+> Throughout this post, I'll be using message to mean data or information. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
 
-- Keep passwords: SHA-256 is too fast. Hence, a hacker could eventually crack your password if your SHA gets leaked. Instead, we use Argon2.
-- Signal protocol: keeping a conversation secure.
+# Algorithm
 
 Protocols: which algorithm to use.
 
 - TLS: negotiate a connection between browser and a server, using ECDSA to verify who you are, AES to encrypt the data, and SHA to verify that no packaets were lost.
 - VPNs: same, but setting up a secure tunner between two networks.
 
-# Encryption
+# Confidentiality
 
-Encrypting data (hard drive, network traffic): AES
+Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
+
+| Original letter | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z |
+|-----------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Shift by 3      | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | A | B | C |
+
+Then, to encrypt the message "HELLO" with key 3, we shift each letter by 3 positions, resulting in "KHOOR". To decrypt, we simply shift back by 3.
 
 ## The cipher: Advanced Encryption Standard
 
-AES is a 128-bit symmetric block cypher. The key has a fixed size (128, 192, 256 bits).
+We have come a long way since Caesar cipher. The standard algorithm to encrypt messages these days is the __Advanced Encryption Standard__ (AES). We find it everywhere, in common applications:
 
-AES arranges the message into a grid.
+- Hard drive encryption (e.g., on MacOS)
+- WiFi encryption (WPA2 protocol)
+- VPNs (IKE)
 
-1 round: a pretty complex transformation of the grid.
+Same as Caesar cipher, AES is a symmetric encryption algorithm. However, the key is not a numbler, but a long binary string. AES accepts three lengths of keys: 128, 192, or 256 bits. They respectively define the three flavors of AES: AES-128, AES-192, and AES-256, respectively. Longer keys provide more secure encryption, but encryption and decryption become more computationally intensive.
 
-128 key: 10 rounds
-192: 12 rounds
-256: 14 rounds
+{% details What does it mean for a key to be secure? %}
+
+In short, a key is secure when it cannot be guessed easily. In other words, it's secure when it's _long_, it can only be guessed via _brute force_ and, optionally, testing each guess is _expensive_. For instance, there are $$2^128$$ 128 bit keys.
+
+{% enddetails %}
+
+In a nutshell<d-footnote>It is easy to find detailed explanations around the web, e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/).</d-footnote>, AES stats by decomposing the message into chunks of 16 bytes. Each chunk is processed independently in _rounds_. Each chunk is arranged into a 4-by-4 grid, with with each cell containing 1 byte. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). To decrypt, the steps are done in reverse order.
 
 ## Sharing keys
 
@@ -114,7 +125,17 @@ This is a replacement for DH. We add a modulo to it.
 
 This is more complicated, but much more efficient mathematically: we can use much shorter keys, and hence to less operations. This is important server-side. The public key is a x, y point, although we can just use x.
 
-## TL;DR: Encryption
+## TL;DR: Confidentiality
+
+The first way to ensure confidentiality of **my personal data private** is to encrypt it, in case I lose my devices. If your data is unencrypted, basically anyone can take out the hard drive from your laptop and read its contents.
+
+- MacOS: enable FileVault (`System Settings > Privacy & Security > FileVault`) to encrypt you data using [a variant of AES-256](https://support.apple.com/en-gb/guide/security/sec4c6dc1b6e/web).
+- iOS: by default, data is encrypted using AES.
+- iCloud: Advanced Data Protection ensures that our data is encrypted _before_ being uploaded to iCloud with a key only you have. This ensures that even if someone gets our iCloud password they can't read it; in theory not even Apple can. Unfortunately, in the UK, His Majesty's Government needs full access to our data, and hence we cannot use this protection.
+
+VPN
+
+- Signal protocol: keeping a conversation secure.
 
 # Authentication
 
@@ -129,6 +150,10 @@ The core of the problem is authentication. How can Gmail be sure that the person
 A cornerstone of good security is multi-factor authentication (MFA), which requires two or more of these factors to authenticate. That's why many important services these days require you to provide, e.g., both a password and a code sent to your phone.
 
 Of course, the more factors you require, the safer you are. But security comes at the cost of convenience. Maybe you don't want to scan your face and receive an email code to shitpost on Reddit. Maybe you don't have good signal, and would rather keep text messages for the imporant stuff.
+
+## Passwords
+
+- Keep passwords: SHA-256 is too fast. Hence, a hacker could eventually crack your password if your SHA gets leaked. Instead, we use Argon2.
 
 ## FIDO2 and passkeys
 
