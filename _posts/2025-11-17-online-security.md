@@ -36,13 +36,6 @@ In this post, I go over the main algorithms behind each goal, and how I use them
 
 > Throughout this post, I'll be using message to mean data or information. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
 
-# Algorithm
-
-Protocols: which algorithm to use.
-
-- TLS: negotiate a connection between browser and a server, using ECDSA to verify who you are, AES to encrypt the data, and SHA to verify that no packaets were lost.
-- VPNs: same, but setting up a secure tunner between two networks.
-
 # Confidentiality
 
 Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
@@ -57,6 +50,7 @@ Then, to encrypt the message "HELLO" with key 3, we shift each letter by 3 posit
 
 We have come a long way since Caesar cipher. The standard algorithm to encrypt messages these days is the __Advanced Encryption Standard__ (AES). We find it everywhere, in common applications:
 
+- Browsing the internet (TLS)
 - Hard drive encryption (e.g., on MacOS)
 - WiFi encryption (WPA2 protocol)
 - VPNs (IKE)
@@ -73,41 +67,39 @@ In a nutshell<d-footnote>It is easy to find detailed explanations around the web
 
 ## Sharing keys
 
-If you and a friend were to exchange a secret key in public over the internet, anyone listening in could get it.
+AES is _everywhere_. It is used gazillions of times every day to encrypt all sorts of communications. However, an obvious problem arises: the need to agree on a common key with which to encrypt the messages. The internet is a very large place, and there are many stops between our computer and (say) our bank's server. Computers need to negotiate a secure key in a way even if someone was listening, they wouldn't be able to get it.
 
-{% details Diffie-Hellman %}
+{% details The OG: Diffie-Hellman %}
 
-The Diffie-Hellman exchange is a way to exchange secret keys in public. Instead of sharing the key publicly, DH shares the variables that are used to generate the secret key, two large integers $$x$$ and $$y$$. You each would generate a third large number (intermediate key), and apply modular exponentiation operation to it:
+The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secret keys in public:
 
-$$
-z_1 = x^{k_1} \bmod y
-$$
+1. One of the parties starts by sharing the variables that are used to generate the secret key, two large integers $$x$$ and $$y$$.
+1. Each partner generates an intermediate, non-shared key ($$k_1$$ and $$k_2$$). They use that to apply the following transformation:
 
-$$
-z_2 = x^{k_2} \bmod y
-$$
+    $$
+    z_i = x^{k_i} \bmod y
+    $$
 
-Then, you'd share that publicly. Notably, modular exponentiation is easy to do, but hard to undo. I.e., if $$x$$ and $$y$$ meet the right conditions, it's hard to recover $$k_1$$ just from $$z_1$$. In fact, the only way is to try all possible intermediate keys untl we stumble upon the right one.
+1. The parties share that result publicly ($$z_1$$ and $$z_2$$).
+1. The parties leverage each other's intermediate result and their own private key to achieve the same number:
 
-However, we can leverage each other's intermediate result and our own private key to achieve the same number:
+    $$
+    \begin{align*}
+    z_1^{k_2} \bmod y &= (x^{k_1} \bmod y)^{k_2} \bmod y \\\\
+    &= x^{k_1 \cdot k_2} \bmod y \\\\
+    &= (x^{k_2} \bmod y)^{k_1} \bmod y \\\\
+    &= z_2^{k_1} \bmod y
+    \end{align*}
+    $$
 
-$$
-\begin{align*}
-  z_1^{k_2} \bmod y &= (x^{k_1} \bmod y)^{k_2} \bmod y \\\\
-  &= x^{k_1 \cdot k_2} \bmod y \\\\
-  &= (x^{k_2} \bmod y)^{k_1} \bmod y \\\\
-  &= z_2^{k_1} \bmod y
-\end{align*}
-$$
+That's the encryption key.
 
-This new number, is our __shared secret__.
+Diffie-Hellman relies on the fact that modular exponentiation is easy to do, but hard to undo. I.e., if $$x$$ and $$y$$ meet the right conditions, it's hard to recover $$k_1$$ just from $$z_1$$. In fact, the only way is to try all possible intermediate keys untl we stumble upon the right one.
 
-For this to work:
+The conditions that Diffie-Hellman needs to work are:
 
 - $$y$$ needs to be a large prime number
-- $$x$$ needs to be a _primitive root modulo n_. In other words, $$x^\text{n} mod y$$ should produce all positive numbers between 0 and $$y$$.
-
-The resulting key is often leveraged by AES, which allows to quickly encrypt and decrypt messages.
+- $$x$$ needs to be a _primitive root modulo n_. In other words, $$x^\text{n} \bmod y$$ should produce all positive numbers between 0 and $$y$$.
 
 {% enddetails %}
 
@@ -121,21 +113,9 @@ We have a generator $$g$$ which is a point on that curve. Then, we can define ad
 
 Adding points on an elliptic curve is a way to get points on the curve (apparently) at random. Given a point on the curve, that we know is $$xg$$, x is our secret key.
 
-This is a replacement for DH. We add a modulo to it.
+This is a replacement for Diffie-Hellman. We add a modulo to it.
 
 This is more complicated, but much more efficient mathematically: we can use much shorter keys, and hence to less operations. This is important server-side. The public key is a x, y point, although we can just use x.
-
-## TL;DR: Confidentiality
-
-The first way to ensure confidentiality of **my personal data private** is to encrypt it, in case I lose my devices. If your data is unencrypted, basically anyone can take out the hard drive from your laptop and read its contents.
-
-- MacOS: enable FileVault (`System Settings > Privacy & Security > FileVault`) to encrypt you data using [a variant of AES-256](https://support.apple.com/en-gb/guide/security/sec4c6dc1b6e/web).
-- iOS: by default, data is encrypted using AES.
-- iCloud: Advanced Data Protection ensures that our data is encrypted _before_ being uploaded to iCloud with a key only you have. This ensures that even if someone gets our iCloud password they can't read it; in theory not even Apple can. Unfortunately, in the UK, His Majesty's Government needs full access to our data, and hence we cannot use this protection.
-
-VPN
-
-- Signal protocol: keeping a conversation secure.
 
 # Authentication
 
@@ -161,9 +141,9 @@ Passkeys are the implementation of the FIDO2 authentication standard. During set
 
 ## RSA: preventing Man-in-the-middle
 
-Imagine there is someone in the middle, Sean. They perform the DH with both Alice and Bob, while Alice and Bob think they are talking to each other. This ends up in the situation in which both Alice and Bob share a secret with Sean, and none with each other. This is bad. Alice and Bob has no way to know they are not talking to each other.
+Imagine there is someone in the middle, Sean. They perform the Diffie-Hellman with both Alice and Bob, while Alice and Bob think they are talking to each other. This ends up in the situation in which both Alice and Bob share a secret with Sean, and none with each other. This is bad. Alice and Bob has no way to know they are not talking to each other.
 
-DH is designed for two parties to exchange a secret in public, but not when there is someone intercepting the secrets and altering the messages.
+Diffie-Hellman is designed for two parties to exchange a secret in public, but not when there is someone intercepting the secrets and altering the messages.
 
 To make sure they can talk to each other, both Alice and Bob need two keys: a public key (`pk`) and a private key (`sk`). You can think of each key as a very large number.
 
@@ -172,7 +152,7 @@ Verify(Message, Signature, pk) \in {True/False}
 
 The Signature has a fixed length, say 256 bits. There's only one valid signature for our message among $2^{256}$ options.
 
-RSA is relatively slow. Commonly, we use RSA to establish an ephemeral DH key for a communication. That way, if RSA gets broken, an attacked can't decrypt all of our communications, but they still have to go through them one-by-one.
+RSA is relatively slow. Commonly, we use RSA to establish an ephemeral Diffie-Hellman key for a communication. That way, if RSA gets broken, an attacked can't decrypt all of our communications, but they still have to go through them one-by-one.
 
 - VPNs: IKE
 - TLS/HTTPS: secure browsing
@@ -192,3 +172,17 @@ We append the hash at the end of our message, and re-compute the hash? to show t
 SHA-1: any string as input, string of 160 bits as output.
 
 Ho
+
+# TL;DR: Cryptography in practice
+
+## Ensuring confidentiality: AES everywhere!
+
+The first way to ensure confidentiality of **my personal data private** is to encrypt it, in case I lose my devices. If your data is unencrypted, basically anyone can take out the hard drive from your laptop and read its contents.
+
+- MacOS: enable FileVault (`System Settings > Privacy & Security > FileVault`) to encrypt you data using [a variant of AES-256](https://support.apple.com/en-gb/guide/security/sec4c6dc1b6e/web).
+- iOS: by default, data is encrypted using AES.
+- iCloud: Advanced Data Protection ensures that our data is encrypted _before_ being uploaded to iCloud with a key only you have. This ensures that even if someone gets our iCloud password they can't read it; in theory not even Apple can. Unfortunately, in the UK, His Majesty's Government needs full access to our data, and hence we cannot use this protection.
+
+VPN
+
+- Signal protocol: keeping a conversation secure.
