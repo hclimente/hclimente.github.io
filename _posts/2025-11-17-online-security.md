@@ -11,30 +11,39 @@ giscus_comments: true
 related_posts: false
 ---
 
-Most activities in our digital life can be broken down four three cryptographic goals:
+If you have ever read anything about online security and encryption, you'll have quickly felt drowning in a soup of letters: RSA, HTTPS, TLS, SHA, RSA, WPA, FIDO, SHA, PGP, ECDH, AES. Then many of them come with a number appended. Which is sometimes, but not always, a power of 2. It's no wonder that most of us give up before even trying.
+
+In reality, modern cryptography revolves around a few, well-trusted algorithms. Everything else are either wrappers to adapt them to specific applications, or legacy algorithms. These applications try to achieve one or several of these goals:
 
 - __Confidentiality__: ensure that our data and communications are private
 - __Authentication__: ensure that we are who we say we are
 - __Integrity__: ensure that our data and communications are not tampered with
 - __Non-repudiation__: ensure that we cannot deny having authored a message
 
-Let's see how each of them is relevant in our day-to-day online activities.
+Let's see how each of them applies to several day-to-day online activities:
 
 | Threat                 | Confidentiality | Authentication | Integrity | Non-repudiation |
-|------------------------|------------|----------------|-----------|-----------------|
-| Private communications | ✓          |                |           |                 |
-| Phishing attacks       | ✓          | ✓              | ✓         |                 |
-| Theft of devices       | ✓          | ✓              |           |                 |
-| Malicious software     |            | ✓              | ✓         |                 |
-| Data tampering         |            |                | ✓         |                 |
-| Online transactions    | ✓          | ✓              |           | ✓               |
-| SSH access             | ✓          | ✓              | ✓         |                 |
-| `git commit`           |            |                | ✓         | ✓               |
-| `git push`             | ✓          | ✓              | ✓         | ✓               |
+|------------------------|-----------------|----------------|-----------|-----------------|
+| Private communications | ✓               |                |           |                 |
+| Phishing attacks       | ✓               | ✓              | ✓         |                 |
+| Theft of devices       | ✓               | ✓              |           |                 |
+| Malicious software     |                 | ✓              | ✓         |                 |
+| Data tampering         |                 |                | ✓         |                 |
+| Online transactions    | ✓               | ✓              |           | ✓               |
+| SSH access             | ✓               | ✓              | ✓         |                 |
+| `git commit`           |                 |                | ✓         | ✓               |
+| `git push`             | ✓               | ✓              | ✓         | ✓               |
 
-In this post, I go over the main algorithms behind each goal, and how I use them to stay safe online. If you don't care about the theory, simply skip to the TL;DR of each section.
+In this post, I go over the main algorithms behind each goal, and how I use them to stay safe online. If you don't care about the theory, simply skip to the TL;DR of each section. This won't protect you from either state actors or rubber-hose cryptanalysis, but should be more than enough for 99% of users.
+
+![](https://imgs.xkcd.com/comics/security.png)
+<div class="caption">
+    From <a href=https://xkcd.com/538>xkcd</a>.
+</div>
 
 > Throughout this post, I'll be using message to mean data or information. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
+
+This post features cherished [Alice and Bob](https://en.wikipedia.org/wiki/Alice_and_Bob). Alice and Bob just want to talk to each other without being snooped in by their evil counterparts, Eve and Mallory.
 
 # Confidentiality
 
@@ -65,46 +74,50 @@ In short, a key is secure when it cannot be guessed easily. In other words, it's
 
 In a nutshell<d-footnote>It is easy to find detailed explanations around the web, e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/).</d-footnote>, AES stats by decomposing the message into chunks of 16 bytes. Each chunk is processed independently in _rounds_. Each chunk is arranged into a 4-by-4 grid, with with each cell containing 1 byte. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). To decrypt, the steps are done in reverse order.
 
-## Sharing keys
+## Sharing keys: Elliptic-curve cryptography
 
-AES is _everywhere_. It is used gazillions of times every day to encrypt all sorts of communications. However, an obvious problem arises: the need to agree on a common key with which to encrypt the messages. The internet is a very large place, and there are many stops between our computer and (say) our bank's server. Computers need to negotiate a secure key in a way even if someone was listening, they wouldn't be able to get it.
+AES is _everywhere_. It is used gazillions of times every day to encrypt all sorts data. But also, to secure __communications__. But how can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would need to secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1977 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to exchange keys in the open, even when Eve could listen to everything they said. This unlocked **public key cryptography** and, ultimately, secure communications over the internet.
+
+At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the function was.
 
 {% details The OG: Diffie-Hellman %}
 
 The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secret keys in public:
 
-1. One of the parties starts by sharing the variables that are used to generate the secret key, two large integers $$x$$ and $$y$$.
-1. Each partner generates an intermediate, non-shared key ($$k_1$$ and $$k_2$$). They use that to apply the following transformation:
+1. The protocol determines the variables that will be used to generate the secret key, two large integers $$g$$ and $$p$$.
+1. Both Alice and Bob generate an intermediate, non-shared key ($$k_A$$ and $$k_B$$). This is how they define their respective trapdoor functions:
 
     $$
-    z_i = x^{k_i} \bmod y
+    z_i = g^{k_i} \bmod p
     $$
 
-1. The parties share that result publicly ($$z_1$$ and $$z_2$$).
-1. The parties leverage each other's intermediate result and their own private key to achieve the same number:
+1. Alice and Bob share that result publicly ($$z_A$$ and $$z_B$$).
+1. Alice and Bob leverage each other's intermediate result and their own private key to achieve the same number:
 
     $$
     \begin{align*}
-    z_1^{k_2} \bmod y &= (x^{k_1} \bmod y)^{k_2} \bmod y \\\\
-    &= x^{k_1 \cdot k_2} \bmod y \\\\
-    &= (x^{k_2} \bmod y)^{k_1} \bmod y \\\\
-    &= z_2^{k_1} \bmod y
+    z_A^{k_B} \bmod p &= (g^{k_A} \bmod p)^{k_B} \bmod p \\\\
+    &= g^{k_A \cdot k_B} \bmod p \\\\
+    &= (g^{k_B} \bmod p)^{k_A} \bmod p \\\\
+    &= z_B^{k_A} \bmod p
     \end{align*}
     $$
 
-That's the encryption key.
+    That numbers is the encryption key.
 
-Diffie-Hellman relies on the fact that modular exponentiation is easy to do, but hard to undo. I.e., if $$x$$ and $$y$$ meet the right conditions, it's hard to recover $$k_1$$ just from $$z_1$$. In fact, the only way is to try all possible intermediate keys untl we stumble upon the right one.
+Diffie-Hellman relies on the fact that modular exponentiation is easy to do, but hard to undo. I.e., if $$g$$ and $$p$$ meet the right conditions, it's hard to recover $$k_A$$ just from $$z_A$$. In fact, the only way is to try all possible intermediate keys untl we stumble upon the right one.
 
 The conditions that Diffie-Hellman needs to work are:
 
-- $$y$$ needs to be a large prime number
-- $$x$$ needs to be a _primitive root modulo n_. In other words, $$x^\text{n} \bmod y$$ should produce all positive numbers between 0 and $$y$$.
+- $$p$$ needs to be a large prime number
+- $$g$$ needs to be a _primitive root modulo n_. In other words, $$g^\text{n} \bmod p$$ should produce all positive numbers between 0 and $$p$$.
 
 {% enddetails %}
 
+Most modern cryptography doesn't revolve around modular exponentiation, but __elliptic curves__. They are the set of points satisfying an equation of the form
+
 $$
-y^2 = x^3 + ax + b
+y^2 = x^3 + ax + b,
 $$
 
 where $$a$$ and $$b$$ are parameters.
@@ -119,8 +132,6 @@ This is more complicated, but much more efficient mathematically: we can use muc
 
 # Authentication
 
-Proving identity (prove who you say you are, e.g., to authenticate of exchange keys, credit card payments): ECDSA, Ed25519
-
 The core of the problem is authentication. How can Gmail be sure that the person logging into my email account is really me? Usually, this is done by requesting information that only I should have. Usually, it's one or several of the following:
 
 - Something I know, like a password, a PIN, or the answer to a secret question
@@ -131,26 +142,30 @@ A cornerstone of good security is multi-factor authentication (MFA), which requi
 
 Of course, the more factors you require, the safer you are. But security comes at the cost of convenience. Maybe you don't want to scan your face and receive an email code to shitpost on Reddit. Maybe you don't have good signal, and would rather keep text messages for the imporant stuff.
 
-## Passwords
+## Storing passwords: Argon2
 
 - Keep passwords: SHA-256 is too fast. Hence, a hacker could eventually crack your password if your SHA gets leaked. Instead, we use Argon2.
 
-## FIDO2 and passkeys
+## Modern authentication: FIDO2 and passkeys
+
+Proving identity (prove who you say you are, e.g., to authenticate of exchange keys, credit card payments): ECDSA, Ed25519
 
 Passkeys are the implementation of the FIDO2 authentication standard. During setup, your device (browser, phone, security key) creates two keys: a public key (`pk`) and a private key (`sk`).
 
-## RSA: preventing Man-in-the-middle
+https://stephentanner.com/ssh-yubikey.html
 
-Imagine there is someone in the middle, Sean. They perform the Diffie-Hellman with both Alice and Bob, while Alice and Bob think they are talking to each other. This ends up in the situation in which both Alice and Bob share a secret with Sean, and none with each other. This is bad. Alice and Bob has no way to know they are not talking to each other.
+# Non-repudiation
 
-Diffie-Hellman is designed for two parties to exchange a secret in public, but not when there is someone intercepting the secrets and altering the messages.
+## Preventing Man-in-the-middle attacks: RSA
 
-To make sure they can talk to each other, both Alice and Bob need two keys: a public key (`pk`) and a private key (`sk`). You can think of each key as a very large number.
+[As before](#ensuring-confidentiality-aes-everywhere), Alice and Bob want to generate a key to encrypt their messages via AES. However, in this case they are not dealing with Eve, but with her evil twin Mallory. As opposed to Eve, Mallory doesn't just eavesdrop; she intercepts and alters the messages.
 
-Sign(Message, sk) = Signature
-Verify(Message, Signature, pk) \in {True/False}
+Hence, while Alice and Bob think they are negotiating their key with each other using [elliptic curves](#sharing-keys-elliptic-curve-cryptography), they are actually negotiating keys with Mallory. This is bad. Alice and Bob have no way to know they are not talking to each other.
 
-The Signature has a fixed length, say 256 bits. There's only one valid signature for our message among $2^{256}$ options.
+To make sure they can talk to each other, they will use the RSA protocol. To that end, both Alice and Bob need two keys: a public key (`pk`) and a private key (`sk`). The RSA provides them with two functions:
+
+- `sign(message: str, sk: key) -> signature: int`. Alice and Bob will append a signature to each of their messages. The signature has a fixed length; 256 bits is a common one. Each message is uniquely mapped to one valid signature among all $2^{256}$ possible ones.
+- `verify(message: str, signature: int, pk: key) -> bool`. Upon receiving a message, Alice and Bob will determine its origin using each other's public key.
 
 RSA is relatively slow. Commonly, we use RSA to establish an ephemeral Diffie-Hellman key for a communication. That way, if RSA gets broken, an attacked can't decrypt all of our communications, but they still have to go through them one-by-one.
 
@@ -170,8 +185,6 @@ hash function take some string and transform them into a fixed-length binary str
 We append the hash at the end of our message, and re-compute the hash? to show that it wasn't modified.
 
 SHA-1: any string as input, string of 160 bits as output.
-
-Ho
 
 # TL;DR: Cryptography in practice
 
