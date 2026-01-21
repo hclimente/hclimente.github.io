@@ -11,9 +11,9 @@ giscus_comments: true
 related_posts: false
 ---
 
-If you have ever read anything about online security and encryption, you'll have quickly felt drowning in a soup of letters: RSA, HTTPS, TLS, SHA, RSA, WPA, FIDO, SHA, PGP, ECDH, AES. Then many of them come with a number appended. Which is sometimes, but not always, a power of 2. It's no wonder that most of us give up before even trying.
+If you've ever read anything about online security and privacy, you'll have quickly felt drowning in a soup of letters: RSA, HTTPS, TLS, SHA, RSA, WPA, FIDO, PGP, ECDH, AES. Many of them come with a number appended. Which is sometimes, but not always, a power of 2. No wonder most of us give up before even trying.
 
-In reality, modern cryptography revolves around a few, well-trusted algorithms. Everything else are either wrappers to adapt them to specific applications, or legacy algorithms. These applications try to achieve one or several of these goals:
+In reality, modern cryptography is built around a few, well-trusted algorithms. Everything else are wrappers to adapt them to specific applications (or legacy algorithms we should ditch as soon as possible!). Each application tries to address one or more of these goals:
 
 - __Confidentiality__: ensure that our data and communications are private
 - __Authentication__: ensure that we are who we say we are
@@ -22,53 +22,48 @@ In reality, modern cryptography revolves around a few, well-trusted algorithms. 
 
 Let's see how each of them applies to several day-to-day online activities:
 
-| Threat                 | Confidentiality | Authentication | Integrity | Non-repudiation |
-|------------------------|-----------------|----------------|-----------|-----------------|
-| Private communications | ✓               |                |           |                 |
-| Phishing attacks       | ✓               | ✓              | ✓         |                 |
-| Theft of devices       | ✓               | ✓              |           |                 |
-| Malicious software     |                 | ✓              | ✓         |                 |
-| Data tampering         |                 |                | ✓         |                 |
-| Online transactions    | ✓               | ✓              |           | ✓               |
-| SSH access             | ✓               | ✓              | ✓         |                 |
-| `git commit`           |                 |                | ✓         | ✓               |
-| `git push`             | ✓               | ✓              | ✓         | ✓               |
+| Scenario              | Confidentiality | Authentication | Integrity | Non-repudiation |
+|-----------------------|-----------------|----------------|-----------|-----------------|
+| Web browsing          | ✓               |                |           |                 |
+| Login/email           | ✓               | ✓              | ✓         |                 |
+| Local storage         | ✓               | ✓              |           |                 |
+| Software downloads    |                 | ✓              | ✓         |                 |
+| File transfers        |                 |                | ✓         |                 |
+| Online payments       | ✓               | ✓              |           | ✓               |
+| SSH access            | ✓               | ✓              | ✓         |                 |
+| `git commit`          |                 |                | ✓         | ✓               |
+| `git push`            | ✓               | ✓              | ✓         | ✓               |
 
-In this post, I go over the main algorithms behind each goal, and how I use them to stay safe online. If you don't care about the theory, simply skip to the TL;DR of each section. This won't protect you from either state actors or rubber-hose cryptanalysis, but should be more than enough for 99% of users.
+In this post, I go over the main algorithms behind each goal, and how I use them to stay safe. If you don't care about the theory, simply skip to the TL;DR of each section. This won't protect you from either state actors or _wrench cryptanalysis_, but should be more than enough for 99% of us.
 
 ![](https://imgs.xkcd.com/comics/security.png)
 <div class="caption">
     From <a href=https://xkcd.com/538>xkcd</a>.
 </div>
 
-> Throughout this post, I'll be using message to mean data or information. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
+> Throughout this post, I'll be using _message_ to mean _data_ or _information_. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
 
-This post features cherished [Alice and Bob](https://en.wikipedia.org/wiki/Alice_and_Bob). Alice and Bob just want to talk to each other without being snooped in by their evil counterparts, Eve and Mallory.
+Our heroes in this story will be [Alice and Bob](https://en.wikipedia.org/wiki/Alice_and_Bob). Alice and Bob just want to talk to each other without being snooped in by their evil counterparts, Eve and Mallory.
 
 # Confidentiality
 
-Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
+The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
 
 | Original letter | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z |
 |-----------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Shift by 3      | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | A | B | C |
 
-Then, to encrypt the message "HELLO" with key 3, we shift each letter by 3 positions, resulting in "KHOOR". To decrypt, we simply shift back by 3.
+To encrypt the message "HELLO" with _key 3_, we shift each letter by 3 positions, resulting in "KHOOR". To decrypt, we simply shift back by 3.
 
 ## The cipher: Advanced Encryption Standard
 
-We have come a long way since Caesar cipher. The standard algorithm to encrypt messages these days is the __Advanced Encryption Standard__ (AES). We find it everywhere, in common applications:
+Given a long enough message, breaking the Caesar cipher is easy, since we know the expected probability of each word in the English language. Or we can simply brute-force all 26 possibilities.
 
-- Browsing the internet (TLS)
-- Hard drive encryption (e.g., on MacOS)
-- WiFi encryption (WPA2 protocol)
-- VPNs (IKE)
-
-Same as Caesar cipher, AES is a symmetric encryption algorithm. However, the key is not a numbler, but a long binary string. AES accepts three lengths of keys: 128, 192, or 256 bits. They respectively define the three flavors of AES: AES-128, AES-192, and AES-256, respectively. Longer keys provide more secure encryption, but encryption and decryption become more computationally intensive.
+Luckily the field is much more sophisticated now. The standard encryption algorithm is the __Advanced Encryption Standard__ (AES). Same as Caesar cipher, AES is a symmetric encryption algorithm. However, the key is not a number, but a long binary string. AES accepts three lengths of keys: 128, 192, or 256 bits. They respectively define the three flavors of AES: AES-128, AES-192, and AES-256. Longer keys provide more secure encryption, but encryption and decryption become more computationally intensive.
 
 {% details What does it mean for a key to be secure? %}
 
-In short, a key is secure when it cannot be guessed easily. In other words, it's secure when it's _long_, it can only be guessed via _brute force_ and, optionally, testing each guess is _expensive_. For instance, there are $$2^128$$ 128 bit keys.
+In short, a key is secure when it cannot be guessed easily. In other words, it's secure when it's _long_, it can only be guessed via _brute force_ and, optionally, testing each guess is _expensive_. For instance, there are $$2^128$$ 128 bit keys. In contrast, Caesar cipher has only 26 possible keys.
 
 {% enddetails %}
 
@@ -76,22 +71,24 @@ In a nutshell<d-footnote>It is easy to find detailed explanations around the web
 
 ## Sharing keys: Elliptic-curve cryptography
 
-AES is _everywhere_. It is used gazillions of times every day to encrypt all sorts data. But also, to secure __communications__. But how can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would need to secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1977 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to exchange keys in the open, even when Eve could listen to everything they said. This unlocked **public key cryptography** and, ultimately, secure communications over the internet.
+AES is _everywhere_. It is used gazillions of times every day to encrypt all hard drives (e.g., on MacOS).
+
+But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1977 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet: browsing the internet (implemented in TLS), securing our WiFi (WPA2), or using a VPN (IKE).
 
 At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the function was.
 
 {% details The OG: Diffie-Hellman %}
 
-The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secret keys in public:
+The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secret keys in public. It's trapdoor function is **modular exponentiation**. It consists on:
 
-1. The protocol determines the variables that will be used to generate the secret key, two large integers $$g$$ and $$p$$.
-1. Both Alice and Bob generate an intermediate, non-shared key ($$k_A$$ and $$k_B$$). This is how they define their respective trapdoor functions:
+1. Alice and Bob establish a communication, using a pre-agreed protocol. The protocol determines the two large integers that will be used to generate the secret key: $$g$$ and $$p$$.
+1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively), that they never share with each other. They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
 
     $$
     z_i = g^{k_i} \bmod p
     $$
 
-1. Alice and Bob share that result publicly ($$z_A$$ and $$z_B$$).
+1. Alice and Bob share that result publicly ($$z_A$$ and $$z_B$$, respectively).
 1. Alice and Bob leverage each other's intermediate result and their own private key to achieve the same number:
 
     $$
@@ -105,9 +102,7 @@ The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secre
 
     That numbers is the encryption key.
 
-Diffie-Hellman relies on the fact that modular exponentiation is easy to do, but hard to undo. I.e., if $$g$$ and $$p$$ meet the right conditions, it's hard to recover $$k_A$$ just from $$z_A$$. In fact, the only way is to try all possible intermediate keys untl we stumble upon the right one.
-
-The conditions that Diffie-Hellman needs to work are:
+Diffie-Hellman is as good as is the trapdoor function. I.e., if $$g$$ and $$p$$ meet the right conditions, it's hard to recover $$k_A$$ just from $$z_A$$. In fact, the only way is to try all possible intermediate keys until we stumble upon the right one. So, for it to work:
 
 - $$p$$ needs to be a large prime number
 - $$g$$ needs to be a _primitive root modulo n_. In other words, $$g^\text{n} \bmod p$$ should produce all positive numbers between 0 and $$p$$.
