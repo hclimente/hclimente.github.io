@@ -41,8 +41,8 @@ def solve_y_for_x(x, a=-1, b=1):
 x1 = 1
 y1 = solve_y_for_x(x1)
 print(f"Point on the curve: ({x1}, {y1})")
-x2 = 2
-y2 = solve_y_for_x(x2)
+x2 = x2 = x1 + 0.0001
+y2 = y2 = solve_y_for_x(x2)
 print(f"Point on the curve: ({x2}, {y2})")
 
 # Store all states for animation (4 frames per iteration)
@@ -50,7 +50,7 @@ states = []
 all_x = [x1, x2]  # Track all x coordinates for dynamic limits
 all_y = [y1, y2]  # Track all y coordinates for dynamic limits
 
-for i in range(1, 5):
+for i in range(0, 5):
     slope = (y2 - y1) / (x2 - x1)
     intercept = y2 - slope * x2
 
@@ -134,12 +134,16 @@ fig, ax = plt.subplots(
     figsize=(10, 6)
 )  # Narrower width helps since your curve is vertical
 # fig.subplots_adjust(left=0, right=1, top=1, bottom=0) # Strip interior margins
-y, x = np.ogrid[-10:10:100j, -10:10:100j]
+y, x = np.ogrid[-12:12:120j, -12:12:100j]
 
 
 def animate(frame):
     ax.clear()
     state = states[frame]
+
+    # Ensure that the label is always outside of the line
+    y1_label_shift_direction = 1 if state["y1"] > -2 else -1
+    y2_label_shift_direction = 1 if state["y2"] > -2 else -1
 
     # Plot the elliptic curve with better styling
     ax.contour(x.ravel(), y.ravel(), ec(x, y), [0], colors="#2C3E50", linewidths=2.5)
@@ -166,16 +170,17 @@ def animate(frame):
         markeredgecolor="#C0392B",
         zorder=5,
     )
-    ax.text(
-        state["x1"],
-        state["y1"] + 0.3,
-        f"{'' if state['i'] == 1 else state['i']}P",
-        fontsize=14,
-        fontweight="bold",
-        verticalalignment="bottom",
-        horizontalalignment="right",
-        color="#C0392B",
-    )
+    if state["i"] > 0:
+        ax.text(
+            state["x1"],
+            state["y1"] + y1_label_shift_direction * 0.3,
+            f"{'' if state['i'] <= 1 else state['i']}P",
+            fontsize=14,
+            fontweight="bold",
+            verticalalignment="bottom",
+            horizontalalignment="right",
+            color="#C0392B",
+        )
 
     ax.plot(
         state["x2"],
@@ -189,8 +194,8 @@ def animate(frame):
     )
     ax.text(
         state["x2"],
-        state["y2"] + 0.3,
-        f"{state['i'] + 1}P",
+        state["y2"] + y2_label_shift_direction * 0.3,
+        f"{'' if state['i'] < 1 else state['i'] + 1}P",
         fontsize=14,
         fontweight="bold",
         verticalalignment="bottom",
@@ -200,8 +205,9 @@ def animate(frame):
 
     # Show intersection and reflection based on step
     if state["step"] in ["intersection", "reflection"]:
-        if state["step"] == "intersection":
-            # Show intersection point (unreflected)
+        ynew_label_shift_direction = 1 if state["y_new"] > -2 else -1
+
+        if state["step"] == "intersection":  # unreflected
             ax.plot(
                 state["x_new"],
                 state["y_new"],
@@ -214,7 +220,7 @@ def animate(frame):
             )
             ax.text(
                 state["x_new"],
-                state["y_new"] + 0.3,
+                state["y_new"] - ynew_label_shift_direction * 0.3,
                 f"-{state['i'] + 2}P",
                 fontsize=14,
                 fontweight="bold",
@@ -223,29 +229,6 @@ def animate(frame):
                 color="#27AE60",
             )
         else:  # reflection
-            # Show both unreflected and reflected points with arrow
-            y_unreflected = -state["y_new"]
-            ax.plot(
-                state["x_new"],
-                y_unreflected,
-                "o",
-                color="#2ECC71",
-                markersize=10,
-                markeredgewidth=2,
-                markeredgecolor="#27AE60",
-                zorder=5,
-            )
-            ax.text(
-                state["x_new"],
-                y_unreflected + 0.3,
-                f"-{state['i'] + 2}P",
-                fontsize=14,
-                fontweight="bold",
-                verticalalignment="bottom",
-                horizontalalignment="right",
-                color="#27AE60",
-            )
-
             ax.plot(
                 state["x_new"],
                 state["y_new"],
@@ -258,18 +241,18 @@ def animate(frame):
             )
             ax.text(
                 state["x_new"],
-                state["y_new"] - 0.3,
+                state["y_new"] + ynew_label_shift_direction * 0.3,
                 f"{state['i'] + 2}P",
                 fontsize=14,
                 fontweight="bold",
-                verticalalignment="top",
+                verticalalignment="bottom",
                 horizontalalignment="right",
                 color="#27AE60",
             )
 
             ax.vlines(
                 state["x_new"],
-                y_unreflected,
+                -state["y_new"],
                 state["y_new"],
                 linestyles="--",
                 color="#3498DB",
@@ -280,7 +263,6 @@ def animate(frame):
     # Set dynamic limits and aspect ratio
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    # ax.set_aspect('equal')
 
     # Remove grid and improve axes
     ax.spines["top"].set_visible(False)
