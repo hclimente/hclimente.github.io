@@ -47,6 +47,9 @@ Our heroes in this story will be [Alice and Bob](https://en.wikipedia.org/wiki/A
 
 # Confidentiality
 
+__Key algorithms:__ AES, elliptic curve algorithms
+__Key protocols:__ TLS/HTTPS, WPA3, IKE
+
 The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
 
 | Original letter | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z |
@@ -67,13 +70,13 @@ In short, a key is secure when it cannot be guessed easily. In other words, it's
 
 {% enddetails %}
 
-In a nutshell<d-footnote>It is easy to find detailed explanations around the web, e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/).</d-footnote>, AES stats by decomposing the message into chunks of 16 bytes. Each chunk is processed independently in _rounds_. Each chunk is arranged into a 4-by-4 grid, with with each cell containing 1 byte. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). To decrypt, the steps are done in reverse order.
+AES is pretty convoluted algorithm, and luckily for me there are many good, detailed explanations around the web, e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/). In a nutshell, AES it starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, with each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
 
 ## Sharing keys: Elliptic-curve cryptography
 
-AES is _everywhere_. It is used gazillions of times every day to encrypt all hard drives (e.g., on MacOS).
+AES is _everywhere_, and it is used gazillions of times every day to encrypt all hard drives (e.g., on MacOS).
 
-But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1977 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet: browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA2), or using a VPN (IKE).
+But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
 
 At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the function was.
 
@@ -109,13 +112,13 @@ Diffie-Hellman is as good as is the trapdoor function. I.e., if $$g$$ and $$p$$ 
 
 {% enddetails %}
 
-Most modern cryptography doesn't revolve around modular exponentiation, but __elliptic curves__. They are the set of points satisfying an equation of the form
+Modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__. They are the set of points satisfying an equation of the form
 
 $$
 y^2 = x^3 + ax + b,
 $$
 
-where $$a$$ and $$b$$ are parameters.
+where $$a$$ and $$b$$ are parameters, and defined over a finite field.
 
 We have a generator $$g$$ which is a point on that curve. Then, we can define additions on the curve. $$2g = g + g$$, which is the result of taking the tangent of the curve at $$g$$, and taking its mirror image. $$3g$$ is the mirror image of the intercept between the curve and the line connecting $$g$$ and $$2g$$. $$4g = 3g + g$$ is the mirror image of the intersection of the curve with the line connecting 3g and g. And so on.
 
@@ -126,6 +129,9 @@ This is a replacement for Diffie-Hellman. We add a modulo to it.
 This is more complicated, but much more efficient mathematically: we can use much shorter keys, and hence to less operations. This is important server-side. The public key is a x, y point, although we can just use x.
 
 # Authentication
+
+__Key algorithms:__ Ed25519
+__Key protocols:__ FIDO2, Webauthn
 
 The core of the problem is authentication. How can Gmail be sure that the person logging into my email account is really me? Usually, this is done by requesting information that only I should have. Usually, it's one or several of the following:
 
@@ -153,8 +159,6 @@ Passkeys are the implementation of the FIDO2 authentication standard. During set
 
 https://stephentanner.com/ssh-yubikey.html
 
-# Non-repudiation
-
 ## Preventing Man-in-the-middle attacks: RSA
 
 [As before](#ensuring-confidentiality-aes-everywhere), Alice and Bob want to generate a key to encrypt their messages via AES. However, in this case they are not dealing with Eve, but with her evil twin Mallory. As opposed to Eve, Mallory doesn't just eavesdrop; she intercepts and alters the messages.
@@ -163,10 +167,14 @@ Hence, while Alice and Bob think they are securely agreeing on a key using [elli
 
 To make sure they can talk to each other, they will use the RSA protocol. To that end, both Alice and Bob need two keys: a public key (`pk`) and a private key (`sk`). The RSA provides them with two functions:
 
-- `sign(message: str, sk: key) -> signature: int`. Alice and Bob will append a signature to each of their messages. The signature has a fixed length; 256 bits is a common one. Each message is uniquely mapped to one valid signature among all $2^{256}$ possible ones.
+- `sign(message: str, sk: key) -> signature: int`. Alice and Bob will append a signature to each of their messages. The signature has a fixed length; 256 bytes is a common one. Each message is uniquely mapped to one valid signature among all $2^{2048}$ possible ones.
 - `verify(message: str, signature: int, pk: key) -> bool`. Upon receiving a message, Alice and Bob will determine its origin using each other's public key.
 
-RSA is relatively slow. Commonly, we use RSA to establish an ephemeral Diffie-Hellman key for a communication. That ensures forward secrecy: if RSA gets broken, an attacker can't decrypt all of our communications, but they still have to go through them one-by-one.
+RSA is relatively slow. Commonly, we use RSA to establish an ephemeral Diffie-Hellman key for each session. That ensures forward secrecy: if RSA gets broken, an attacker can't decrypt all of our communications, but they still have to go through them one-by-one.
+
+# Non-repudiation
+
+
 
 # Integrity
 
@@ -194,7 +202,7 @@ Someone stealing your authentication credentials can be very damaging. They coul
 1. Enable multi-factor authentication wherever possible.
 1. Use a password manager, never repeat the same password twice.
 1. Use strong passwords.
-1. Secure your critical accounts
+1. Secure your critical accounts using a Yubikey.
 
 ## Encrypt your data!
 
@@ -202,14 +210,33 @@ The first way to ensure confidentiality of my personal data private is to encryp
 
 - MacOS: enable FileVault (`System Settings > Privacy & Security > FileVault`) to encrypt you data using [a variant of AES-256](https://support.apple.com/en-gb/guide/security/sec4c6dc1b6e/web).
 - iOS: by default, data is encrypted using AES.
-- iCloud: Advanced Data Protection ensures that our data is encrypted _before_ being uploaded to iCloud with a key only you have. This ensures that even if someone gets our iCloud password they can't read it; in theory not even Apple can. Unfortunately, in the UK, His Majesty's Government needs full access to our data, and hence we cannot use this protection.
+- iCloud: Advanced Data Protection ensures that our data is encrypted _before_ being uploaded to iCloud with a key only you have. This ensures that even if someone gets our iCloud password they can't read it; in theory not even Apple can.
 
-
-
-Wherever possible, enable multi-factor authentication.
+> Unfortunately, in the UK, His Majesty's Government needs full access to our data, and hence we cannot use this protection.
 
 ## Encrypt your communications
 
 VPN
 
 - Signal protocol: keeping a conversation secure.
+
+## Up your git game
+
+### Signing your commits
+
+```bash
+# e.g.
+GIT_EMAIL="noreply@hclimente.eu"
+# assuming your key is the first one in the agent
+PUBLIC_KEY=$(ssh-add -L | head -n1)
+
+# set git settings
+git config --global gpg.format ssh
+git config --global user.signingKey "key::$PUBLIC_KEY"
+git config --global commit.gpgsign true
+git config --global tag.gpgsign true
+
+mkdir -p ~/.config/git
+echo $GIT_EMAIL $PUBLIC_KEY >~/.config/git/allowed_signers
+git config --global gpg.ssh.allowedSignersFile "$HOME/.config/git/allowed_signers"
+```
