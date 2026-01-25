@@ -37,8 +37,8 @@ Let's see how each of them applies to several day-to-day online activities:
 In this post, I go over the main algorithms behind each goal, and how I use them to stay safe. If you don't care about the theory, simply skip to the TL;DR of each section. This won't protect you from either state actors or _wrench cryptanalysis_, but should be more than enough for 99% of us.
 
 ![](https://imgs.xkcd.com/comics/security.png)
-<div class="caption">
-    From <a href=https://xkcd.com/538>xkcd</a>.
+<div class="caption" align="center">
+    From <a href="https://xkcd.com/538">xkcd</a>.
 </div>
 
 > Throughout this post, I'll be using _message_ to mean _data_ or _information_. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
@@ -78,14 +78,52 @@ AES is _everywhere_, and it is used gazillions of times every day to encrypt all
 
 But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
 
+### Trapdoor functions
+
 At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the function was.
 
-{% details The OG: Diffie-Hellman %}
+A classic example of a trapdoor function is __modular exponentiation__, used by Diffie-Hellman.
 
-The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secret keys in public. It's trapdoor function is **modular exponentiation**. It consists on:
+$$
+g^{k} \bmod p
+$$
 
-1. Alice and Bob establish a communication, using a pre-agreed protocol. The protocol determines the two large integers that will be used to generate the secret key: $$g$$ and $$p$$.
-1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively), that they never share with each other. They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
+If tell I you the second hand of my clock ($$\bmod 60$$) was pointing at 32 ($$g = 32$$) seconds, and raise that number to the 4th power ($$k = 4$$), you will have no issues computing that it will end up pointing at
+
+$$
+32^{4} \bmod 60 = 16.
+$$
+
+But if only I tell you I started at 32s and ended at 16, you'll only be able to guess $$k$$ by enumerating all possibilities:
+
+$$
+32^{1} \bmod 60 = 32
+$$
+
+$$
+32^{2} \bmod 60 = 4
+$$
+
+$$
+32^{3} \bmod 60 = 8
+$$
+
+$$
+32^{4} \bmod 60 = 16
+$$
+
+Now, it turns out 60 is not a great choice for $$p$$. The space of outcomes encompasses, at most, 60 values. That means that we just need to enumerate 60 possibilities to identify which number $$k$$ is a multiple of, reducing our search space by a factor of 60. The larger $$p$$ is, the harder this problem becomes: we want $$\boldsymbol{p}$$ __to be astronomically large__; Diffie-Hellman makes it at least 2048 bits long.
+
+But, on a related note, 32 is not a great choice for $$g$$ if we are taking modulo 60. Out of the 60 outcomes $$\bmod 60$$ offers, the powers of 32 modulo 60 only occupy 4: the solution to $$k=1$$ is the same as to $$k=5$$: $$32^{5} \bmod 60 = 32$$. Hence, we quickly shrink our space of possibilities by a factor of 15: only multiples of 4 could produce a remainder of 16. We want the opposite: all options between 0 and $$p$$ should be possible (i.e., __g is a primitive root modulo p__.) In fact, [there are no primitive roots modulo 60](https://en.wikipedia.org/wiki/Primitive_root_modulo_n#:~:text=A%20primitive%20root%20exists%20if%20and,odd%20prime%20and%20k%20%3E%200.) Since 5 is a primitive root modulo 6, that'd be a better choice.
+
+### The OG: Diffie-Hellman
+
+Now that we understand better its trapdoor function, let's go back to Diffie-Hellman's. Alice and Bob want to communicate privately with each other. To that end, they will encrypt each of their messages using AES-256. However, they haven't agreed on an encryption key yet, and Eve is there listening to everything they say to each other. (This is very similar to what happens anytime we access a website on public WiFi.)
+
+This is how Diffie-Hellman solved this issue:
+
+1. Alice and Bob will first establish a communication using a pre-agreed protocol. The protocol determines the two large integers $$g$$ and $$p$$.
+1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively), that they never share with each other (or with Eve). They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
 
     $$
     z_i = g^{k_i} \bmod p
@@ -103,24 +141,38 @@ The Diffie-Hellman algorithm is one of the earliest algorithms to exchange secre
     \end{align*}
     $$
 
-    That numbers is the encryption key.
+    Crucially, Eve is clueless about which this number is.
 
-Diffie-Hellman is as good as is the trapdoor function. I.e., if $$g$$ and $$p$$ meet the right conditions, it's hard to recover $$k_A$$ just from $$z_A$$. In fact, the only way is to try all possible intermediate keys until we stumble upon the right one. So, for it to work:
+1. Alice and Bob will pass that number to the same key derivation function to produce the AES key they'll use in their communications.
 
-- $$p$$ needs to be a large prime number
-- $$g$$ needs to be a _primitive root modulo n_. In other words, $$g^\text{n} \bmod p$$ should produce all positive numbers between 0 and $$p$$.
+### Elliptic curve cryptography
 
-{% enddetails %}
+A crucial drawback of Diffie-Hellman is that $$\boldsymbol{p}$$ needs to be massive. This poses a large burden on our CPU. While a modern laptop can just ram through it, smaller devices struggle with it. That's why modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__, which offers comparable security with much smaller key sizes.
 
-Modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__. They are the set of points satisfying an equation of the form
+Elliptic curves are the set of points satisfying an equation of the form
 
 $$
 y^2 = x^3 + ax + b,
 $$
 
-where $$a$$ and $$b$$ are parameters, and defined over a finite field.
+where $$a$$ and $$b$$ are parameters.
 
-We have a generator $$g$$ which is a point on that curve. Then, we can define additions on the curve. $$2g = g + g$$, which is the result of taking the tangent of the curve at $$g$$, and taking its mirror image. $$3g$$ is the mirror image of the intercept between the curve and the line connecting $$g$$ and $$2g$$. $$4g = 3g + g$$ is the mirror image of the intersection of the curve with the line connecting 3g and g. And so on.
+The key operations are is __elliptic curve point addition and multiplication__. Elliptic curve __point addition__ of a point ($$P + Q$$) consists on taking the line connecting $$P$$ and $$Q$$, intersecting it with the curve itself and taking the mirror image.
+
+{% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_addition.gif" class="img-fluid" %}
+<div class="caption" align="center">
+    <b>Elliptic curve point addition.</b>
+</div>
+
+Then, elliptic curve __point multiplication__ consists on doing that over and over to the same point. In the absence of another point to compute a line, we will take the tangent of the curve at $$P$$ to compute $$2P$$. Then, we simply keep adding $$P$$ to the resulting number to compute higher multiples.
+
+{% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_multiplication.gif" class="img-fluid" %}
+
+<div class="caption" align="center">
+    <b>Elliptic curve point multiplication.</b>
+</div>
+
+Crucially, elliptic curves are defined over a finite field.
 
 Adding points on an elliptic curve is a way to get points on the curve (apparently) at random. Given a point on the curve, that we know is $$xg$$, x is our secret key.
 
