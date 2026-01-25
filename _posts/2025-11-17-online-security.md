@@ -218,8 +218,10 @@ where $$p$$ is a prime, defined over $$\mathbb{Z} / p \mathbb{Z}$$. It would be 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_finite_field.png" class="img-fluid" %}
 
 <div class="caption" align="center">
-    <b>Elliptic curve on a finite field.</b>
+    <b>Elliptic curve on a finite field: \(y^2 \equiv x^3 - x + 1 \pmod {47}\).</b>
 </div>
+
+We can also define addition on this curve, although with one peculiarity: the modulo warps the space, so that the line that reaches the top continues from the bottom, and the line reaching the left continues on the right.
 
 This is a replacement for Diffie-Hellman. We add a modulo to it.
 
@@ -264,10 +266,22 @@ Hence, while Alice and Bob think they are securely agreeing on a key using [elli
 
 To make sure they can talk to each other, they will use the RSA protocol. To that end, both Alice and Bob need two keys: a public key (`pk`) and a private key (`sk`). The RSA provides them with two functions:
 
-- `sign(message: str, sk: key) -> signature: int`. Alice and Bob will append a signature to each of their messages. The signature has a fixed length; 256 bytes is a common one. Each message is uniquely mapped to one valid signature among all $2^{2048}$ possible ones.
-- `verify(message: str, signature: int, pk: key) -> bool`. Upon receiving a message, Alice and Bob will determine its origin using each other's public key.
+- `sign(message_hash: str, sk: key) -> signature: int`. Alice will append a signature to her message. The signature has a fixed length; 256 bytes is a common one. The message is first hashed, then the hash is mapped to one valid signature among all $2^{2048}$ possible ones.
+- `verify(message_hash: str, signature: int, pk: key) -> bool`. Upon receiving the message, Bob will hash it, and verify that it originates from Alice using her public key.
 
 RSA is relatively slow. Commonly, we use RSA to establish an ephemeral Diffie-Hellman key for each session. That ensures forward secrecy: if RSA gets broken, an attacker can't decrypt all of our communications, but they still have to go through them one-by-one.
+
+{% details The root of trust: Certificate Authorities %}
+
+You might have noticed that this solution only kicks the problem one level up. How can Bob be sure that the public key comes actually from Alice, and not from Mallory?
+
+Bob has two options. The first one is to get it directly from Alice, which can be impractical. The second one is to rely on the say-so of a third party, a Certificate Authorities (CA).
+
+The CA is someone that we trust. Alice will show her public key to a CA, prove her identity to them, and the CA will sign a Certificate with their own private key, stating that "Public key `0x123...` _definitely_ belongs to Alice". In reality, Alice and Bob don't exchange public keys. _They exchange certificates._ The most powerful certificates are the _root_ certificates: they are the ~150 certificates that come pre-installed in our system and that are not signed by anyone other than themselves. They include big tech, internet companies and different government agencies, among others.
+
+Did we just kick the can one level up? Yes. We are just praying none of these 150 CAs is in cahoots with Mallory.
+
+{% enddetails %}
 
 # Non-repudiation
 

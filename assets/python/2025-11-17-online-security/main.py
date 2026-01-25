@@ -292,7 +292,7 @@ print(f"Using y limits: {ylim}")
 
 # Create animation
 fig, ax = plt.subplots(figsize=(10, 6))
-y, x = np.ogrid[-12:12:120j, -12:12:100j]
+y, x = np.ogrid[-12:12:300j, -12:12:300j]
 anim = FuncAnimation(fig, animate, frames=len(states), interval=1000, repeat=True)
 anim.save(
     "img/elliptic_curve_addition.gif",
@@ -400,7 +400,7 @@ print(f"Using y limits: {ylim}")
 
 # Create animation
 fig, ax = plt.subplots(figsize=(10, 6))
-y, x = np.ogrid[-12:12:120j, -12:12:100j]
+y, x = np.ogrid[-12:12:300j, -12:12:300j]
 anim = FuncAnimation(fig, animate, frames=len(states), interval=1000, repeat=True)
 anim.save(
     "img/elliptic_curve_multiplication.gif",
@@ -450,19 +450,24 @@ fig, ax = plt.subplots(figsize=(10, 6))
 
 if points:
     x_coords, y_coords = zip(*points)
-    ax.scatter(x_coords, y_coords, s=50, alpha=0.6, color="#2C3E50")
+    ax.scatter(
+        x_coords,
+        y_coords,
+        s=50,
+        color="#E74C3C",
+        linewidths=2,
+        edgecolors="#C0392B",
+        zorder=5,
+    )
     ax.axhline(p / 2, color="black", linewidth=0.5, ls="--")
 
 ax.set_xlabel("x", fontsize=14)
 ax.set_ylabel("y", fontsize=14)
-ax.set_title(
-    f"Elliptic Curve: $y^2 \\equiv x^3 + {a}x + {b} (\\operatorname{{mod}} {p})$",
-    fontsize=16,
-)
 ax.grid(True, alpha=0.3)
 ax.set_xlim(-1, p)
 ax.set_ylim(-1, p)
-ax.set_aspect("equal")
+# ax.set_aspect('equal')
+ax.tick_params(labelsize=15)
 
 # Add grid lines at integer positions
 ax.set_xticks(range(0, p, 5))
@@ -474,5 +479,312 @@ plt.show()
 
 print("\nPlot saved as 'img/elliptic_curve_finite_field.png'")
 print(f"\nFirst 10 points: {points[:10]}")
+
+
+# %% [markdown]
+# # EC Addition on Finite Field
+
+
+# %%
+def mod_inverse(a, p):
+    """Calculate modular multiplicative inverse using extended Euclidean algorithm"""
+    if a < 0:
+        a = (a % p + p) % p
+
+    def extended_gcd(a, b):
+        if a == 0:
+            return b, 0, 1
+        gcd, x1, y1 = extended_gcd(b % a, a)
+        x = y1 - (b // a) * x1
+        y = x1
+        return gcd, x, y
+
+    gcd, x, _ = extended_gcd(a % p, p)
+    if gcd != 1:
+        raise ValueError(f"Modular inverse does not exist for {a} mod {p}")
+    return (x % p + p) % p
+
+
+def ec_add_mod(x1, y1, x2, y2, a=-1, b=1, p=47):
+    """Add two points on elliptic curve over finite field F_p"""
+
+    # Calculate slope
+    if x1 == x2:
+        if y1 == y2:
+            # Point doubling: slope = (3x1^2 + a) / (2y1)
+            numerator = (3 * x1**2 + a) % p
+            denominator = (2 * y1) % p
+        else:
+            # Points are inverses, return point at infinity
+            return None, None
+    else:
+        # Point addition: slope = (y2 - y1) / (x2 - x1)
+        numerator = (y2 - y1) % p
+        denominator = (x2 - x1) % p
+
+    # Calculate modular inverse of denominator
+    slope = (numerator * mod_inverse(denominator, p)) % p
+
+    # Calculate new point
+    x3 = (slope**2 - x1 - x2) % p
+    y3 = (slope * (x1 - x3) - y1) % p
+
+    return x3, y3
+
+
+def animate_mod(frame):
+    ax.clear()
+    state = states_mod[frame]
+
+    # Plot all points on the curve
+    if all_points:
+        all_x, all_y = zip(*all_points)
+        ax.scatter(
+            all_x, all_y, s=30, alpha=0.3, color="#95A5A6", edgecolors="none", zorder=1
+        )
+
+    # Draw connecting line or show calculation
+    if state["step"] in ["line", "intersection", "reflection"]:
+        # Draw line through the two points - show points on curve that lie on this "line"
+        x_vals = list(range(p))
+
+        for x in x_vals:
+            # Calculate y on the line (in modular arithmetic)
+            if state["x1"] != state["x2"]:
+                slope_vis = (
+                    (state["y2"] - state["y1"])
+                    * mod_inverse((state["x2"] - state["x1"]) % p, p)
+                ) % p
+                y = (slope_vis * (x - state["x1"]) + state["y1"]) % p
+                # Only plot if this point is on the curve
+                if ec_mod(x, y, a, b, p):
+                    ax.plot(
+                        x, y, "o", color="#3498DB", markersize=8, alpha=0.5, zorder=3
+                    )
+
+    # Plot the two input points
+    ax.plot(
+        state["x1"],
+        state["y1"],
+        "o",
+        color="#E74C3C",
+        markersize=12,
+        markeredgewidth=2,
+        markeredgecolor="#C0392B",
+        zorder=5,
+    )
+    ax.text(
+        state["x1"],
+        state["y1"] + 1.5,
+        "P",
+        fontsize=16,
+        fontweight="bold",
+        verticalalignment="bottom",
+        horizontalalignment="center",
+        color="#C0392B",
+    )
+
+    ax.plot(
+        state["x2"],
+        state["y2"],
+        "o",
+        color="#E74C3C",
+        markersize=12,
+        markeredgewidth=2,
+        markeredgecolor="#C0392B",
+        zorder=5,
+    )
+    ax.text(
+        state["x2"],
+        state["y2"] + 1.5,
+        "Q",
+        fontsize=16,
+        fontweight="bold",
+        verticalalignment="bottom",
+        horizontalalignment="center",
+        color="#C0392B",
+    )
+
+    # Show intersection and result
+    if state["step"] in ["intersection", "reflection"]:
+        if state["x_new"] is not None:
+            # In finite fields, -y is (p - y) % p
+            y_neg = (p - state["y_new"]) % p
+
+            if state["step"] == "intersection":
+                # Show intermediate point (before reflection)
+                ax.plot(
+                    state["x_new"],
+                    y_neg,
+                    "o",
+                    color="#2ECC71",
+                    markersize=12,
+                    markeredgewidth=2,
+                    markeredgecolor="#27AE60",
+                    zorder=5,
+                )
+                ax.text(
+                    state["x_new"],
+                    y_neg + 1.5,
+                    "-(P+Q)",
+                    fontsize=16,
+                    fontweight="bold",
+                    verticalalignment="bottom",
+                    horizontalalignment="center",
+                    color="#27AE60",
+                )
+            else:
+                # Show both the intermediate and final reflected point
+                ax.plot(
+                    state["x_new"],
+                    y_neg,
+                    "o",
+                    color="#2ECC71",
+                    markersize=8,
+                    markeredgewidth=1,
+                    markeredgecolor="#27AE60",
+                    alpha=0.5,
+                    zorder=4,
+                )
+                ax.plot(
+                    state["x_new"],
+                    state["y_new"],
+                    "o",
+                    color="#2ECC71",
+                    markersize=12,
+                    markeredgewidth=2,
+                    markeredgecolor="#27AE60",
+                    zorder=5,
+                )
+                ax.text(
+                    state["x_new"],
+                    state["y_new"] + 1.5,
+                    "P+Q",
+                    fontsize=16,
+                    fontweight="bold",
+                    verticalalignment="bottom",
+                    horizontalalignment="center",
+                    color="#27AE60",
+                )
+
+                # Show reflection line
+                y_min_line = min(y_neg, state["y_new"])
+                y_max_line = max(y_neg, state["y_new"])
+                ax.vlines(
+                    state["x_new"],
+                    y_min_line,
+                    y_max_line,
+                    linestyles="--",
+                    color="#3498DB",
+                    linewidth=2,
+                    alpha=0.6,
+                )
+
+    ax.set_xlim(-1, p)
+    ax.set_ylim(-1, p)
+    ax.set_xlabel("x", fontsize=14)
+    ax.set_ylabel("y", fontsize=14)
+    ax.grid(True, alpha=0.3)
+    ax.set_xticks(range(0, p, 5))
+    ax.set_yticks(range(0, p, 5))
+    ax.tick_params(labelsize=12)
+    ax.set_facecolor("#FFFFFF")
+    fig_mod.patch.set_facecolor("white")
+
+
+# Setup for animation
+p = 47
+a = -1
+b = 1
+
+# Find all points
+all_points = find_all_ec_points(a, b, p)
+
+# Choose two valid points from the curve
+# Pick specific points that are known to be on the curve
+x1, y1 = all_points[0]  # First point on the curve
+x2, y2 = all_points[5]  # Another point on the curve
+
+print(f"P = ({x1}, {y1})")
+print(f"Q = ({x2}, {y2})")
+
+# Verify points are on the curve
+print(f"P on curve: {ec_mod(x1, y1, a, b, p)}")
+print(f"Q on curve: {ec_mod(x2, y2, a, b, p)}")
+
+# Calculate result
+x3, y3 = ec_add_mod(x1, y1, x2, y2, a, b, p)
+print(f"P + Q = ({x3}, {y3})")
+print(f"P+Q on curve: {ec_mod(x3, y3, a, b, p)}")
+
+# Create animation states
+states_mod = []
+
+# Frame 1: Just the two points
+states_mod.append(
+    {
+        "step": "points",
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "x_new": None,
+        "y_new": None,
+    }
+)
+
+# Frame 2: Show line through points
+states_mod.append(
+    {
+        "step": "line",
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "x_new": None,
+        "y_new": None,
+    }
+)
+
+# Frame 3: Show intersection (before reflection)
+states_mod.append(
+    {
+        "step": "intersection",
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "x_new": x3,
+        "y_new": y3,
+    }
+)
+
+# Frame 4: Show reflection (final result)
+states_mod.append(
+    {
+        "step": "reflection",
+        "x1": x1,
+        "y1": y1,
+        "x2": x2,
+        "y2": y2,
+        "x_new": x3,
+        "y_new": y3,
+    }
+)
+
+# Create animation
+fig_mod, ax = plt.subplots(figsize=(10, 10))
+anim_mod = FuncAnimation(
+    fig_mod, animate_mod, frames=len(states_mod), interval=1500, repeat=True
+)
+anim_mod.save(
+    "img/elliptic_curve_mod_addition.gif",
+    writer="pillow",
+    fps=1,
+    dpi=300,
+    savefig_kwargs={"bbox_inches": "tight", "pad_inches": 0.1},
+)
+plt.close()
+print("Animation saved as 'img/elliptic_curve_mod_addition.gif'")
 
 # %%
