@@ -45,12 +45,30 @@ In this post, I go over the main algorithms behind each goal, and how I use them
 
 Our heroes in this story will be [Alice and Bob](https://en.wikipedia.org/wiki/Alice_and_Bob). Alice and Bob just want to talk to each other without being snooped in by their evil counterparts, Eve and Mallory.
 
+# Prelude: finite field arithmetic
+
+Cryptography works with integers, rather than with real numbers. One advantage is that integers do not suffer from rounding errors. Cryptography often consists on performing a fixed series of calculations to arrive to the same conclusion. When each step incurs in a precision cost, that is no longer guaranteed.
+
+To make the maths work, they rely on __finite fields__, also known as Galois fields. Let's break that down.
+
+First, the field is __finite__, that is, it operates on a bounded set of items. In our case a set of integers. The size of the set is called the _order_ of the field.
+
+Second, it _is_ a __field__, that is, it has 4 binary operators (multiplication, addition, subtraction and division) satisfying the field axioms. An important one is that the result of the operation must also be in the field.
+
+The classical example is the set of integers modulo $$p$$, with $$p$$ being a prime:
+
+$$
+\mathbb{Z} / p \mathbb{Z} = \{ \bar{a}_p | a \in \mathbb{Z} \}
+$$
+
+where $$\bar{a}_p$$ represents the entire set of integers that produce the same remainder as $$a$$ when divided by $$p$$.
+
 # Confidentiality
 
-__Key algorithms:__ AES, elliptic curve algorithms
-__Key protocols:__ TLS/HTTPS, WPA3, IKE
+| __Key algorithms__ | AES, elliptic curve cryptography |
+| __Key protocols__  | TLS/HTTPS, WPA3, IKE             |
 
-The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using a secret key. If you have the key, decryption allows you to recover the original information. I will focus on __symmetric__ encryption in this section, i.e., the same key is used for both actions. The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
+The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using an encyption key. If you have the decryption key, decryption allows you to recover the original information. This section focuses on __symmetric__ encryption, i.e., the same key is used for both actions. The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
 
 | Original letter | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z |
 |-----------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -70,17 +88,19 @@ In short, a key is secure when it cannot be guessed easily. In other words, it's
 
 {% enddetails %}
 
-AES is pretty convoluted algorithm, and luckily for me there are many good, detailed explanations around the web, e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/). In a nutshell, AES it starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, with each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
+AES is pretty convoluted algorithm, and I find it a bit uninteresting. Kind of like an algorithm to shuffle cards reproducibly; interesting and lucrative applications, boring to watch. Luckily for me there are many good, detailed explanations around the web I can point you to (e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/)).
 
-## Sharing keys: Elliptic-curve cryptography
+The TL;DR is this: AES starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, with each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
+
+## Sharing keys: public key cryptography
 
 AES is _everywhere_, and it is used gazillions of times every day to encrypt all hard drives (e.g., on MacOS).
 
-But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would secretly meet in a park to exchange keys in closed envelops, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
+But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would meet in a park and exchange keys in closed envelopes, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
 
 ### Trapdoor functions
 
-At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the function was.
+At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the functions were.
 
 A classic example of a trapdoor function is __modular exponentiation__, used by Diffie-Hellman.
 
@@ -88,13 +108,13 @@ $$
 g^{k} \bmod p
 $$
 
-If tell I you the second hand of my clock ($$\bmod 60$$) was pointing at 32 ($$g = 32$$) seconds, and raise that number to the 4th power ($$k = 4$$), you will have no issues computing that it will end up pointing at
+If tell I you the second hand of my clock ($$\text{Current time} \bmod 60$$) is pointing at 32 ($$g = 32$$) seconds, and that I raise that number to the 4th power ($$k = 4$$), you will have no issues computing that it will end up pointing at
 
 $$
 32^{4} \bmod 60 = 16.
 $$
 
-But if only I tell you I started at 32s and ended at 16, you'll only be able to guess $$k$$ by enumerating all possibilities:
+But if only I tell you I started at 32s and ended at 16, and ask you what $$k$$, that's the __discrete logarithm problem__, and it is much harder. In fact, you'll only be able to solve it by enumerating all possibilities:
 
 $$
 32^{1} \bmod 60 = 32
@@ -112,25 +132,30 @@ $$
 32^{4} \bmod 60 = 16
 $$
 
-Now, it turns out 60 is not a great choice for $$p$$. The space of outcomes encompasses, at most, 60 values. That means that we just need to enumerate 60 possibilities to identify which number $$k$$ is a multiple of, reducing our search space by a factor of 60. The larger $$p$$ is, the harder this problem becomes: we want $$\boldsymbol{p}$$ __to be astronomically large__; Diffie-Hellman makes it at least 2048 bits long.
+Now, it turns out 60 is not a great choice for $$p$$. The space of outcomes encompasses, at most, the 60 ticks of the clock. That means that we just need to enumerate 60 possibilities to identify which number $$k$$ is a multiple of, reducing our search space by a factor of 60. The larger $$p$$ is, the harder this problem becomes: we want $$\boldsymbol{p}$$ __to be astronomically large__; Diffie-Hellman makes it at least 2048 bits long.
 
-But, on a related note, 32 is not a great choice for $$g$$ if we are taking modulo 60. Out of the 60 outcomes $$\bmod 60$$ offers, the powers of 32 modulo 60 only occupy 4: the solution to $$k=1$$ is the same as to $$k=5$$: $$32^{5} \bmod 60 = 32$$. Hence, we quickly shrink our space of possibilities by a factor of 15: only multiples of 4 could produce a remainder of 16. We want the opposite: all options between 0 and $$p$$ should be possible (i.e., __g is a primitive root modulo p__.) In fact, [there are no primitive roots modulo 60](https://en.wikipedia.org/wiki/Primitive_root_modulo_n#:~:text=A%20primitive%20root%20exists%20if%20and,odd%20prime%20and%20k%20%3E%200.) Since 5 is a primitive root modulo 6, that'd be a better choice.
+But, given that we are doing modulo 60, 32 is not a good choice for $$g$$ either. Out of the 60 outcomes $$\operatorname{mod} 60$$ offers, the powers of 32 modulo 60 occupy only 4: the solution to $$k=1$$ is the same as to $$k=5$$: $$32^{5} \bmod 60 = 32$$. Hence, we quickly shrink our space of possibilities by a factor of 15: only multiples of 4 could produce a remainder of 16. We want the opposite: all options between 0 and $$p$$ should be possible (i.e., we want $$g$$ to be a __primitive root modulo__ $$\boldsymbol{p}$$.) While there are better choices than 32, [there are no primitive roots modulo 60](https://en.wikipedia.org/wiki/Primitive_root_modulo_n#:~:text=A%20primitive%20root%20exists%20if%20and,odd%20prime%20and%20k%20%3E%200.), and hence we should ditch it altogether. A better choice would be $$g=5$$ and $$p = 6$$, since 5 is a primitive root modulo 6. An even better choice would be to pick a massive, prime $$p$$, and a small $$g$$ that is a primitive root modulo $$p$$.
 
-### The OG: Diffie-Hellman
+### The OG: the Diffie-Hellman algorithm
 
-Now that we understand better its trapdoor function, let's go back to Diffie-Hellman's. Alice and Bob want to communicate privately with each other. To that end, they will encrypt each of their messages using AES-256. However, they haven't agreed on an encryption key yet, and Eve is there listening to everything they say to each other. (This is very similar to what happens anytime we access a website on public WiFi.)
+Now that we understand its trapdoor function, let's go back to Diffie-Hellman. Alice and Bob want to communicate privately with each other. To that end, they will encrypt each of their messages using AES-256. However, they haven't agreed on an encryption key yet, and Eve is there listening to everything they say to each other. (Not too unlike anytime we access a website on public WiFi.)
 
-This is how Diffie-Hellman solved this issue:
+This is how Diffie and Hellman solved this issue:
 
-1. Alice and Bob will first establish a communication using a pre-agreed protocol. The protocol determines the two large integers $$g$$ and $$p$$.
-1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively), that they never share with each other (or with Eve). They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
+1. Alice and Bob will first establish a communication using a pre-agreed protocol. The protocol determines the two integers $$g$$ and $$p$$ that will provide a good trapdoor $$f$$:
 
     $$
-    z_i = g^{k_i} \bmod p
+    f(k) = g^{k} \bmod p
+    $$
+
+1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively) that they never share with each other (and hence with Eve). They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
+
+    $$
+    z_i = f(k_i)
     $$
 
 1. Alice and Bob share that result publicly ($$z_A$$ and $$z_B$$, respectively).
-1. Alice and Bob leverage each other's intermediate result and their own private key to achieve the same number:
+1. Alice and Bob leverage each other's intermediate result and their own private key to compute the same number:
 
     $$
     \begin{align*}
@@ -147,7 +172,7 @@ This is how Diffie-Hellman solved this issue:
 
 ### Elliptic curve cryptography
 
-A crucial drawback of Diffie-Hellman is that $$\boldsymbol{p}$$ needs to be massive. This poses a large burden on our CPU. While a modern laptop can just ram through it, smaller devices struggle with it. That's why modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__, which offers comparable security with much smaller key sizes.
+A crucial drawback of Diffie-Hellman is the computational burden of integer arithmetic on astronomically large $$p$$. This gets really expensive at scale! Consider the burdent on servers that run all these computations for millions of concurrent connections. Luckily modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__, which offer comparable security with much smaller key sizes.
 
 Elliptic curves are the set of points satisfying an equation of the form
 
@@ -155,9 +180,13 @@ $$
 y^2 = x^3 + ax + b,
 $$
 
-where $$a$$ and $$b$$ are parameters.
+where $$a$$ and $$b$$ are parameters. They are defined over a finite field.
 
-The key operations are is __elliptic curve point addition and multiplication__. Elliptic curve __point addition__ of a point ($$P + Q$$) consists on taking the line connecting $$P$$ and $$Q$$, intersecting it with the curve itself and taking the mirror image.
+#### The trapdoor
+
+Elliptic curves are defined over a finite field of whole numbers. However, let's set that aside for now, and develop our intuitions on the continuous case.
+
+Elliptic curves cryptography relies on __elliptic curve point addition and multiplication__. Elliptic curve __point addition__ of a point ($$P + Q$$) consists on taking the line connecting $$P$$ and $$Q$$, intersecting it with the curve itself and taking the mirror image.
 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_addition.gif" class="img-fluid" %}
 <div class="caption" align="center">
@@ -172,9 +201,25 @@ Then, elliptic curve __point multiplication__ consists on doing that over and ov
     <b>Elliptic curve point multiplication.</b>
 </div>
 
-Crucially, elliptic curves are defined over a finite field.
+__Our trapdoor is elliptic curve point multiplication.__ Given a _generator_ point $$P$$ and a factor $$k$$, it is easy to compute $$kP$$. However, given $$kP$$ and $$P$$, it is really hard to guess the value of $$k$$. $$P$$ is our public key, and $$k$$ is our secret key.
 
-Adding points on an elliptic curve is a way to get points on the curve (apparently) at random. Given a point on the curve, that we know is $$xg$$, x is our secret key.
+#### Finite fields
+
+Working with real numbers is hard for computers, since precision is lost. That's why cryptography prefers to work with integers. Remember I said elliptic curves are defined over a finite field? Let's revisit that.
+
+We can define a curve as the set of solutions to
+
+$$
+y^2 \equiv x^3 + ax + b \pmod{p}
+$$
+
+where $$p$$ is a prime, defined over $$\mathbb{Z} / p \mathbb{Z}$$. It would be hard to see why this is a _curve_, although we should, by analogy to the continuous case:
+
+{% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_finite_field.png" class="img-fluid" %}
+
+<div class="caption" align="center">
+    <b>Elliptic curve on a finite field.</b>
+</div>
 
 This is a replacement for Diffie-Hellman. We add a modulo to it.
 
@@ -182,8 +227,8 @@ This is more complicated, but much more efficient mathematically: we can use muc
 
 # Authentication
 
-__Key algorithms:__ Ed25519
-__Key protocols:__ FIDO2, Webauthn
+| __Key algorithms__ | Ed25519         |
+| __Key protocols__  | FIDO2, Webauthn |
 
 The core of the problem is authentication. How can Gmail be sure that the person logging into my email account is really me? Usually, this is done by requesting information that only I should have. Usually, it's one or several of the following:
 

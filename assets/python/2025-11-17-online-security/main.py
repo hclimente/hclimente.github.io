@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # ---
 # jupyter:
 #   jupytext:
@@ -25,17 +26,18 @@ b = 1
 
 
 def ec(x, y, a=-1, b=1):
+    """Elliptic curve equation: y^2 = x^3 + a*x + b"""
     return pow(y, 2) - pow(x, 3) - x * a - b
 
 
-def solve_x_for_y(y, a=-1, b=1):
+def solve_ec_for_x(y, a=-1, b=1):
     coeffs = [1, 0, a, b - y**2]
     roots = np.roots(coeffs)
     real_roots = roots[np.isreal(roots)].real
     return real_roots
 
 
-def solve_y_for_x(x, a=-1, b=1):
+def solve_ec_for_y(x, a=-1, b=1):
     return np.sqrt(x**3 + a * x + b)
 
 
@@ -200,10 +202,10 @@ def animate(frame):
 
 # %%
 x1 = 1
-y1 = solve_y_for_x(x1, a, b)
+y1 = solve_ec_for_y(x1, a, b)
 print(f"Point on the curve: ({x1}, {y1})")
 x2 = 0
-y2 = solve_y_for_x(x2, a, b)
+y2 = solve_ec_for_y(x2, a, b)
 print(f"Point on the curve: ({x2}, {y2})")
 
 # Store all states for animation (4 frames per iteration)
@@ -288,11 +290,8 @@ ylim = [y_min - y_padding, y_max + y_padding]
 print(f"Using x limits: {xlim}")
 print(f"Using y limits: {ylim}")
 
-# Create animation with improved styling
-fig, ax = plt.subplots(
-    figsize=(10, 6)
-)  # Narrower width helps since your curve is vertical
-# fig.subplots_adjust(left=0, right=1, top=1, bottom=0) # Strip interior margins
+# Create animation
+fig, ax = plt.subplots(figsize=(10, 6))
 y, x = np.ogrid[-12:12:120j, -12:12:100j]
 anim = FuncAnimation(fig, animate, frames=len(states), interval=1000, repeat=True)
 anim.save(
@@ -310,10 +309,10 @@ print("Animation saved as 'img/elliptic_curve_addition.gif'")
 
 # %%
 x1 = 1
-y1 = solve_y_for_x(x1, a, b)
+y1 = solve_ec_for_y(x1, a, b)
 print(f"Point on the curve: ({x1}, {y1})")
 x2 = x1 + 0.0001
-y2 = solve_y_for_x(x2, a, b)
+y2 = solve_ec_for_y(x2, a, b)
 print(f"Point on the curve: ({x2}, {y2})")
 
 # Store all states for animation (4 frames per iteration)
@@ -399,11 +398,8 @@ ylim = [y_min - y_padding, y_max + y_padding]
 print(f"Using x limits: {xlim}")
 print(f"Using y limits: {ylim}")
 
-# Create animation with improved styling
-fig, ax = plt.subplots(
-    figsize=(10, 6)
-)  # Narrower width helps since your curve is vertical
-# fig.subplots_adjust(left=0, right=1, top=1, bottom=0) # Strip interior margins
+# Create animation
+fig, ax = plt.subplots(figsize=(10, 6))
 y, x = np.ogrid[-12:12:120j, -12:12:100j]
 anim = FuncAnimation(fig, animate, frames=len(states), interval=1000, repeat=True)
 anim.save(
@@ -415,5 +411,68 @@ anim.save(
 )
 plt.close()
 print("Animation saved as 'img/elliptic_curve_multiplication.gif'")
+
+
+# %%
+def ec_mod(x, y, a=-1, b=1, p=47):
+    """Check if point (x, y) is on the elliptic curve over finite field F_p
+    Equation: y^2 ≡ x^3 + ax + b (mod p)
+    """
+    left = (y * y) % p
+    right = (x**3 + a * x + b) % p
+    return left == right
+
+
+def find_all_ec_points(a=-1, b=1, p=47):
+    """Find all points on elliptic curve over finite field F_p"""
+    points = []
+
+    # Check all possible (x, y) pairs
+    for x in range(p):
+        for y in range(p):
+            if ec_mod(x, y, a, b, p):
+                points.append((x, y))
+
+    return points
+
+
+# Find all points on the curve
+p = 47
+a = -1
+b = 1
+points = find_all_ec_points(a, b, p)
+
+print(f"Elliptic curve: y^2 ≡ x^3 + {a}x + {b} (mod {p})")
+print(f"Found {len(points)} points on the curve")
+
+# Plot the points
+fig, ax = plt.subplots(figsize=(10, 6))
+
+if points:
+    x_coords, y_coords = zip(*points)
+    ax.scatter(x_coords, y_coords, s=50, alpha=0.6, color="#2C3E50")
+    ax.axhline(p / 2, color="black", linewidth=0.5, ls="--")
+
+ax.set_xlabel("x", fontsize=14)
+ax.set_ylabel("y", fontsize=14)
+ax.set_title(
+    f"Elliptic Curve: $y^2 \\equiv x^3 + {a}x + {b} (\\operatorname{{mod}} {p})$",
+    fontsize=16,
+)
+ax.grid(True, alpha=0.3)
+ax.set_xlim(-1, p)
+ax.set_ylim(-1, p)
+ax.set_aspect("equal")
+
+# Add grid lines at integer positions
+ax.set_xticks(range(0, p, 5))
+ax.set_yticks(range(0, p, 5))
+
+plt.tight_layout()
+plt.savefig("img/elliptic_curve_finite_field.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+print("\nPlot saved as 'img/elliptic_curve_finite_field.png'")
+print(f"\nFirst 10 points: {points[:10]}")
 
 # %%
