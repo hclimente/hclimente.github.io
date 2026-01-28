@@ -11,7 +11,7 @@ giscus_comments: true
 related_posts: false
 ---
 
-If you've ever read anything about online security and privacy, you'll have quickly felt drowning in a soup of letters: RSA, HTTPS, SHA, RSA, WPA, TLS, FIDO, PGP, ECDH, AES. Many of them come with a number appended. Which is sometimes, but not always, a power of 2. No wonder most of us give up before even trying.
+If you've ever read anything about online security and privacy, you'll have quickly felt drowning in a soup of letters in which "S"s are definitely overrepresented. Often there are also numbers, which are sometimes, but not always, powers of 2. You will also have heard many words that seem kind of the same, but also kind of different: keys, certificates, signatures, passkeys. No wonder most of us give up before even trying.
 
 In reality, modern cryptography is built around a few, well-trusted algorithms. Everything else are wrappers to adapt them to specific applications (or legacy algorithms we should ditch as soon as possible!). Each application tries to address one or more of these goals:
 
@@ -186,14 +186,21 @@ where $$a$$ and $$b$$ are parameters. They are defined over a finite field.
 
 Elliptic curves are defined over a finite field of whole numbers. However, let's set that aside for now, and develop our intuitions on the continuous case.
 
-Elliptic curves cryptography relies on __elliptic curve point addition and multiplication__. Elliptic curve __point addition__ of a point ($$P + Q$$) consists on taking the line connecting $$P$$ and $$Q$$, intersecting it with the curve itself and taking the mirror image.
+Elliptic curves cryptography relies on __elliptic curve point addition and multiplication__. __Addition__ is the operation that allows us to combine elements and obtain a third one. Elliptic curve addition of two points consists on taking the line connecting them, intersecting it with the curve itself and taking the mirror image.
 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_addition.gif" class="img-fluid" %}
 <div class="caption" align="center">
     <b>Elliptic curve point addition.</b>
 </div>
 
-Then, elliptic curve __point multiplication__ consists on doing that over and over to the same point. In the absence of another point to compute a line, we will take the tangent of the curve at $$P$$ to compute $$2P$$. Then, we simply keep adding $$P$$ to the resulting number to compute higher multiples.
+While this might seem like a weird way to define addition, note that it guarantees an additive inverse exists (e.g., subtracting $$P$$ from $$P+Q$$ produces $$Q$$):
+
+{% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_subtraction.gif" class="img-fluid" %}
+<div class="caption" align="center">
+    <b>Elliptic curve point subtraction.</b>
+</div>
+
+__Multiplication__ is the operation that allows us to repeatedly perform addition. Elliptic curve multiplication consists on adding a point over and over. The main problem is defining $$2P = P + P$$. In the absence of another point to compute a line, we will take the tangent of the curve at $$P$$ and carry on. Then, we simply keep adding $$P$$ to the resulting number to compute higher multiples.
 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_multiplication.gif" class="img-fluid" %}
 
@@ -220,6 +227,12 @@ where $$p$$ is a prime, defined over $$\mathbb{Z} / p \mathbb{Z}$$. It would be 
 <div class="caption" align="center">
     <b>Elliptic curve on a finite field: \(y^2 \equiv x^3 - x + 1 \pmod {47}\).</b>
 </div>
+
+{% details What am I looking at? %}
+
+First, the curve is only defined for integers. This means that we won't see a smooth continuous curve. It also means that for some values of $$x$$, $$y$$ is not an integer, and hence it's not defined. For instance, $$x = 20$$ would produce $$y_1 = 4.66$$ and $$y_2 = 42.34$$.
+
+{% enddetails %}
 
 We can also define addition on this curve, although with one peculiarity: the modulo warps the space, so that the line that reaches the top continues from the bottom, and the line reaching the left continues on the right.
 

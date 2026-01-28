@@ -48,16 +48,16 @@ def animate(frame):
     # Detect addition vs multiplication
     if (state["x1"] - state["x2"]) < 0.01 or state["i"] > 0:
         # multiplication
-        x1_name = "P"
-        x2_name = f"{'' if state['i'] < 1 else state['i'] + 1}P"
-        xnew_name = f"{state['i'] + 2}P"
         label_shift = 0.3
+        arrow_shortening = 0.6
+        arrow_head_width = 0.03
+        arrow_head_length = 0.2
     else:
         # addition
-        x1_name = "P"
-        x2_name = "Q"
-        xnew_name = "P+Q"
         label_shift = 0.1
+        arrow_shortening = 0.1
+        arrow_head_width = 0.1
+        arrow_head_length = 1.5 * arrow_head_width
 
     # Plot the elliptic curve
     ax.contour(
@@ -66,13 +66,16 @@ def animate(frame):
 
     # Only show tangent line if step is not 'points'
     if state["step"] != "points":
-        ax.plot(
-            state["x_tangent"],
-            state["y_tangent"],
-            "--",
-            color="#3498DB",
-            linewidth=2,
+        ax.axline(
+            (state["x1"], state["y1"]),
+            (state["x2"], state["y2"]),
+            linestyle="--",
+            color="gray",
+            linewidth=1,
             alpha=0.8,
+        )
+        ax.plot(
+            state["x_tangent"], state["y_tangent"], "-", color="#3498DB", linewidth=2
         )
 
     # Plot the current two points
@@ -89,7 +92,7 @@ def animate(frame):
     ax.text(
         state["x1"],
         state["y1"] + label_shift,
-        x1_name,
+        state["name1"],
         fontsize=18,
         fontweight="bold",
         verticalalignment="bottom",
@@ -110,7 +113,7 @@ def animate(frame):
     ax.text(
         state["x2"],
         state["y2"] + label_shift,
-        x2_name,
+        state["name2"],
         fontsize=18,
         fontweight="bold",
         verticalalignment="bottom",
@@ -134,7 +137,7 @@ def animate(frame):
             ax.text(
                 state["x_new"],
                 state["y_new"] + label_shift,
-                f"-{xnew_name}",
+                state["name_new"],
                 fontsize=18,
                 fontweight="bold",
                 verticalalignment="bottom",
@@ -165,7 +168,7 @@ def animate(frame):
             ax.text(
                 state["x_new"],
                 state["y_new"] + label_shift,
-                f"{xnew_name}",
+                state["name_new"],
                 fontsize=18,
                 fontweight="bold",
                 verticalalignment="bottom",
@@ -173,14 +176,18 @@ def animate(frame):
                 color="#27AE60",
             )
 
-            ax.vlines(
+            #     ax.vlines(state['x_new'], -state['y_new'], state['y_new'], linestyles='--', color='#3498DB', linewidth=2, alpha=0.8)
+            ax.arrow(
                 state["x_new"],
                 -state["y_new"],
-                state["y_new"],
-                linestyles="--",
+                0,
+                (2 * state["y_new"]) - (np.sign(state["y_new"]) * arrow_shortening),
                 color="#3498DB",
                 linewidth=2,
                 alpha=0.8,
+                length_includes_head=True,
+                head_width=arrow_head_width,
+                head_length=arrow_head_length,
             )
 
     # Set dynamic limits and aspect ratio
@@ -228,7 +235,18 @@ all_x.extend([x_new])
 all_y.extend([y_new, -y_new])
 
 # Frame 1: Show just the two points (no tangent)
-states.append({"step": "points", "i": 0, "x1": x1, "y1": y1, "x2": x2, "y2": y2})
+states.append(
+    {
+        "step": "points",
+        "i": 0,
+        "x1": x1,
+        "y1": y1,
+        "name1": "P",
+        "x2": x2,
+        "y2": y2,
+        "name2": "Q",
+    }
+)
 
 # Frame 2: Show tangent line
 states.append(
@@ -237,8 +255,10 @@ states.append(
         "i": 0,
         "x1": x1,
         "y1": y1,
+        "name1": "P",
         "x2": x2,
         "y2": y2,
+        "name2": "Q",
         "x_tangent": x_tangent,
         "y_tangent": y_tangent,
     }
@@ -251,10 +271,13 @@ states.append(
         "i": 0,
         "x1": x1,
         "y1": y1,
+        "name1": "P",
         "x2": x2,
         "y2": y2,
+        "name2": "Q",
         "x_new": x_new,
         "y_new": y_new,
+        "name_new": "-(P+Q)",
         "x_tangent": x_tangent,
         "y_tangent": y_tangent,
     }
@@ -267,16 +290,17 @@ states.append(
         "i": 0,
         "x1": x1,
         "y1": y1,
+        "name1": "P",
         "x2": x2,
         "y2": y2,
+        "name2": "Q",
         "x_new": x_new,
         "y_new": -y_new,
+        "name_new": "P+Q",
         "x_tangent": x_tangent,
         "y_tangent": y_tangent,
     }
 )
-
-x2, y2 = x_new, -y_new
 
 # Calculate dynamic limits with minimal padding
 x_min, x_max = -2, 3
@@ -303,6 +327,122 @@ anim.save(
 )
 plt.close()
 print("Animation saved as 'img/elliptic_curve_addition.gif'")
+
+# %% [markdown]
+# # EC Subtraction
+
+# %%
+y_new - slope * x_new
+
+# %%
+# Store all states for animation (4 frames per iteration)
+states = []
+all_x = [x1, x2]  # Track all x coordinates for dynamic limits
+all_y = [y1, y2]  # Track all y coordinates for dynamic limits
+
+slope = (-y_new + y1) / (x_new - x1)
+intercept = -y_new - slope * x_new
+
+x_tangent = np.linspace(min(x1, x2, x_new), max(x1, x2, x_new), 100)
+y_tangent = slope * x_tangent + intercept
+
+# Track coordinates
+all_x.extend([x_new])
+all_y.extend([y_new, -y_new])
+
+# Frame 1: Show just the two points (no tangent)
+states.append(
+    {
+        "step": "points",
+        "i": 0,
+        "x1": x1,
+        "y1": -y1,
+        "name1": "-P",
+        "x2": x_new,
+        "y2": -y_new,
+        "name2": "P+Q",
+    }
+)
+
+# Frame 2: Show tangent line
+states.append(
+    {
+        "step": "tangent",
+        "i": 0,
+        "x1": x1,
+        "y1": -y1,
+        "name1": "-P",
+        "x2": x_new,
+        "y2": -y_new,
+        "name2": "P+Q",
+        "x_tangent": x_tangent,
+        "y_tangent": y_tangent,
+    }
+)
+
+# Frame 3: Show intersection point (before reflection)
+states.append(
+    {
+        "step": "intersection",
+        "i": 0,
+        "x1": x1,
+        "y1": -y1,
+        "name1": "-P",
+        "x2": x_new,
+        "y2": -y_new,
+        "name2": "P+Q",
+        "x_new": x2,
+        "y_new": -y2,
+        "name_new": "-Q",
+        "x_tangent": x_tangent,
+        "y_tangent": y_tangent,
+    }
+)
+
+# Frame 4: Show reflection
+states.append(
+    {
+        "step": "reflection",
+        "i": 0,
+        "x1": x1,
+        "y1": -y1,
+        "name1": "-P",
+        "x2": x_new,
+        "y2": -y_new,
+        "name2": "P+Q",
+        "x_new": x2,
+        "y_new": y2,
+        "name_new": "Q",
+        "x_tangent": x_tangent,
+        "y_tangent": y_tangent,
+    }
+)
+
+# Calculate dynamic limits with minimal padding
+x_min, x_max = -2, 3
+y_min, y_max = -2, 2
+x_padding = (x_max - x_min) * 0.08
+y_padding = (y_max - y_min) * 0.08
+
+xlim = [x_min - x_padding, x_max + x_padding]
+ylim = [y_min - y_padding, y_max + y_padding]
+
+print(f"Using x limits: {xlim}")
+print(f"Using y limits: {ylim}")
+
+# Create animation
+fig, ax = plt.subplots(figsize=(10, 6))
+y, x = np.ogrid[-12:12:300j, -12:12:300j]
+anim = FuncAnimation(fig, animate, frames=len(states), interval=1000, repeat=True)
+anim.save(
+    "img/elliptic_curve_subtraction.gif",
+    writer="pillow",
+    fps=1,
+    dpi=300,
+    savefig_kwargs={"bbox_inches": "tight", "pad_inches": 0.1},
+)
+plt.close()
+print("Animation saved as 'img/elliptic_curve_subtraction.gif'")
 
 # %% [markdown]
 # # EC Multiplication
@@ -336,7 +476,18 @@ for i in range(0, 5):
     all_y.extend([y_new, -y_new])
 
     # Frame 1: Show just the two points (no tangent)
-    states.append({"step": "points", "i": i, "x1": x1, "y1": y1, "x2": x2, "y2": y2})
+    states.append(
+        {
+            "step": "points",
+            "i": i,
+            "x1": x1,
+            "y1": y1,
+            "name1": "P",
+            "x2": x2,
+            "y2": y2,
+            "name2": f"{'' if i < 1 else i + 1}P",
+        }
+    )
 
     # Frame 2: Show tangent line
     states.append(
@@ -345,8 +496,10 @@ for i in range(0, 5):
             "i": i,
             "x1": x1,
             "y1": y1,
+            "name1": "P",
             "x2": x2,
             "y2": y2,
+            "name2": f"{'' if i < 1 else i + 1}P",
             "x_tangent": x_tangent,
             "y_tangent": y_tangent,
         }
@@ -359,10 +512,13 @@ for i in range(0, 5):
             "i": i,
             "x1": x1,
             "y1": y1,
+            "name1": "P",
             "x2": x2,
             "y2": y2,
+            "name2": f"{'' if i < 1 else i + 1}P",
             "x_new": x_new,
             "y_new": y_new,
+            "name_new": f"-{i + 2}P",
             "x_tangent": x_tangent,
             "y_tangent": y_tangent,
         }
@@ -375,10 +531,13 @@ for i in range(0, 5):
             "i": i,
             "x1": x1,
             "y1": y1,
+            "name1": "P",
             "x2": x2,
             "y2": y2,
+            "name2": f"{'' if i < 1 else i + 1}P",
             "x_new": x_new,
             "y_new": -y_new,
+            "name_new": f"{i + 2}P",
             "x_tangent": x_tangent,
             "y_tangent": y_tangent,
         }
