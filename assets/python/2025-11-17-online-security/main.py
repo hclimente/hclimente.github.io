@@ -176,7 +176,6 @@ def animate(frame):
                 color="#27AE60",
             )
 
-            #     ax.vlines(state['x_new'], -state['y_new'], state['y_new'], linestyles='--', color='#3498DB', linewidth=2, alpha=0.8)
             ax.arrow(
                 state["x_new"],
                 -state["y_new"],
@@ -704,22 +703,49 @@ def animate_mod(frame):
 
     # Draw connecting line or show calculation
     if state["step"] in ["line", "intersection", "reflection"]:
-        # Draw line through the two points - show points on curve that lie on this "line"
-        x_vals = list(range(p))
+        if state["x1"] != state["x2"]:
+            slope_vis = (
+                (state["y2"] - state["y1"])
+                * mod_inverse((state["x2"] - state["x1"]) % p, p)
+            ) % p
 
-        for x in x_vals:
-            # Calculate y on the line (in modular arithmetic)
-            if state["x1"] != state["x2"]:
-                slope_vis = (
-                    (state["y2"] - state["y1"])
-                    * mod_inverse((state["x2"] - state["x1"]) % p, p)
-                ) % p
+            # Draw continuous line across entire plot (without modulo wrapping)
+            x_line = np.linspace(-1, p, 500)
+            y_line = slope_vis * (x_line - state["x1"]) + state["y1"]
+
+            # Draw multiple copies of the line to show it wrapping across the entire field
+            for y_offset in [-4 * p, -3 * p, -2 * p, -p, 0, p, 2 * p, 3 * p, 4 * p]:
+                ax.plot(
+                    x_line,
+                    y_line + y_offset,
+                    "--",
+                    color="#AED6F1",
+                    linewidth=1.5,
+                    alpha=0.5,
+                    zorder=2,
+                )
+
+            # Plot integer grid points on the line
+            for x in range(p):
                 y = (slope_vis * (x - state["x1"]) + state["y1"]) % p
-                # Only plot if this point is on the curve
+
+                # Plot all points on the line, highlight those also on the curve
                 if ec_mod(x, y, a, b, p):
+                    # Point is on both the line AND the curve
                     ax.plot(
-                        x, y, "o", color="#3498DB", markersize=8, alpha=0.5, zorder=3
+                        x,
+                        y,
+                        "x",
+                        color="#3498DB",
+                        markersize=5,
+                        markeredgewidth=2,
+                        markeredgecolor="#2980B9",
+                        alpha=0.8,
+                        zorder=3,
                     )
+                else:
+                    # Point is only on the line
+                    ax.plot(x, y, "s", color="#AED6F1", markersize=5, zorder=2)
 
     # Plot the two input points
     ax.plot(
@@ -733,12 +759,12 @@ def animate_mod(frame):
         zorder=5,
     )
     ax.text(
-        state["x1"],
-        state["y1"] + 1.5,
+        state["x1"] + 1.4,
+        state["y1"],
         "P",
         fontsize=16,
         fontweight="bold",
-        verticalalignment="bottom",
+        verticalalignment="center",
         horizontalalignment="center",
         color="#C0392B",
     )
@@ -754,12 +780,12 @@ def animate_mod(frame):
         zorder=5,
     )
     ax.text(
-        state["x2"],
-        state["y2"] + 1.5,
+        state["x2"] + 1.4,
+        state["y2"],
         "Q",
         fontsize=16,
         fontweight="bold",
-        verticalalignment="bottom",
+        verticalalignment="center",
         horizontalalignment="center",
         color="#C0392B",
     )
@@ -783,45 +809,24 @@ def animate_mod(frame):
                     zorder=5,
                 )
                 ax.text(
-                    state["x_new"],
-                    y_neg + 1.5,
+                    state["x_new"] + 3.5,
+                    y_neg,
                     "-(P+Q)",
                     fontsize=16,
                     fontweight="bold",
-                    verticalalignment="bottom",
+                    verticalalignment="center",
                     horizontalalignment="center",
                     color="#27AE60",
                 )
             else:
                 # Show both the intermediate and final reflected point
-                ax.plot(
-                    state["x_new"],
-                    y_neg,
-                    "o",
-                    color="#2ECC71",
-                    markersize=8,
-                    markeredgewidth=1,
-                    markeredgecolor="#27AE60",
-                    alpha=0.5,
-                    zorder=4,
-                )
-                ax.plot(
-                    state["x_new"],
-                    state["y_new"],
-                    "o",
-                    color="#2ECC71",
-                    markersize=12,
-                    markeredgewidth=2,
-                    markeredgecolor="#27AE60",
-                    zorder=5,
-                )
                 ax.text(
-                    state["x_new"],
-                    state["y_new"] + 1.5,
+                    state["x_new"] + 2.5,
+                    state["y_new"],
                     "P+Q",
                     fontsize=16,
                     fontweight="bold",
-                    verticalalignment="bottom",
+                    verticalalignment="center",
                     horizontalalignment="center",
                     color="#27AE60",
                 )
@@ -839,6 +844,28 @@ def animate_mod(frame):
                     alpha=0.6,
                 )
 
+                ax.plot(
+                    state["x_new"],
+                    y_neg,
+                    "o",
+                    color="#2ECC71",
+                    markersize=8,
+                    markeredgewidth=1,
+                    markeredgecolor="#27AE60",
+                    zorder=4,
+                )
+                ax.plot(
+                    state["x_new"],
+                    state["y_new"],
+                    "o",
+                    color="#2ECC71",
+                    markersize=12,
+                    markeredgewidth=2,
+                    markeredgecolor="#27AE60",
+                    zorder=5,
+                )
+
+    ax.axhline(p / 2, color="black", linewidth=0.5, ls="--")
     ax.set_xlim(-1, p)
     ax.set_ylim(-1, p)
     ax.set_xlabel("x", fontsize=14)
@@ -851,6 +878,7 @@ def animate_mod(frame):
     fig_mod.patch.set_facecolor("white")
 
 
+# %%
 # Setup for animation
 p = 47
 a = -1
@@ -861,8 +889,8 @@ all_points = find_all_ec_points(a, b, p)
 
 # Choose two valid points from the curve
 # Pick specific points that are known to be on the curve
-x1, y1 = all_points[0]  # First point on the curve
-x2, y2 = all_points[5]  # Another point on the curve
+x1, y1 = all_points[26]  # First point on the curve
+x2, y2 = all_points[28]  # Another point on the curve
 
 print(f"P = ({x1}, {y1})")
 print(f"Q = ({x2}, {y2})")
@@ -945,5 +973,78 @@ anim_mod.save(
 )
 plt.close()
 print("Animation saved as 'img/elliptic_curve_mod_addition.gif'")
+
+# %%
+# Curve25519
+
+# %%
+# Curve25519 parameters (Montgomery form: y² = x³ + Ax² + x)
+# Actual: p = 2^255 - 19, A = 486662
+# For visualization, use smaller prime with same A coefficient
+p_vis = 2**255 - 19  # Smaller prime for visualization
+A = 486662
+
+
+def ec_montgomery_mod(x, y, A=486662, p=2**255 - 19):
+    """Check if point (x, y) is on Montgomery curve over finite field F_p
+    Equation: y² ≡ x³ + Ax² + x (mod p)
+    """
+    left = (y * y) % p
+    right = (x**3 + A * x**2 + x) % p
+    return left == right
+
+
+def find_all_montgomery_points(A=486662, p=2**255 - 19):
+    """Find all points on Montgomery curve over finite field F_p"""
+    points = []
+    for x in range(p):
+        for y in range(p):
+            if ec_montgomery_mod(x, y, A, p):
+                points.append((x, y))
+    return points
+
+
+# Find all points on the curve
+points_curve25519 = find_all_montgomery_points(A, p_vis)
+
+print(f"Curve25519 (Montgomery form): y² ≡ x³ + {A}x² + x (mod {p_vis})")
+print(f"Found {len(points_curve25519)} points on the curve")
+print(
+    f"Note: Using p = {p_vis} for visualization. Actual Curve25519 uses p = 2^255 - 19"
+)
+
+# Plot the points
+fig, ax = plt.subplots(figsize=(10, 6))
+
+if points_curve25519:
+    x_coords, y_coords = zip(*points_curve25519)
+    ax.scatter(
+        x_coords,
+        y_coords,
+        s=50,
+        color="#E74C3C",
+        linewidths=2,
+        edgecolors="#C0392B",
+        zorder=5,
+    )
+    ax.axhline(p_vis / 2, color="black", linewidth=0.5, ls="--")
+
+ax.set_xlabel("x", fontsize=14)
+ax.set_ylabel("y", fontsize=14)
+ax.grid(True, alpha=0.3)
+ax.set_xlim(-1, p_vis)
+ax.set_ylim(-1, p_vis)
+ax.tick_params(labelsize=15)
+
+# Add grid lines at integer positions
+ax.set_xticks(range(0, p_vis, 10))
+ax.set_yticks(range(0, p_vis, 10))
+
+plt.tight_layout()
+plt.savefig("img/curve25519.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+print("\nPlot saved as 'img/curve25519.png'")
+print(f"First 10 points: {points_curve25519[:10]}")
 
 # %%
