@@ -15,10 +15,10 @@ If you've ever read anything about online security and privacy, you'll have quic
 
 In reality, modern cryptography is built around a few, well-trusted algorithms. Everything else are wrappers to adapt them to specific applications (or legacy algorithms we should ditch as soon as possible!). Each application tries to address one or more of these goals:
 
-- __Confidentiality__: ensure that our data and communications are private
-- __Authentication__: ensure that we are who we say we are
-- __Integrity__: ensure that our data and communications are not tampered with
-- __Non-repudiation__: ensure that we cannot deny having authored a message
+- __Confidentiality__: our data and communications remain private
+- __Authentication__: we are who we say we are
+- __Integrity__: our data and communications are not tampered with
+- __Non-repudiation__: we cannot deny having authored a message
 
 Let's see how each of them applies to several day-to-day online activities:
 
@@ -41,19 +41,19 @@ In this post, I go over the main algorithms behind each goal, and how I use them
     From <a href="https://xkcd.com/538">xkcd</a>.
 </div>
 
-> Throughout this post, I'll be using _message_ to mean _data_ or _information_. This should bring a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
+> Throughout this post, I'll be using _message_ to mean _data_ or _information_. This should bring to mind a more concrete picture, but the contents of this post go well beyond bantering on WhatsApp.
 
 Our heroes in this story will be [Alice and Bob](https://en.wikipedia.org/wiki/Alice_and_Bob). Alice and Bob just want to talk to each other without being snooped in by their evil counterparts, Eve and Mallory.
 
 # Prelude: finite field arithmetic
 
-Cryptography works with integers, rather than with real numbers. One advantage is that integers do not suffer from rounding errors. Cryptography often consists on performing a fixed series of calculations to arrive to the same conclusion. When each step incurs in a precision cost, that is no longer guaranteed.
+Digital cryptography works with __integers__, not with real numbers. That's because cryptography often relies on a fixed series of calculations to reliably reaching the same conclusion. Each floating point operation incurs in a precision cost, and hence they cannot guarantee that.
 
-To make the maths work, they rely on __finite fields__, also known as Galois fields. Let's break that down.
+However, to make the maths work, we need to rely on __finite fields__. Let's unpack what that means.
 
-First, the field is __finite__, that is, it operates on a bounded set of items. In our case a set of integers. The size of the set is called the _order_ of the field.
+First, the fields we work with are __finite__, that is, they operate on a bounded set of items. In our case a set of integers. The size of the set is called the _order_ of the field.
 
-Second, it _is_ a __field__, that is, it has 4 binary operators (multiplication, addition, subtraction and division) satisfying the field axioms. An important one is that the result of the operation must also be in the field.
+Second, they are __fields__, that is, they have 4 binary operators (multiplication, addition, subtraction and division) satisfying the field axioms. An important one is _closure_, i.e., the result of the operation must also be in the field.
 
 The classical example is the set of integers modulo $$p$$, with $$p$$ being a prime:
 
@@ -78,31 +78,31 @@ To encrypt the message "HELLO" with _key 3_, we shift each letter by 3 positions
 
 ## The cipher: Advanced Encryption Standard
 
-Given a long enough message, breaking the Caesar cipher is easy, since we know the expected probability of each word in the English language. Or we can simply brute-force all 26 possibilities.
+Given a long enough message, breaking the Caesar cipher is easy. Since we know that "E", "T" and "A" are the most common letters in English texts, we expect the most common letters in the message to map to that. Or we can simply brute-force all 26 possibilities and see which one produces an intelligible text.
 
-Luckily the field is much more sophisticated now. The standard encryption algorithm is the __Advanced Encryption Standard__ (AES). Same as Caesar cipher, AES is a symmetric encryption algorithm. However, the key is not a number, but a long binary string. AES accepts three lengths of keys: 128, 192, or 256 bits. They respectively define the three flavors of AES: AES-128, AES-192, and AES-256. Longer keys provide more secure encryption, but encryption and decryption become more computationally intensive.
+Luckily the field has evolved quite a bit in the last two millenia. The standard encryption algorithm nowadays is the __Advanced Encryption Standard__ (AES). Same as Caesar cipher, AES is a symmetric encryption algorithm. However the key is not a number between 0 and 25, but an enormously large integer, one that requires 128, 192, or 256 bits to represent. They respectively define the three flavors of AES: AES-128, AES-192, and AES-256. Longer keys provide more secure encryption, but make encryption and decryption more computationally intensive.
 
 {% details What does it mean for a key to be secure? %}
 
-In short, a key is secure when it cannot be guessed easily. In other words, it's secure when it's _long_, it can only be guessed via _brute force_ and, optionally, testing each guess is _expensive_. For instance, there are $$2^128$$ 128 bit keys. In contrast, Caesar cipher has only 26 possible keys.
+In short, a key is secure when it cannot be guessed easily. In other words, it's secure when it's _long_, i.e., it can only be guessed via _brute force_. Since AES-128 has $$2^128$$ possible 128-bit keys, we can see how testing them all is unfeasible. The _algorithm_ is even stronger when testing each key is _expensive_.
 
 {% enddetails %}
 
-AES is pretty convoluted algorithm, and I find it a bit uninteresting. Kind of like an algorithm to shuffle cards reproducibly; interesting and lucrative applications, boring to watch. Luckily for me there are many good, detailed explanations around the web I can point you to (e.g., [here](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/)).
+AES is pretty convoluted algorithm, and I find it a bit uninteresting. Kind of like an algorithm to shuffle cards reproducibly; interesting and lucrative applications, boring to watch. Luckily for me there are many good, detailed explanations around the web I can point you to (e.g., [this one](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/)).
 
-The TL;DR is this: AES starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, with each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
+The TL;DR is this: AES starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
 
 ## Sharing keys: public key cryptography
 
 AES is _everywhere_, and it is used gazillions of times every day to encrypt all hard drives (e.g., on MacOS).
 
-But what about securing _communications_? How can Alice and Bob agree on a common key in the presence of Eve, who will eavesdrop on each of their conversations? In the old times, Alice and Bob would meet in a park and exchange keys in closed envelopes, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in the open, even when Eve could listen to everything they said to each other. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
+But what about securing _communications_? How can Alice and Bob agree on an AES key in the presence of Eve, who will listen to every word they cross? In the old times, Alice and Bob would meet in a park and exchange keys in closed envelopes, making sure Eve can't get a peek. But in 1976 two researchers, Diffie and Hellman, introduced an algorithm that allowed them to agree on a key in public. This unlocked __public key cryptography__ and, ultimately, secure communications over the internet, like browsing the internet (implemented in TLS/HTTPS), securing our WiFi (WPA3), or using a VPN (IKE).
 
 ### Trapdoor functions
 
-At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing its respective outputs, can reach the same mathematical result. And Eve will fall right through the trapdoor, taking her eons to figure out what the functions were.
+At the core of public key cryptography lies a [trapdoor function](https://en.wikipedia.org/wiki/Trapdoor_function), a mathematical function that's easy to do, but very hard to undo. Alice and Bob each apply have their own trapdoor function and, by only sharing their respective outputs, can reach the same mathematical result. Meanwhile, Eve will fall right through the trapdoor, taking her eons to figure out what the functions were.
 
-A classic example of a trapdoor function is __modular exponentiation__, used by Diffie-Hellman.
+A classic example of a trapdoor function, and the one used by Diffie-Hellman, is __modular exponentiation__.
 
 $$
 g^{k} \bmod p
@@ -114,7 +114,7 @@ $$
 32^{4} \bmod 60 = 16.
 $$
 
-But if only I tell you I started at 32s and ended at 16, and ask you what $$k$$, that's the __discrete logarithm problem__, and it is much harder. In fact, you'll only be able to solve it by enumerating all possibilities:
+But if only I tell you I started at 32 and ended at 16, and ask you what $$k$$ was, the problem becomes much harder. This is known as the __discrete logarithm problem__, and you'll only be able to solve it by enumerating all possibilities:
 
 $$
 32^{1} \bmod 60 = 32
@@ -132,7 +132,7 @@ $$
 32^{4} \bmod 60 = 16
 $$
 
-Now, it turns out 60 is not a great choice for $$p$$. The space of outcomes encompasses, at most, the 60 ticks of the clock. That means that we just need to enumerate 60 possibilities to identify which number $$k$$ is a multiple of, reducing our search space by a factor of 60. The larger $$p$$ is, the harder this problem becomes: we want $$\boldsymbol{p}$$ __to be astronomically large__; Diffie-Hellman makes it at least 2048 bits long.
+Now, it turns out 60 is not a great choice for $$p$$. The space of outcomes encompasses, at most, the 60 ticks of the clock. That means that at most we need to enumerate 60 possibilities to identify the number $$k$$ is a multiple of, reducing our search space by a factor of 60. The larger $$p$$ is, the harder this problem becomes: we want $$\boldsymbol{p}$$ __to be astronomically large__; Diffie-Hellman makes it at least 2048 bits long.
 
 But, given that we are doing modulo 60, 32 is not a good choice for $$g$$ either. Out of the 60 outcomes $$\operatorname{mod} 60$$ offers, the powers of 32 modulo 60 occupy only 4: the solution to $$k=1$$ is the same as to $$k=5$$: $$32^{5} \bmod 60 = 32$$. Hence, we quickly shrink our space of possibilities by a factor of 15: only multiples of 4 could produce a remainder of 16. We want the opposite: all options between 0 and $$p$$ should be possible (i.e., we want $$g$$ to be a __primitive root modulo__ $$\boldsymbol{p}$$.) While there are better choices than 32, [there are no primitive roots modulo 60](https://en.wikipedia.org/wiki/Primitive_root_modulo_n#:~:text=A%20primitive%20root%20exists%20if%20and,odd%20prime%20and%20k%20%3E%200.), and hence we should ditch it altogether. A better choice would be $$g=5$$ and $$p = 6$$, since 5 is a primitive root modulo 6. An even better choice would be to pick a massive, prime $$p$$, and a small $$g$$ that is a primitive root modulo $$p$$.
 
@@ -148,7 +148,7 @@ This is how Diffie and Hellman solved this issue:
     f(k) = g^{k} \bmod p
     $$
 
-1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively) that they never share with each other (and hence with Eve). They will use it to define their respective trapdoor functions, and apply it to $$g$$ and $$p$$:
+1. Both Alice and Bob generate a secret large integer ($$k_A$$ and $$k_B$$, respectively) that they never share with each other (and hence with Eve). They will use it to define their respective trapdoor functions:
 
     $$
     z_i = f(k_i)
@@ -172,7 +172,7 @@ This is how Diffie and Hellman solved this issue:
 
 ### Elliptic curve cryptography
 
-A crucial drawback of Diffie-Hellman is the computational burden of integer arithmetic on astronomically large $$p$$. This gets really expensive at scale! Consider the burdent on servers that run all these computations for millions of concurrent connections. Luckily modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__, which offer comparable security with much smaller key sizes.
+A crucial drawback of Diffie-Hellman is the computational burden of integer arithmetic on astronomically large $$p\text{s}$$. This gets really expensive at scale! Consider the burden on servers that need to run all these computations on millions of concurrent connections. Luckily modern cryptography has mostly moved past Diffie-Hellman's modular exponentiation and into __elliptic curves__, which offer comparable security with much smaller key sizes.
 
 Elliptic curves are the set of points satisfying an equation of the form
 
@@ -180,13 +180,13 @@ $$
 y^2 = x^3 + ax + b,
 $$
 
-where $$a$$ and $$b$$ are parameters. They are defined over a finite field.
+where $$a$$ and $$b$$ are parameters.
 
 #### The trapdoor
 
 Elliptic curves are defined over a finite field of whole numbers. However, let's set that aside for now, and develop our intuitions on the continuous case.
 
-Elliptic curves cryptography relies on __elliptic curve point addition and multiplication__. __Addition__ is the operation that allows us to combine elements and obtain a third one. Elliptic curve addition of two points consists on taking the line connecting them, intersecting it with the curve itself and taking the mirror image.
+Elliptic curves cryptography relies on __elliptic curve point addition and multiplication__. __Addition__ is the operation that allows us to combine elements and obtain a third one. Elliptic curve addition of two points consists on taking the line connecting them, intersecting it with the curve itself and taking the reflection of that point across the x-axis.
 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_addition.gif" class="img-fluid" %}
 <div class="caption" align="center">
@@ -200,7 +200,7 @@ While this might seem like a weird way to define addition, note that it guarante
     <b>Elliptic curve point subtraction.</b>
 </div>
 
-__Multiplication__ is the operation that allows us to repeatedly perform addition. Elliptic curve multiplication consists on adding a point over and over. The main problem is defining $$2P = P + P$$. In the absence of another point to compute a line, we will take the tangent of the curve at $$P$$ and carry on. Then, we simply keep adding $$P$$ to the resulting number to compute higher multiples.
+__Multiplication__ is the operation that allows us to repeatedly perform addition. Elliptic curve multiplication consists on adding a point over and over. The main problem is defining $$2P = P + P$$ in the absence of another point to compute a line. To do that, we will define the first line taking the tangent of the curve at $$P$$. Then, we simply keep adding $$P$$ to the resulting number to compute higher multiples.
 
 {% include figure.liquid path="assets/python/2025-11-17-online-security/img/elliptic_curve_multiplication.gif" class="img-fluid" %}
 
@@ -230,7 +230,9 @@ where $$p$$ is a prime, defined over $$\mathbb{Z} / p \mathbb{Z}$$. It would be 
 
 {% details What am I looking at? %}
 
-First, the curve is only defined for integers. This means that we won't see a smooth continuous curve. It also means that for some values of $$x$$, $$y$$ is not an integer, and hence it's not defined. For instance, $$x = 20$$ would produce $$y_1 = 4.66$$ and $$y_2 = 42.34$$.
+First, the curve is only defined for integers. This means that we won't see a smooth continuous curve. It also means that for some values of $$x$$, $$y$$ is not an integer, and hence it's not defined. For instance, $$x = 20$$ would produce $$y_1 = 4.66$$ and $$y_2 = 42.34$$, which are outside of the codomain.
+
+Second, we use a _congruence_ relationship ($$\equiv$$) rather than _equality_ ($$=$$). This is because we're working in a finite field: all values must stay within $$\{0, 1, 2, \ldots, p-1\}$$. Congruence means $$y^2$$ and $$x^3 + ax + b$$ don't need to be exactly equal, they just need to have the same remainder when divided by $$p$$. For example, $$17 \equiv 2 \pmod{5}$$ because both leave remainder 2 when divided by 5.
 
 {% enddetails %}
 
