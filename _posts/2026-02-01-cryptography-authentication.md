@@ -65,6 +65,8 @@ The CA is someone that we trust. Alice will show her public key to a CA, prove h
 
 Did we just kick the can one level up? Yes. We are just praying none of these 150 CAs is in cahoots with Mallory.
 
+(A decentralized version of this is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust).)
+
 {% enddetails %}
 
 # TL;DR: Everyday cryptography

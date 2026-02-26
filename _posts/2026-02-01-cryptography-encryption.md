@@ -14,15 +14,19 @@ related_posts: false
 | __Key algorithms__ | AES, elliptic curve cryptography |
 | __Key protocols__  | TLS/HTTPS, WPA3, IKE             |
 
-The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using an encyption key. If you have the decryption key, decryption allows you to recover the original information. This section focuses on __symmetric__ encryption, i.e., the same key is used for both actions. The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
+The main tool to ensure that our communications remain private is __encryption__. Encryption consists on reversibly transforming a message into an (apparently) random message using an encyption key. The decryption key, if you have it, allows you to recover the original information.
+
+We will first focus on __symmetric__ encryption, i.e., the same key is used for both actions. Then, we'll move onto __asymmetic__ encription, in which the keys are different.
+
+# Symmetric Encription: Advanced Encryption Standard
+
+The [Caesar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) is the simplest example. Our key is a number, which indicates how many letters we shift the alphabet by:
 
 | Original letter | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z |
 |-----------------|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | Shift by 3      | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z | A | B | C |
 
 To encrypt the message "HELLO" with _key 3_, we shift each letter by 3 positions, resulting in "KHOOR". To decrypt, we simply shift back by 3.
-
-# The cipher: Advanced Encryption Standard
 
 Given a long enough message, breaking the Caesar cipher is easy. Since we know that "E", "T" and "A" are the most common letters in English texts, we expect the most common letters in the message to map to that. Or we can simply brute-force all 26 possibilities and see which one produces an intelligible text.
 
@@ -37,6 +41,8 @@ In short, a key is secure when it cannot be guessed easily. In other words, it's
 AES is pretty convoluted algorithm, and I find it a bit uninteresting. Kind of like an algorithm to shuffle cards reproducibly; interesting and lucrative applications, boring to watch. Luckily for me there are many good, detailed explanations around the web I can point you to (e.g., [this one](https://www.geeksforgeeks.org/computer-networks/advanced-encryption-standard-aes/)).
 
 The TL;DR is this: AES starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
+
+> Encryption alone doesn't guarantee that our data hasn't been tampered with. An attacker can still flip bits and alter a message, even if they are not quite sure what they are doing. We explore how to guarantee __integrity__ in another post.
 
 # Sharing keys: public key cryptography
 
@@ -209,6 +215,11 @@ y^2 = x^3 + 486662 x^2 + x \pmod{2^{255} − 19}
 $$
 
 The public key is just the base point $$(9, 39\,420\,351)$$. The private key is a 256 intefer we multiply it by. Significantly shorter than the 2048-bit one that DH required!
+
+# Asymmetric Encryption
+
+TODO
+
 
 # TL;DR: Everyday Encryption
 
