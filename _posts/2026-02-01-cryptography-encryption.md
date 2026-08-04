@@ -42,7 +42,7 @@ AES is pretty convoluted algorithm, and I find it a bit uninteresting. Kind of l
 
 The TL;DR is this: AES starts by decomposing the message into chunks of 16 bytes, which are arranged into a 4-by-4 grid, each cell containing 1 byte. Each chunk is then processed independently in _rounds_. One round consists on a pretty complex transformation of the grid, involving dictionary replacements of the cells' contents, shifting rows and columns and, finally, a combination with a key. The key is round-specific, and is derived from the encryption key. The number of rounds depends on the length of the key (10 in AES-128, 12 in AES-192 and 14 in AES-256). Decrypting the data consists on performing the steps in reverse order.
 
-> Encryption alone doesn't guarantee that our data hasn't been tampered with. An attacker can still flip bits and alter a message, even if they are not quite sure what they are doing. We explore how to guarantee __integrity__ in another post.
+> Encryption alone doesn't guarantee that our data hasn't been tampered with. An attacker can still flip bits and alter a message, even if they are not quite sure what they are doing. That's __integrity__, covered [here]({% post_url 2026-02-01-cryptography-integrity %}).
 
 # Sharing keys: public key cryptography
 
